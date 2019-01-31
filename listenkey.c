@@ -82,6 +82,5 @@ int main(int argc, char** argv){
    case 'h': printhelp();
    default: abort();}
   signal(SIGINT,quitlistenkey);
-  signal(SIGHUP,quitlistenkey);
   signal(SIGTERM,quitlistenkey);
  runlistenkey(processevent,progname);}

@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 //Send an injected keyboard event.
-inline void
+void
 sendkbdinput(DWORD scancode, DWORD virtualkey, BOOL up, BOOL hw, BOOL extended, BOOL unicode){
     INPUT i;
     i.type = INPUT_KEYBOARD;
