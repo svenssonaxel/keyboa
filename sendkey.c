@@ -1,4 +1,4 @@
-#include "libsendkey.c"
+#include "libsendkey.h"
 
 int main(int argc, char* argv[]) {
 	DWORD code;

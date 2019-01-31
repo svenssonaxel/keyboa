@@ -1,6 +1,6 @@
 root = true
 
-[*.c]
+[*.{c,h}]
 end_of_line = lf
 insert_final_newline = true
 charset = latin1

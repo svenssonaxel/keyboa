@@ -1,4 +1,4 @@
-#include "liblistenkey.c"
+#include "liblistenkey.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
