@@ -1,0 +1,3 @@
+#!/bin/bash
+gcc -o listenkey.exe listenkey.c
+gcc -o sendkey.exe sendkey.c
