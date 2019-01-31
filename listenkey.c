@@ -12,7 +12,6 @@ int evcount;
 BOOL processevent(DWORD scancode, DWORD virtualkey, DWORD flags){
  if(optI&&(flags&LLKHF_INJECTED))return FALSE;
  if(optA&&(flags&LLKHF_EXTENDED)==0&&scancode==0x021d)return optc;
- if(optO && ftell(stdout)!=-1) quitlistenkey();
  if(!(optU&&(flags&LLKHF_UP))){
   if(optJ){
    printf("{\"§\":{}");
