@@ -12,6 +12,9 @@
 #define BOOL unsigned short
 #define TRUE 1
 #define FALSE 0
+#ifndef LLKHF_LOWER_IL_INJECTED
+#define LLKHF_LOWER_IL_INJECTED 0x02
+#endif
 
 typedef BOOL (*EVENTPROCESSOR)(DWORD, DWORD, DWORD);
 EVENTPROCESSOR eventProcessor;

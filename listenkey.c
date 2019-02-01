@@ -3,76 +3,82 @@
 #include <stdio.h>
 #include <signal.h>
 
-BOOL optc, optU, optI, optO, optE, optD, optJ, optA;
+BOOL opt_c, opt_i, opt_e, opt_d, opt_f;
 int evcount;
 
 BOOL processevent(DWORD scancode, DWORD virtualkey, DWORD flags) {
-	if(optI && (flags & LLKHF_INJECTED)) {
+	if(opt_i && (flags & LLKHF_INJECTED)) {
 		return FALSE;
 	}
-	if(optA && (flags & LLKHF_EXTENDED) == 0 && scancode == 0x021d) {
-		return optc;
+	if(!opt_f) {
+		printf(
+			"{\"win_scancode\":%5u"
+			",\"win_virtualkey\":%3u"
+			",\"win_extended\":%s"
+			",\"win_injected\":%s"
+			",\"win_lower_il_injected\":%s"
+			",\"win_altdown\":%s"
+			",\"type\":%s}",
+			scancode,
+			virtualkey,
+			(flags & LLKHF_EXTENDED) ? "true " : "false",
+			(flags & LLKHF_INJECTED) ? "true " : "false",
+			(flags & LLKHF_LOWER_IL_INJECTED) ? "true " : "false",
+			(flags & LLKHF_ALTDOWN) ? "true " : "false",
+			(flags & LLKHF_UP) ? "\"keyup\"  " : "\"keydown\""
+		);
 	}
-	if(!(optU && (flags & LLKHF_UP))) {
-		if(optJ) {
-			printf(
-				"{\"source\":\"windows\""
-				",\"extended\":%s"
-				",\"injected\":%s"
-				",\"altdown\":%s"
-				",\"up\":%s"
-				",\"scancode\":%04X"
-				",\"virtualkey\":%02X"
-				"}",
-				(flags & LLKHF_EXTENDED) ? "true " : "false",
-				(flags & LLKHF_INJECTED) ? "true " : "false",
-				(flags & LLKHF_ALTDOWN ) ? "true " : "false",
-				(flags & LLKHF_UP      ) ? "true " : "false",
-				scancode,
-				virtualkey
-			);
-		}
-		else {
-			printf("%s%s%s%s%04X%02X",
-				(flags & LLKHF_EXTENDED) ? "e" : "-",
-				(flags & LLKHF_INJECTED) ? "i" : "-",
-				(flags & LLKHF_ALTDOWN ) ? "a" : "-",
-				(flags & LLKHF_UP      ) ? "u" : "d",
-				scancode,
-				virtualkey
-			);
-		}
-		if(printf("\n") == -1 && optO) {
+	if(opt_f) {
+		printf("%04x %02x %s%s%s%s%s",
+			scancode,
+			virtualkey,
+			(flags & LLKHF_EXTENDED) ? "e" : "-",
+			(flags & LLKHF_INJECTED) ? "i" : "-",
+			(flags & LLKHF_LOWER_IL_INJECTED) ? "l" : "-",
+			(flags & LLKHF_ALTDOWN) ? "a" : "-",
+			(flags & LLKHF_UP) ? "u" : "d"
+		);
+	}
+	if(printf("\n") == -1) {
+		quitlistenkey();
+	}
+	fflush(stdout);
+	if(opt_d) {
+		if(++evcount>20) {
 			quitlistenkey();
 		}
-		fflush(stdout);
-		if(optD) {
-			if(++evcount>20) {
-				quitlistenkey();
-			}
-		}
 	}
-	if(optE) {
+	if(opt_e) {
 		if(scancode == 1 && flags == 128) {
 			quitlistenkey();
 		}
 	}
-	return optc;
+	return opt_c;
 }
 
 void printhelp() {
-	printf(
-		"Print Windows keyboard events on stdout.\n"
-		"Options:\n"
-		"-c Turn on event consuming (prevents applications to see the event).\n"
-		"-U Do not print up-key events.\n"
-		"-I Do not print or consume injected events.\n"
-		"-A Prevent AltGr from acting like two keys.\n"
-		"-O Exit when stdout closes.\n"
-		"-E Exit when escape key is pressed.\n"
-		"-D Exit after 20 events are processed.\n"
-		"-J Output in JSON format.\n"
-		"-h Print this help text and exit.\n"
+	fprintf(stderr,
+		"\nPrint Windows keyboard events on stdout.\n\n"
+		"Unless -f is provided, output will be JSON.\n\n"
+		"Options:\n\n"
+		" -c Consume events (prevent windows sending them to applications).\n\n"
+		" -i Do not print injected events.\n"
+		"    Also, do not consume injected events even if -c is present.\n\n"
+		" -e Exit when escape key is pressed.\n\n"
+		" -d Exit after 20 events are processed (useful for debugging).\n\n"
+		" -f Output in fixed width format:\n"
+		"    Column Content\n"
+		"      1-4  Scan code, 4 hex digits\n"
+		"        5  Space\n"
+		"      6-7  Virtual key code, 2 hex digits\n"
+		"        8  Space\n"
+		"        9  'e' if extended, otherwise '-'\n"
+		"       10  'i' if injected (from any process), otherwise '-'\n"
+		"       11  'l' if injected (from process at lower integrity level),\n"
+		"               otherwise '-'\n"
+		"       12  'a' if alt down, otherwise '-'\n"
+		"       13  'u' if key-up, 'd' if key-down\n\n"
+		" -h Print this help text and exit.\n\n"
 	);
 	exit(0);
 }
@@ -84,20 +90,18 @@ int main(int argc, char** argv) {
 	}
 	char* progname = argv[0];
 	int c;
-	while ((c = getopt (argc, argv, "eiadsvcUIAOEDJh")) != -1)
+	while ((c = getopt (argc, argv, "ciedjfh")) != -1) {
 		switch (c) {
-			case 'c': optc = TRUE;  break;
-			case 'U': optU = TRUE;  break;
-			case 'I': optI = TRUE;  break;
-			case 'A': optA = TRUE;  break;
-			case 'O': optO = TRUE;  break;
-			case 'E': optE = TRUE;  break;
-			case 'D': optD = TRUE;  break;
-			case 'J': optJ = TRUE;  break;
+			case 'c': opt_c = TRUE;  break;
+			case 'i': opt_i = TRUE;  break;
+			case 'e': opt_e = TRUE;  break;
+			case 'd': opt_d = TRUE;  break;
+			case 'f': opt_f = TRUE;  break;
 			case 'h': printhelp();
 			default: abort();
 		}
-		signal(SIGINT, quitlistenkey);
-		signal(SIGTERM, quitlistenkey);
+	}
+	signal(SIGINT, quitlistenkey);
+	signal(SIGTERM, quitlistenkey);
 	runlistenkey(processevent, progname);
 }
