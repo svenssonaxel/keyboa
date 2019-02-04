@@ -1,5 +1,9 @@
 root = true
 
+[jsonsl*]
+indent_style = space
+indent_size = unset
+
 [*.{c,h}]
 end_of_line = lf
 insert_final_newline = true
