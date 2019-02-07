@@ -1,5 +1,4 @@
-#define WINVER 0x0500
-#include <windows.h>
+#include "common.h"
 #include <stdio.h>
 
 //Send an injected keyboard event.

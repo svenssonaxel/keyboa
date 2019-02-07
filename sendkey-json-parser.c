@@ -1,20 +1,8 @@
+#include "common.h"
 #include <stdio.h>
-
-#define DWORD int
-#define int_4 long int
-
-#include <assert.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-
 #include "jsonsl.c"
 #include "json-str.c"
-
-#define BOOL unsigned short
-#define TRUE 1
-#define FALSE 0
 
 #define BUFFER_SIZE 10240
 

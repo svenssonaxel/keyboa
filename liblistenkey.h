@@ -1,20 +1,8 @@
+#include "common.h"
+#include <stdio.h>
+
 //This code is an adaptation of:
 //http://www.reocities.com/timessquare/cauldron/1299/hooknodll.html
-
-// This code will only work if you have Windows NT or
-// any later version installed, 2k and XP will work.
-
-#define _WIN32_WINNT 0x0500
-
-#include <windows.h>
-#include <winuser.h>
-#include <stdio.h>
-#define BOOL unsigned short
-#define TRUE 1
-#define FALSE 0
-#ifndef LLKHF_LOWER_IL_INJECTED
-#define LLKHF_LOWER_IL_INJECTED 0x02
-#endif
 
 typedef BOOL (*EVENTPROCESSOR)(DWORD, DWORD, DWORD);
 EVENTPROCESSOR eventProcessor;
