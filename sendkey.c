@@ -1,6 +1,10 @@
+#include "common.h"
 #include "libsendkey.h"
+#include "sendkey-json-parser.c"
+#include "sendkey-handlers.c"
+#include <stdio.h>
 
-int main(int argc, char* argv[]) {
+void sendkey_txt_parser() {
 	DWORD code;
 	char ch[6];
 	BOOL up;
@@ -15,4 +19,12 @@ int main(int argc, char* argv[]) {
 			default: abort();
 		}
 	}
+}
+
+int main(int argc, char* argv[]) {
+	global_sendkey_parser = sendkey_json_parser;
+	//global_sendkey_parser = sendkey_txt_parser;
+	global_sendkey_keyevent_handler = sendkey_printjson_handler;
+
+	global_sendkey_parser();
 }

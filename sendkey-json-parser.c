@@ -1,26 +1,11 @@
 #include "common.h"
+#include "libsendkey.h"
 #include <stdio.h>
 #include <sys/stat.h>
 #include "jsonsl.c"
 #include "json-str.c"
 
 #define BUFFER_SIZE 10240
-
-enum keyevent_type {
-	KEYEVENT_T_UNDEFINED = 0,
-	KEYEVENT_T_KEYUP = 1,
-	KEYEVENT_T_KEYDOWN = 2,
-	KEYEVENT_T_UNICODE_CHARACTER = 3
-};
-
-struct keyevent {
-	enum keyevent_type eventtype;
-	DWORD scancode;
-	DWORD virtualkey;
-	BOOL extended;
-	BOOL altdown;
-	uint32_t unicode_codepoint;
-};
 
 struct parse_context {
 	//key event data
@@ -75,21 +60,7 @@ void callback(jsonsl_t jsn,
 	//at end of top-level object
 	if(level == 1 && type == JSONSL_T_OBJECT && action == JSONSL_ACTION_POP) {
 		//handle keyevent
-		fprintf(stderr,
-			"Handle this!\n"
-			"eventtype:        %u\n"
-			"scancode:         %u\n"
-			"virtualkey:       %u\n"
-			"extended:         %u\n"
-			"altdown:          %u\n"
-			"unicode_codepoint %u\n\n",
-			ke->eventtype,
-			ke->scancode,
-			ke->virtualkey,
-			ke->extended,
-			ke->altdown,
-			ke->unicode_codepoint);
-		fflush(stderr);
+		global_sendkey_keyevent_handler(ke);
 		jsonsl_stop(jsn);
 	}
 
@@ -202,7 +173,7 @@ void callback(jsonsl_t jsn,
 	}
 }
 
-int main(int argc, char **argv) {
+void sendkey_json_parser() {
 	struct parse_context pc={};
 	jsonsl_char_t buffer[BUFFER_SIZE];
 	int charsize = sizeof(jsonsl_char_t);

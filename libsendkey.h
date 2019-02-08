@@ -1,5 +1,30 @@
+#ifndef keyboa_win_libsendkey_h
+#define keyboa_win_libsendkey_h
+
 #include "common.h"
 #include <stdio.h>
+
+enum keyevent_type {
+	KEYEVENT_T_UNDEFINED = 0,
+	KEYEVENT_T_KEYUP = 1,
+	KEYEVENT_T_KEYDOWN = 2,
+	KEYEVENT_T_UNICODE_CHARACTER = 3
+};
+
+struct keyevent {
+	enum keyevent_type eventtype;
+	DWORD scancode;
+	DWORD virtualkey;
+	BOOL extended;
+	BOOL altdown;
+	unsigned __int32 unicode_codepoint;
+};
+
+typedef void (*sendkey_keyevent_handler)(struct keyevent *ke);
+sendkey_keyevent_handler global_sendkey_keyevent_handler;
+
+typedef void (*sendkey_parser)();
+sendkey_parser global_sendkey_parser;
 
 //Send an injected keyboard event.
 void sendkbdinput(
@@ -45,3 +70,5 @@ void sendunicodekey(DWORD unicode, BOOL up) {
 		sendkbdinput(unicode, 0, up, 0, 0, 1);
 	}
 }
+
+#endif
