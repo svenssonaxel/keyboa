@@ -19,6 +19,7 @@ struct parse_context {
 	BOOL need_look_back;
 	size_t hkeystart;
 	size_t hkeyend;
+	BOOL stopped;
 };
 
 int error_callback(jsonsl_t jsn,
@@ -61,6 +62,7 @@ void callback(jsonsl_t jsn,
 	if(level == 1 && type == JSONSL_T_OBJECT && action == JSONSL_ACTION_POP) {
 		//handle keyevent
 		global_sendkey_keyevent_handler(ke);
+		pc->stopped = TRUE;
 		jsonsl_stop(jsn);
 	}
 
@@ -98,7 +100,6 @@ void callback(jsonsl_t jsn,
 			uint32_t intval = state->nelem;
 			BOOL isbool = (t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_BOOLEAN)?1:0;
 			BOOL boolval = (f & JSONSL_SPECIALf_TRUE)?1:0;
-
 			if(strcmp(keyname, "type")==0) {
 				if(isstring) {
 					char* stringvalue = malloc(sizeof(char) * (state->pos_cur - state->pos_begin));
@@ -201,10 +202,17 @@ void sendkey_json_parser() {
 		while(toprocess>=charsize) {
 			int posbefore = jsn->pos;
 			jsonsl_feed(jsn, (jsonsl_char_t*) buffer_process, toprocess);
-			int bytesprocessed = (jsn->pos - posbefore + 1)*charsize;
+
+			//workaround for off-by-one bug in jsonsl_stop(jsn)
+			if(pc.stopped) {
+				jsn->pos++;
+			}
+
+			int bytesprocessed = (jsn->pos - posbefore)*charsize;
 			toprocess -= bytesprocessed;
 			buffer_process += bytesprocessed;
-			if(jsn->level == 0) {
+			if(pc.stopped) {
+				pc.stopped = FALSE;
 				pc.min_available -= (jsn->pos);
 				pc.min_needed=0;
 				jsonsl_reset(jsn);
@@ -216,16 +224,15 @@ void sendkey_json_parser() {
 			memcpy(pc.buffer, pc.buffer + shift_bytes, pc.buffer_writeat - shift_bytes);
 			pc.min_available += shift_chars;
 			pc.buffer_writeat -= shift_bytes;
+			buffer_process -= shift_bytes;
 		}
 		if(nread <= 0) {
 			if(jsn->level == 0) {
 				fprintf(stderr, "Done: End of input.\n");
-				fflush(stderr);
 				exit(0);
 			}
 			else {
 				fprintf(stderr, "Error: Input ended during parsing.\n");
-				fflush(stderr);
 				exit(1);
 			}
 		}
