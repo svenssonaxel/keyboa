@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <signal.h>
 
-BOOL opt_c, opt_i, opt_e, opt_d, opt_f;
+bool opt_c, opt_i, opt_e, opt_d, opt_f;
 int evcount;
 
-BOOL processevent(DWORD scancode, DWORD virtualkey, DWORD flags) {
+bool processevent(DWORD scancode, DWORD virtualkey, DWORD flags) {
 	if(opt_i && (flags & LLKHF_INJECTED)) {
-		return FALSE;
+		return false;
 	}
 	if(!opt_f) {
 		printf(
@@ -92,11 +92,11 @@ int main(int argc, char** argv) {
 	int c;
 	while ((c = getopt (argc, argv, "ciedjfh")) != -1) {
 		switch (c) {
-			case 'c': opt_c = TRUE;  break;
-			case 'i': opt_i = TRUE;  break;
-			case 'e': opt_e = TRUE;  break;
-			case 'd': opt_d = TRUE;  break;
-			case 'f': opt_f = TRUE;  break;
+			case 'c': opt_c = true;  break;
+			case 'i': opt_i = true;  break;
+			case 'e': opt_e = true;  break;
+			case 'd': opt_d = true;  break;
+			case 'f': opt_f = true;  break;
 			case 'h': printhelp();
 			default: abort();
 		}

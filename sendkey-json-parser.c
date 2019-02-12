@@ -16,10 +16,10 @@ struct parse_context {
 	void* buffer;
 	size_t buffer_writeat;
 	size_t buffer_len;
-	BOOL need_look_back;
+	bool need_look_back;
 	size_t hkeystart;
 	size_t hkeyend;
-	BOOL stopped;
+	bool stopped;
 };
 
 int error_callback(jsonsl_t jsn,
@@ -53,8 +53,8 @@ void callback(jsonsl_t jsn,
 		ke->eventtype = KEYEVENT_T_UNDEFINED;
 		ke->scancode=0;
 		ke->virtualkey=0;
-		ke->extended=FALSE;
-		ke->altdown=FALSE;
+		ke->extended=false;
+		ke->altdown=false;
 		ke->unicode_codepoint=0;
 	}
 
@@ -62,16 +62,16 @@ void callback(jsonsl_t jsn,
 	if(level == 1 && type == JSONSL_T_OBJECT && action == JSONSL_ACTION_POP) {
 		//handle keyevent
 		global_sendkey_keyevent_handler(ke);
-		pc->stopped = TRUE;
+		pc->stopped = true;
 		jsonsl_stop(jsn);
 	}
 
 	//We're only interested in 2nd-level key/value pairs
 	if(level == 2 && type == JSONSL_T_HKEY && action == JSONSL_ACTION_PUSH) {
-		pc->need_look_back = TRUE;
+		pc->need_look_back = true;
 	}
 	if(level == 2 && (type == JSONSL_T_STRING || type == JSONSL_T_SPECIAL) && action == JSONSL_ACTION_POP) {
-		pc->need_look_back = FALSE;
+		pc->need_look_back = false;
 	}
 	//Unless we're interested, allow discarding data
 	if(!pc->need_look_back) {
@@ -95,11 +95,11 @@ void callback(jsonsl_t jsn,
 					keyname)) {
 			jsonsl_type_t t = state->type;
 			jsonsl_special_t f = state->special_flags;
-			BOOL isstring = (t == JSONSL_T_STRING)?1:0;
-			BOOL ispint = (t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_UNSIGNED) && !(f & JSONSL_SPECIALf_NUMNOINT);
+			bool isstring = (t == JSONSL_T_STRING)?1:0;
+			bool ispint = (t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_UNSIGNED) && !(f & JSONSL_SPECIALf_NUMNOINT);
 			uint32_t intval = state->nelem;
-			BOOL isbool = (t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_BOOLEAN)?1:0;
-			BOOL boolval = (f & JSONSL_SPECIALf_TRUE)?1:0;
+			bool isbool = (t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_BOOLEAN)?1:0;
+			bool boolval = (f & JSONSL_SPECIALf_TRUE)?1:0;
 			if(strcmp(keyname, "type")==0) {
 				if(isstring) {
 					char* stringvalue = malloc(sizeof(char) * (state->pos_cur - state->pos_begin));
@@ -188,7 +188,7 @@ void sendkey_json_parser() {
 	jsn->error_callback = error_callback;
 	jsn->max_callback_level = 3;
 	jsn->data = &pc;
-	while(TRUE) {
+	while(true) {
 		ssize_t maxread = pc.buffer_len-pc.buffer_writeat;
 		if(maxread<=0) {
 			fprintf(stderr, "Error: Buffer exhausted\n");
@@ -212,7 +212,7 @@ void sendkey_json_parser() {
 			toprocess -= bytesprocessed;
 			buffer_process += bytesprocessed;
 			if(pc.stopped) {
-				pc.stopped = FALSE;
+				pc.stopped = false;
 				pc.min_available -= (jsn->pos);
 				pc.min_needed=0;
 				jsonsl_reset(jsn);

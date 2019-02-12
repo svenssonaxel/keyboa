@@ -4,13 +4,13 @@
 //This code is an adaptation of:
 //http://www.reocities.com/timessquare/cauldron/1299/hooknodll.html
 
-typedef BOOL (*EVENTPROCESSOR)(DWORD, DWORD, DWORD);
+typedef bool (*EVENTPROCESSOR)(DWORD, DWORD, DWORD);
 EVENTPROCESSOR eventProcessor;
 HHOOK hKeyHook;
-BOOL quitListenKey;
+bool quitListenKey;
 
 void quitlistenkey() {
-	quitListenKey = TRUE;
+	quitListenKey = true;
 	PostMessage(NULL, 0, 0, 0);
 }
 
@@ -63,7 +63,7 @@ DWORD WINAPI KeyReader(LPVOID lpParameter) {
 // terminates.
 
 int runlistenkey(EVENTPROCESSOR ep, char* progname) {
-	quitListenKey = FALSE;
+	quitListenKey = false;
 	eventProcessor = ep;
 	HANDLE hThread;
 	DWORD dwThread;

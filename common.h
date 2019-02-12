@@ -4,9 +4,9 @@
 #define WINVER 0x0500
 #include <windows.h>
 
-#define BOOL unsigned __int8
-#define TRUE 1
-#define FALSE 0
+typedef unsigned __int8 bool;
+#define true ((bool)(1==1))
+#define false ((bool)(1==0))
 
 #ifndef LLKHF_LOWER_IL_INJECTED
 #define LLKHF_LOWER_IL_INJECTED 0x02

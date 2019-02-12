@@ -3,10 +3,10 @@
 #include <stdio.h>
 
 void sendkey_printjson_handler(struct keyevent *ke) {
-	BOOL td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
-	BOOL tu = (ke->eventtype == KEYEVENT_T_KEYUP);
-	BOOL tc = (ke->eventtype == KEYEVENT_T_UNICODE_CHARACTER);
-	BOOL to = !(td || tu || tc);
+	bool td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
+	bool tu = (ke->eventtype == KEYEVENT_T_KEYUP);
+	bool tc = (ke->eventtype == KEYEVENT_T_UNICODE_CHARACTER);
+	bool to = !(td || tu || tc);
 	if(td) printf("{\"type\":\"keydown\"");
 	if(tu) printf("{\"type\":\"keyup\"");
 	if(tc) printf("{\"type\":\"unicode_character\"");
@@ -30,10 +30,10 @@ void sendkey_printjson_handler(struct keyevent *ke) {
 }
 
 void sendkey_printprettyjson_handler(struct keyevent *ke) {
-	BOOL td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
-	BOOL tu = (ke->eventtype == KEYEVENT_T_KEYUP);
-	BOOL tc = (ke->eventtype == KEYEVENT_T_UNICODE_CHARACTER);
-	BOOL to = !(td || tu || tc);
+	bool td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
+	bool tu = (ke->eventtype == KEYEVENT_T_KEYUP);
+	bool tc = (ke->eventtype == KEYEVENT_T_UNICODE_CHARACTER);
+	bool to = !(td || tu || tc);
 	printf("{\"type\":              ");
 	if(td) printf("\"keydown\"");
 	if(tu) printf("\"keyup\"");

@@ -15,8 +15,8 @@ struct keyevent {
 	enum keyevent_type eventtype;
 	DWORD scancode;
 	DWORD virtualkey;
-	BOOL extended;
-	BOOL altdown;
+	bool extended;
+	bool altdown;
 	unsigned __int32 unicode_codepoint;
 };
 
@@ -30,10 +30,10 @@ sendkey_parser global_sendkey_parser;
 void sendkbdinput(
 	DWORD scancode,
 	DWORD virtualkey,
-	BOOL up,
-	BOOL hw,
-	BOOL extended,
-	BOOL unicode
+	bool up,
+	bool hw,
+	bool extended,
+	bool unicode
 ) {
 	INPUT i;
 	i.type = INPUT_KEYBOARD;
@@ -50,17 +50,17 @@ void sendkbdinput(
 }
 
 //Send a keyboard event defined by virtual key
-void sendvkey(DWORD virtualkey, BOOL up) {
+void sendvkey(DWORD virtualkey, bool up) {
 	sendkbdinput(0, virtualkey, up, 0, 0, 0);  //todo: lookup scancode
 }
 
 //Send a keyboard event defined by scancode
-void sendhwkey(DWORD scancode, BOOL extended, BOOL up) {
+void sendhwkey(DWORD scancode, bool extended, bool up) {
 	sendkbdinput(scancode, 0, up, 1, extended, 0);
 }
 
 //Send a unicode key event
-void sendunicodekey(DWORD unicode, BOOL up) {
+void sendunicodekey(DWORD unicode, bool up) {
 	if(unicode & 0x00FF0000) {
 		unicode -= 0x10000;
 		sendkbdinput(0xD800 | (unicode >> 10), 0, up, 0, 0, 1);

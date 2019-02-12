@@ -7,7 +7,7 @@
 void sendkey_txt_parser() {
 	DWORD code;
 	char ch[6];
-	BOOL up;
+	bool up;
 	while(scanf("%1[ud]%1[vseu]%x%1[\n]", ch, ch+2, &code, ch+4) == 4) {
 		up = ch[0] == 'u';
 		printf("got: {up:%c, type:%c, code:%x}\n", up ? 'u' : 'd', ch[2], code);
