@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
 	global_sendkey_parser = sendkey_json_parser;
 	//global_sendkey_parser = sendkey_txt_parser;
 	global_sendkey_keyevent_handler = sendkey_printjson_handler;
+	global_sendkey_keyevent_handler = sendkey_printprettyjson_handler;
 
 	global_sendkey_parser();
 }
