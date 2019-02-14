@@ -1,10 +1,11 @@
 #include "common.h"
+#include "json-str.c"
 #include <stdio.h>
 
 //This code is an adaptation of:
 //http://www.reocities.com/timessquare/cauldron/1299/hooknodll.html
 
-typedef bool (*EVENTPROCESSOR)(DWORD, DWORD, DWORD);
+typedef bool (*EVENTPROCESSOR)(KBDLLHOOKSTRUCT*);
 EVENTPROCESSOR eventProcessor;
 HHOOK hKeyHook;
 bool quitListenKey;
@@ -17,8 +18,7 @@ void quitlistenkey() {
 __declspec(dllexport) LRESULT CALLBACK
 KeyEvent (int nCode, WPARAM wParam, LPARAM lParam) {
 	if (nCode == HC_ACTION) {
-		KBDLLHOOKSTRUCT hooked = *((KBDLLHOOKSTRUCT*)lParam);
-		if(eventProcessor(hooked.scanCode, hooked.vkCode, hooked.flags)) {
+		if(eventProcessor((KBDLLHOOKSTRUCT*)lParam)) {
 			return 1;
 		}
 	}

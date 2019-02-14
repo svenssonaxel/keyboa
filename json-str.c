@@ -1,3 +1,5 @@
+#include "common.h"
+
 /**
  * Converts a JSON string value to a null-terminated ASCII string.
  * This can be used with object keys as well, since the syntax is the same.
@@ -37,7 +39,7 @@ int json_string_value_to_ascii(char* beginquote, char* endquote, char* target) {
 	}
 	for(int i=0;i<8;i++) {
 	  if(s[1] == "\"\\/bfnrt"[i]) {
-		*t = "\"\\/\e\f\n\r\t"[i];
+		*t = "\"\\/\b\f\n\r\t"[i];
 		s+=2;
 		t++;
 		break;
@@ -73,4 +75,48 @@ int json_string_value_to_ascii(char* beginquote, char* endquote, char* target) {
   }
   *t = 0;
   return t - target;
+}
+
+/**
+ * Converts a null-terminated Latin-1 encoded string to a null-terminated
+ * ASCII string holding its JSON representation excluding the beginning and
+ * ending quote characters.
+ *
+ * @param source The string to be converted
+ * @param target A buffer able to hold the converted string. It is safe to
+ * assume that a buffer 6 times as large as the source buffer is sufficient.
+ */
+bool latin1_string_to_json(unsigned char* source, unsigned char* target) {
+	unsigned char* s = source;
+	unsigned char* t = target;
+	while(*s) {
+		unsigned char c = s[0];
+		int intchar = c;
+		for(int i=0;i<8;i++) {
+			if(c=="\"\\/\b\f\n\r\t"[i]) {
+				t[0] = '\\';
+				t[1] = "\"\\/bfnrt"[i];
+				t+=2;
+				s++;
+				break;
+				continue;
+			}
+		}
+		if(0<=c && c<=127) {
+			*t = *s;
+			t++;
+			s++;
+			continue;
+
+		}
+		else if(128<=c && c<=255) {
+			sprintf(t, "\\u00%02X", c);
+			t+=6;
+			s++;
+			continue;
+		}
+		return false;
+	}
+	*t = 0;
+	return true;
 }

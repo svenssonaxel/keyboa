@@ -5,7 +5,7 @@
 #include "jsonsl.c"
 #include "json-str.c"
 
-#define BUFFER_SIZE 10240
+#define BUFFER_SIZE 102400
 
 struct parse_context {
 	//key event data
@@ -54,7 +54,6 @@ void callback(jsonsl_t jsn,
 		ke->scancode=0;
 		ke->virtualkey=0;
 		ke->extended=false;
-		ke->altdown=false;
 		ke->unicode_codepoint=0;
 	}
 
@@ -113,8 +112,8 @@ void callback(jsonsl_t jsn,
 						else if(strcmp(stringvalue, "keydown")==0) {
 							ke->eventtype = KEYEVENT_T_KEYDOWN;
 						}
-						else if(strcmp(stringvalue, "unicode_character")==0) {
-							ke->eventtype = KEYEVENT_T_UNICODE_CHARACTER;
+						else if(strcmp(stringvalue, "keypress")==0) {
+							ke->eventtype = KEYEVENT_T_KEYPRESS;
 						}
 						else {
 							fprintf(stderr, "Illegal value for %s\n", keyname);
@@ -153,17 +152,17 @@ void callback(jsonsl_t jsn,
 					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
 				}
 			}
+			else if(strcmp(keyname, "time")==0) {
+				if(ispint) {
+					ke->time = intval;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
+				}
+			}
 			else if(strcmp(keyname, "win_extended")==0) {
 				if(isbool) {
 					ke->extended = boolval;
-				}
-				else {
-					fprintf(stderr, "Value for %s must be a boolean\n", keyname);
-				}
-			}
-			else if(strcmp(keyname, "win_altdown")==0) {
-				if(isbool) {
-					ke->altdown = boolval;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a boolean\n", keyname);
