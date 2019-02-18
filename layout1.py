@@ -170,6 +170,7 @@ def chordmachine(gen):
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
+	altgr_workaround_input,          # libkeyboa
 	enrich_input,                    # libkeyboa
 	add_common_name,                 # common_name
 	allow_repeat("physkey"),         # libkeyboa
@@ -177,6 +178,7 @@ list_of_transformations = [
 	chordmachine,                    # Customization from this file
 	chords_to_events("common_name"), # libkeyboa
 	resolve_common_name,             # common_name
+	altgr_workaround_output,         # libkeyboa
 	sendkey_cleanup,                 # libkeyboa
 	output]                          # libkeyboa
 

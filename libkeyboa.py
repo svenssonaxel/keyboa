@@ -191,6 +191,80 @@ def sendkey_cleanup(gen):
 		if(obj["type"]=="output"):
 			yield obj
 
+#If the AltGr key is present, it causes the following problems:
+#- It is reported as a combination of two key events.
+#- One of the key events has a different scancode, but the same virtualkey as
+#   left Ctrl.
+#- Sometimes when consuming events, one of the keyup events is absent.
+#The transformation altgr_workaround_input will detect whether AltGr is present,
+#remove the offending key event and inform altgr_workaround_output.
+#The transformation altgr_workaround_output will reinstate/create a correct key
+#event if AltGr is present.
+#The transformations between these two workarounds can then act on key events
+#for RMENU (virtualkey 0xA5=165), which will mean AltGr if and only if it is present.
+
+def altgr_workaround_input(gen):
+	lctrl=0xA2
+	rmenu=0xA5
+	altgr_present=False
+	altgr_lctrl_sc=None
+	for obj in gen:
+		if(obj["type"] in ["keydown", "keyup"]
+		   and "win_scancode" in obj
+		   and "win_virtualkey" in obj
+		   and obj["win_virtualkey"] in [lctrl, rmenu]
+		   and "win_time" in obj):
+			sc=obj["win_scancode"]
+			vk=obj["win_virtualkey"]
+			if(not altgr_present and sc>0x200 and vk==lctrl):
+				altgr_present=True
+				altgr_lctrl_sc=sc
+				yield {"type": "altgr_present", "win_scancode": sc, "win_extended": obj["win_extended"]}
+			if(not (altgr_present and obj["win_scancode"]==altgr_lctrl_sc and vk==lctrl)):
+				yield obj
+		else:
+			yield obj
+
+def altgr_workaround_output(gen):
+	lctrl=0xA2
+	rmenu=0xA5
+	altgr_present=False
+	altgr_lctrl_sc=None
+	altgr_lctrl_ext=None
+	for obj in gen:
+		if(obj["type"]=="altgr_present"):
+			altgr_present=True
+			altgr_lctrl_sc=obj["win_scancode"]
+			altgr_lctrl_ext=obj["win_extended"]
+		elif(altgr_present
+		     and obj["type"] in ["keydown", "keyup", "keypress"]
+		     and "win_virtualkey" in obj
+		     and obj["win_virtualkey"] in [lctrl, rmenu]):
+			sc=obj["win_scancode"] if "win_scancode" in obj else None
+			vk=obj["win_virtualkey"]
+			type=obj["type"]
+			altgr_lctrl_event={
+				"type":type,
+				"win_scancode": altgr_lctrl_sc,
+				"win_extended": altgr_lctrl_ext,
+				"win_virtualkey": lctrl}
+			if("win_time" in obj):
+				altgr_lctrl_event["win_time"]=obj["win_time"]
+			if(vk==lctrl and (not sc or sc<=0x200)):
+				yield obj
+			elif(vk==lctrl):
+				pass
+			elif(vk==rmenu and type in ["keydown", "keyup"]):
+				yield altgr_lctrl_event
+				yield obj
+			else: #means (vk==rmenu and type=="keypress")
+				yield {**altgr_lctrl_event, "type": "keydown"}
+				yield {**obj, "type": "keydown"}
+				yield {**altgr_lctrl_event, "type": "keyup"}
+				yield {**obj, "type": "keyup"}
+		else:
+			yield obj
+
 #Remove all events from the event stream except the given types.
 def selecttypes(types):
 	def ret(gen):
