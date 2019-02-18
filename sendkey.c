@@ -55,7 +55,7 @@ void printprettyjson(struct keyevent *ke, FILE *stream) {
 void sendkey_dispatch_handler(struct keyevent *ke) {
 	char* ke_error = validate_keyevent(ke);
 	if(ke_error) {
-		global_sendkey_error_handler(false, "Refusing to use invalid keyevent", ke_error);
+		global_sendkey_error_handler(false, "Ignoring keyevent", ke_error);
 	}
 	else {
 		if(!opt_d) {

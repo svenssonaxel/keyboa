@@ -102,14 +102,13 @@ bool latin1_string_to_json(unsigned char* source, unsigned char* target) {
 				continue;
 			}
 		}
-		if(0<=c && c<=127) {
+		if(0<=c && c!=27 && c<=127) {
 			*t = *s;
 			t++;
 			s++;
 			continue;
-
 		}
-		else if(128<=c && c<=255) {
+		else if((128<=c && c<=255) || c==27) {
 			sprintf(t, "\\u00%02X", c);
 			t+=6;
 			s++;

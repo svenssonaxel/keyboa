@@ -85,7 +85,13 @@ void callback(jsonsl_t jsn,
 	}
 
 	//At end of value for a key
-	if(level == 2 && type != JSONSL_T_HKEY && action == JSONSL_ACTION_POP) {
+	if(
+		level == 2 &&
+		type != JSONSL_T_HKEY &&
+		action == JSONSL_ACTION_POP &&
+		!(state->type == JSONSL_T_SPECIAL &&
+			state->special_flags & JSONSL_SPECIALf_NULL)
+	) {
 		//figure out which key the value was given for
 		char* keyname = malloc(sizeof(char) * (pc->hkeyend - pc->hkeystart));
 		if(0 <= json_string_value_to_ascii(
@@ -116,7 +122,7 @@ void callback(jsonsl_t jsn,
 							ke->eventtype = KEYEVENT_T_KEYPRESS;
 						}
 						else {
-							fprintf(stderr, "Illegal value for %s\n", keyname);
+							fprintf(stderr, "Unknown keyevent type\n");
 						}
 					}
 					else {

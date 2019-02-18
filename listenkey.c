@@ -68,7 +68,7 @@ bool processevent(KBDLLHOOKSTRUCT* hooked) {
 }
 
 void printinit(FILE* stream) {
-	fprintf(stream, "{\"type\":\"init\"");
+	fprintf(stream, "{\"type\":\"init\",\"platform\":\"windows\"");
 
 	//Retrieve current state for virtualkeys
 	//https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-getasynckeystate

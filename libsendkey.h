@@ -30,7 +30,7 @@ char* validate_keyevent(struct keyevent *ke) {
 	if(ke->eventtype!=KEYEVENT_T_KEYDOWN &&
 	   ke->eventtype!=KEYEVENT_T_KEYUP &&
 	   ke->eventtype!=KEYEVENT_T_KEYPRESS) {
-		return "Keyevent has erroneous type";
+		return "Keyevent has unknown type";
 	}
 	if(ke->scancode==0 && ke->extended!=false) {
 		return "Keyevent cannot have extended flag set without scancode";
