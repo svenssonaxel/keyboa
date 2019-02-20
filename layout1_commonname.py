@@ -25,7 +25,7 @@ _commonname_mapping={
 
 	"LMENU":        "S2",
 	"LWIN":         "S3",
-	"LCONTROL":     "S5"
+	"LCONTROL":     "S4"
 	}
 
 _aliases={
@@ -48,7 +48,9 @@ _aliases={
 	"sp":           "SPACE",
 	"SpaceBar":     "SPACE",
 	"Caps":         "CAPITAL",
-	"CapsLock":     "CAPITAL"
+	"CapsLock":     "CAPITAL",
+	"lef":          "LEFT",
+	"rig":          "RIGHT"
 }
 
 vkey_cn_map = {}

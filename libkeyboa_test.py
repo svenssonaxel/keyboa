@@ -19,9 +19,9 @@ def testtransformation(stack, title, input, output):
 	if(state==output):
 		print("Test OK: " + str(title))
 	else:
-		print("Test FAILED: " + str(title))
-		print("Expected output: " + str(output))
-		print("Actual output: " + str(state))
+		print("Test FAILED: " + str(title) + "\n")
+		print("Expected output:\n" + str(output) + "\n")
+		print("Actual output:\n" + str(state) + "\n")
 		raise Exception("Test failed")
 
 def unchanged(input):
@@ -53,19 +53,29 @@ testtransformation([releaseall_at_init], "releaseall_at_init",
 	 [{"type":"keydown","win_virtualkey": 65}],
 	 [{"type":"keyup"  ,"win_virtualkey": 65}]])
 
+initmsg={"type":"init","platform":"windows","keyboard_type":111,
+	"keyboard_subtype":222,"function_keys":333,"OEMCP":444,"oem_mapping":[1,2,3],
+	"key_names":[
+	{"scancode":1001,"extended":False,"keyname":"first"},
+	{"scancode":2002,"extended":False,"keyname":"Second"},
+	{"scancode":3003,"extended":True,"keyname":"THIRD"}]}
+keyboard_hw_hash=hash("""{"function_keys":333,"keyboard_subtype":222,"keyboard_type":111,"platform":"windows"}""")
+keyboard_hash=hash("""{"OEMCP":444,"function_keys":333,"key_names":[{"extended":false,"keyname":"first","scancode":1001},{"extended":false,"keyname":"Second","scancode":2002},{"extended":true,"keyname":"THIRD","scancode":3003}],"keyboard_subtype":222,"keyboard_type":111,"oem_mapping":[1,2,3],"platform":"windows"}""")
+physkey_keyname_dict={
+	"_03E9": "first",
+	"_07D2": "Second",
+	"E0BBB": "THIRD"}
+initmsg_out={**initmsg,
+	"physkey_keyname_dict":physkey_keyname_dict,
+	"keyboard_hash": keyboard_hash,
+	"keyboard_hw_hash": keyboard_hw_hash}
 testtransformation([enrich_input], "enrich_input",
-	[{"type":"init","platform":"windows","key_names":[
-		{"scancode":1001,"extended":False,"keyname":"first"},
-		{"scancode":2002,"extended":False,"keyname":"Second"},
-		{"scancode":3003,"extended":True,"keyname":"THIRD"}]},
+	[initmsg,
 	 {"type":"keydown"  ,"win_scancode": 1001,"win_virtualkey": 13,"win_extended":False},
 	 {"type":"keyup"    ,"win_scancode": 2002,"win_virtualkey": 27,"win_extended":False},
 	 {"type":"keypress" ,"win_scancode": 3003,"win_virtualkey": 65,"win_extended":False},
 	 {"type":"keydown"  ,"win_scancode": 3003,"win_virtualkey": 65,"win_extended":True}],
-	[[{"type":"init","platform":"windows","key_names":[
-	  {"scancode":1001,"extended":False,"keyname":"first"},
-	  {"scancode":2002,"extended":False,"keyname":"Second"},
-	  {"scancode":3003,"extended":True,"keyname":"THIRD"}]}],
+	[[initmsg_out],
 	 [{'type': 'keydown',  'win_scancode': 1001, 'win_virtualkey': 13,
 	   'win_extended': False, 'physkey': '_03E9', 'keyid': '_03E9.0D',
 	   'win_virtualkey_symbol': 'VK_RETURN', 'win_virtualkey_description': 'ENTER key',
@@ -189,6 +199,9 @@ input=[
 	{"type":"keydown"},
 	{"type":"keyup"},
 	{"type":"keypress"},
+	{"type":"keydown", "unicode_codepoint":15},
+	{"type":"keyup", "win_scancode":16},
+	{"type":"keypress", "win_virtualkey":17},
 	{"type":"illegal"},
 	{"type":"chord"},
 	{"type":"keyup_all"},
@@ -208,9 +221,12 @@ input=[
 	 "illegal":True}]
 output=[
 	[],
-	[{"type":"keydown"}],
-	[{"type":"keyup"}],
-	[{"type":"keypress"}],
+	[],
+	[],
+	[],
+	[{"type":"keydown", "unicode_codepoint":15}],
+	[{"type":"keyup", "win_scancode":16}],
+	[{"type":"keypress", "win_virtualkey":17}],
 	[],
 	[],
 	[],
@@ -224,11 +240,12 @@ output=[
 	  "win_virtualkey": 27}]]
 testtransformation([sendkey_cleanup], "sendkey_cleanup", input, output)
 
-testtransformation([selecttypes(["keydown","keyup","keypress"])], "selecttypes", input[:-2], output[:-2])
+output=[output[0],*[[e] for e in input[1:4]],*output[4:-1],[input[-1]]]
+testtransformation([selecttypes(["keydown","keyup","keypress"])], "selecttypes", input, output)
 
 testtransformation(
 	[selecttypes(["keydown","keyup","keypress"]),
-	 selectfields(["type", "win_scancode", "win_virtualkey", "win_extended"])],
+	 selectfields(["type", "win_scancode", "win_virtualkey", "win_extended", "unicode_codepoint"])],
 	"selectfields", input[:-1], output[:-1])
 
 testtransformation(

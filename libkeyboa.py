@@ -32,13 +32,27 @@ def releaseall_at_init(gen):
 			for key in obj["vkeysdown"]:
 				yield {"type": "output", "data": {"type": "keyup", "win_virtualkey": key}}
 
-#Add a few fields:
+#Dictionaries/lists aren't natively hashable
+def hashobj(obj):
+	return hash(json.dumps(obj,sort_keys=True,separators=(',',':')))
+
+#Add a few fields to key events:
 #- physkey: Based on scancode and extended flag. Identifies a physical key on
 #  the keyboard.
 #- keyid: Based on scancode, extended flag, and virtualkey. Identifies a
 #  physical key on the keyboard given a certain keyboard layout setting.
+#- keyname_local: The name of the physical key in current localization.
 #- win_virtualkey_symbol: A symbol representing win_virtualkey
 #- win_virtualkey_description: A description/comment for win_virtualkey
+#Also add a few fields to the init message:
+#- keyboard_hash: A value that stays the same for the same physical keyboard and
+#  layout but likely changes otherwise, useful for making portable
+#  configurations.
+#- keyboard_hw_hash: A value that stays the same for the same physical keyboard
+#  even under layout changes but likely changes otherwise, useful for making
+#  portable configurations.
+#- physkey_keyname_dict: A dictionary mapping physkey values to layout-specific
+#  key names.
 def enrich_input(gen):
 	initmsg = {}
 	physkey_keyname_dict = {}
@@ -50,7 +64,16 @@ def enrich_input(gen):
 				hexsc=str.format('{:04X}', q["scancode"])
 				physkey=ext+hexsc
 				physkey_keyname_dict[physkey]=q["keyname"]
-		if obj["type"] in ["keydown", "keyup", "keypress"]:
+			kb_phys={field:obj[field] for field in
+				["platform","keyboard_type","keyboard_subtype","function_keys"]}
+			kb_layout={**kb_phys,**{field:obj[field] for field in
+				["OEMCP","key_names","oem_mapping"]}}
+			#"active_input_locale_current_thread":69010461,"available_input_locales":[69010461],
+			yield {**obj,
+				"physkey_keyname_dict":physkey_keyname_dict,
+				"keyboard_hash": hashobj(kb_layout),
+				"keyboard_hw_hash": hashobj(kb_phys)}
+		elif obj["type"] in ["keydown", "keyup", "keypress"]:
 			ret={**obj} #Shallow copy
 			ext="E" if obj["win_extended"] else "_"
 			hexsc=str.format('{:04X}', obj["win_scancode"])
@@ -184,10 +207,14 @@ def sendkey_cleanup(gen):
 	for obj in gen:
 		if(obj["type"] in ["keydown", "keyup", "keypress"]):
 			event={}
+			send=False
 			for field in ["type", "win_scancode", "win_virtualkey", "win_extended", "unicode_codepoint"]:
-				if field in obj and obj[field]:
+				if(field in obj and obj[field]):
 					event[field]=obj[field]
-			yield event
+					if(field=="win_virtualkey" or field=="win_scancode" or field=="unicode_codepoint"):
+						send=True
+			if(send):
+				yield event
 		if(obj["type"]=="output"):
 			yield obj
 
