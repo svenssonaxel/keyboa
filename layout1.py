@@ -89,7 +89,7 @@ load("Nav4",[
 	("P", "S-C-left,S-del")])
 
 w("Num",
- ".       .       F12     F11     F10     .       E       A       B       C       D       F       .       " +
+ ".       .       F12     F11     F10     .       .E      .A      .B      .C      .D      .F      .       " +
  ".       F12     F9      F8      F7      .       )       7       8       9       back    /       .       " +
  ".       F11     F6      F5      F4      .       (       4       5       6       ret     *       .       " +
  ".       F10     F3      F2      F1      space   +       1       2       3       -       :       .       " +
@@ -200,7 +200,7 @@ def chordmachine(gen):
 				for item in out.split(","):
 					if(len(item)>0 and item[0]=="."):
 						for char in item[1:]:
-							yield {"type":"chord","chord":[char]}
+							yield {"type":"chord","chord":["."+char]}
 					else:
 						itemch=item.split("-")
 						itemmods=itemch[:-1]

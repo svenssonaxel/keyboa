@@ -106,8 +106,8 @@ def resolve_common_name(gen):
 			if(cn in cn_vkey_map):
 				vkey=cn_vkey_map[cn]
 				ret={**ret, **vkeyinfo(vkey)}
-			elif(len(cn)==1):
-				ret={**ret, "unicode_codepoint":ord(cn)}
+			elif(len(cn)==1 or (len(cn)==2 and cn[0]==".")):
+				ret={**ret, "unicode_codepoint":ord(cn[-1])}
 		yield ret
 
 #Test the mappings
