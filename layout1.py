@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from libkeyboa import *
 from layout1_commonname import *
 

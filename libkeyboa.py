@@ -1,3 +1,5 @@
+# Requires python3
+
 import sys, json, functools
 
 #Run data in series through the supplied list of transformations

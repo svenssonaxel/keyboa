@@ -1,3 +1,5 @@
+# Requires python3
+
 from libkeyboa import vkeyinfo
 
 _commonname_mapping={
