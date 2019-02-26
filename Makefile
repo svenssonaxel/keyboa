@@ -1,6 +1,13 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 # License: See LICENSE
 
+ifneq ($(shell echo $${OSTYPE}),cygwin)
+$(error Building only supported under Cygwin.)
+endif
+ifeq (,$(shell which i686-w64-mingw32-gcc))
+$(error mingw32 compiler not found. Install cygwin package mingw64-i686-gcc-cor)
+endif
+
 default: listenkey.exe sendkey.exe
 
 clean:
