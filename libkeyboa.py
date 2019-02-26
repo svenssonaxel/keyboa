@@ -1,5 +1,7 @@
 # Requires python3
 
+# Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
+
 import sys, json, functools
 
 #Run data in series through the supplied list of transformations

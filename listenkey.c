@@ -1,3 +1,4 @@
+// Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
@@ -213,6 +214,8 @@ void printhelp() {
 		"       15  Space\n"
 		"    16-23  Time (ms since system start), 8 hex digits\n\n"
 		" -h Print this help text and exit.\n\n"
+		"listenkey is part of keyboa, pre-release\n"
+		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
 	);
 	exit(0);
 }

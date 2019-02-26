@@ -1,3 +1,4 @@
+// Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 #include "common.h"
 
 /**

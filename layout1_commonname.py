@@ -1,5 +1,7 @@
 # Requires python3
 
+# Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
+
 from libkeyboa import vkeyinfo
 
 _commonname_mapping={
