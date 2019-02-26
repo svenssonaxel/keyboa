@@ -1,4 +1,5 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
+# License: See LICENSE
 
 default: listenkey.exe sendkey.exe
 

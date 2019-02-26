@@ -1,0 +1,20 @@
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as
+	published by the Free Software Foundation, either version 3 of the
+	License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+
+	JSONSL is a JSON lexer that is included in this program. It is licensed as
+	indicated above, as well as under the licence found in jsonsl-LICENSE. This
+	applies to the files jsonsl.c and jsonsl.h. The complete source code for
+	JSONSL can be found at https://github.com/mnunberg/jsonsl
