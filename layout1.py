@@ -168,7 +168,7 @@ def chordmachine(gen):
 			nativemods=set()
 			for mod in inmods:
 				i=planes["from"].index(mod) if mod in planes["from"] else None
-				if(i
+				if(i!=None
 				   and i<len(planes["mods"])
 				   and planes["mods"][i]):
 					mod=planes["mods"][i]
@@ -179,12 +179,10 @@ def chordmachine(gen):
 			out=None
 			outmods=set()
 			planename="".join(sorted(planemods))
-			i=None
-			if(inkey in planes["from"]):
-				i=planes["from"].index(inkey)
+			i=planes["from"].index(inkey) if inkey in planes["from"] else None
 			for pre in planeprefixes:
 				pl="".join(pre)+planename
-				if(i
+				if(i!=None
 				   and pl in planes
 				   and set(pre)<=nativemods
 				   and i<len(planes[pl])
