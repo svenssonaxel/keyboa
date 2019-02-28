@@ -6,6 +6,7 @@
 from libkeyboa import *
 from layout1_commonname import *
 from boxdrawings import *
+from time import strftime
 
 planes={}
 def load(plane, iter):
@@ -40,7 +41,7 @@ w("from",
 
 w("mods",
  "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       .       .       " +
- "Super   .       WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      .       Super   .       " +
+ "Super   .       WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Date    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
  "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
@@ -271,6 +272,25 @@ def boxdrawings(gen):
 		else:
 			yield obj
 
+load("Date",[
+	("D", "Printdate-%Y_%m_%d"),
+	("C", "Printdate-%y%m%d"),
+	("T", "Printdate-%H:%M"),
+	("G", "Printdate-%H%M"),
+	("S", "Printdate-%y%m%d%H%M%S")])
+
+def printdate(gen):
+	for obj in gen:
+		if(obj["type"]=="chord"
+		   and len(obj["chord"])==2
+		   and obj["chord"][0]=="Printdate"):
+			format=obj["chord"][1]
+			datestr=strftime(format.replace("_", "-"))
+			for char in datestr:
+				yield {**obj, "chord":["." + char]}
+		else:
+			yield obj
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
@@ -281,6 +301,7 @@ list_of_transformations = [
 	events_to_chords("common_name"), # libkeyboa
 	chordmachine,                    # Customization from this file
 	boxdrawings,                     # Customization from this file
+	printdate,                       # Customization from this file
 	chords_to_events("common_name"), # libkeyboa
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
