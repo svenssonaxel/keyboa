@@ -42,30 +42,31 @@ w("mods",
  "Super   .       WM      Nav2    Nav3    Nav4    .       .       Nav2    WM      .       Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
  "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
- "           Ctrl    .       Alt            Mirror            AltGr   .       Ctrl                        " )
+ "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
-ch("Sym",           """ ⁿ²³   0,. ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
-ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔     ∀∃«»∈ℕℤℚℝℂ """) #Inspired by the Knight keyboard
+ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
+ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔    ∀∃«»∈ℕℤℚℝℂ  """) #Inspired by the Knight keyboard
+ch("HyperSym",      """                【】⫷⫸«»‹›         ⸨⸩—    ⦕⦖⦓⦔ „“”‘’  """) #http://xahlee.info/comp/unicode_matching_brackets.html
 ch("Math",          """             ¬⋀⋁∈ ⇒ ≈∞∅∝   ∀∫∂ ⊂⊃ ⇔    ≤ ∃  ⇐ℕℤℚℝℂ  """)
 ch("ShiftMath",     """          ≠   ⋂⋃∉ ∴ ≉       ∮  ⊏⊐      ≥ ∄  ∵∇      """)
 ch("Greek",         """               ςερτυθιοπ   ασδφγηξκλ´   ζχψωβνμ     """)
 ch("ShiftGreek",    """               ¨ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒΝΜ     """)
 ch("Cyr",           """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
 ch("ShiftCyr",      """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
-ch("Bats",          """ ♭♮♯♩♪♫♬      ☠☢✗✆☎y┌┬┐   C✧✦✓➔◢◣├┼┤─        ◥◤└┴┘  """)
-ch("ShiftBats",     """        ║           ╔╦╗   C◇◆●   ╠╬╣═          ╚╩╝  """)
-ch("Sub",           """          ₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
+ch("Bats",          """ ♭♮♯♩♪♫♬┃     ☠☢✗✆☎y┌┬┐   C✧✦✓➔◢◣├┼┤─       ◥◤└┴┘   """)
+ch("ShiftBats",     """        ║           ╔╦╗   C◇◆●   ╠╬╣═         ╚╩╝   """)
+ch("Sub",           """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
 
 load("Sym", [("0","space")])
 load("Sub",[("SPACE","₀")])
 
 w("Nav",
- ".       .       .       .       .       .       .       .       10*Up   .       .       .       .       " +
+ ".       .       .       C-S-Tab C-Tab   .       .       .       10*Up   .       .       .       .       " +
  ".       Esc     Alt-F4  C-PgUp  C-PgDn  A-Home  .       Home    Up      End     Back    Del     .       " +
  ".       A-Left  A-Right S-Tab   Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Lef .       " +
  ".       .       .       .       .       .       .       .       10*Down S-home,Back S-end,del . .       " +
- "           .       .       .              SPACE,left        .       .       .                           " )
+ "           .       .       .              SPACE          SPACE,left .       .                           " )
 
 w("Nav2",
  ".       .       .       .       .       .       .       .       10*PgUp .       .       .       .       " +
@@ -96,9 +97,9 @@ load("Nav4",[
 w("Num",
  ".       .       F12     F11     F10     .       .E      .A      .B      .C      .D      .F      .       " +
  ".       F12     F9      F8      F7      .       )       7       8       9       back    /       .       " +
- ".       F11     F6      F5      F4      .       (       4       5       6       ret     *       .       " +
- ".       F10     F3      F2      F1      space   +       1       2       3       -       :       .       " +
- "           .       ]       [                0               M3      M2      .                           " )
+ ".       F11     F6      F5      F4      ]       (       4       5       6       ret     *       .       " +
+ ".       F10     F3      F2      F1      [       +       1       2       3       -       :       .       " +
+ "           .       .      space             0               M3      M2     .                            " )
 
 load("Shell",[
 	("Y", """C-A,C-K,.cd "$dir3",Ret"""),
@@ -140,21 +141,22 @@ w("Mirror",
  "L3      L2      L       K       J       H       G       F       D       S       A       .       .       " +
  ".       M4      M3      M2      M       N       B       V       C       X       Z       Z2      .       " )
 
-#List and priority of modifier combinations allowed beyond those that make up
-#plane names
+nativemodifiers=["Super", "Hyper", "Meta", "Alt", "Ctrl", "Shift"]
+
+#List and priority of native modifier combinations allowed as prefixes to plane
+#names. The empty list represents an exact match between non-native modifiers
+#and plane name.
 planeprefixes=[
-	["Ctrl","Alt","Shift"],
-	["Alt","Shift"],
-	["Ctrl","Shift"],
-	["Ctrl","Alt"],
 	["Shift"],
-	["Alt"],
-	["Ctrl"],
+	["Hyper"],
 	[]]
 
 modnotation={
-	"C": "Ctrl",
+	"s": "Super",
+	"H": "Hyper",
+	"M": "Meta",
 	"A": "Alt",
+	"C": "Ctrl",
 	"S": "Shift"}
 
 def chordmachine(gen):
@@ -172,7 +174,7 @@ def chordmachine(gen):
 				   and i<len(planes["mods"])
 				   and planes["mods"][i]):
 					mod=planes["mods"][i]
-				if(mod in ["Ctrl", "Alt", "Shift"]):
+				if(mod in nativemodifiers):
 					nativemods.add(mod)
 				else:
 					planemods.add(mod)

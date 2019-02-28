@@ -42,6 +42,7 @@ _aliases={
 	"Shift":        "VK_SHIFT",
 	"LShift":       "VK_LSHIFT",
 	"RShift":       "VK_RSHIFT",
+	"Super":        "LWIN",
 	"esc":          "ESCAPE",
 	"del":          "DELETE",
 	"ret":          "RETURN",
