@@ -5,6 +5,7 @@
 
 from libkeyboa import *
 from layout1_commonname import *
+from boxdrawings import *
 
 planes={}
 def load(plane, iter):
@@ -38,7 +39,7 @@ w("from",
  "           S4      S3      S2             SPACE             T2      T3      T4                          " )
 
 w("mods",
- "Bats    Sub     WM2     .       Phon    .       .       .       .       WM2     .       Modlock .       " +
+ "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       Modlock .       " +
  "Super   .       WM      Nav2    Nav3    Nav4    .       .       Nav2    WM      .       Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
  "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
@@ -54,8 +55,8 @@ ch("Greek",         """               ςερτυθιοπ   ασδφγηξκλ´ 
 ch("ShiftGreek",    """               ¨ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒΝΜ     """)
 ch("Cyr",           """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
 ch("ShiftCyr",      """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
-ch("Bats",          """ ♭♮♯♩♪♫♬┃     ☠☢✗✆☎y┌┬┐   C✧✦✓➔◢◣├┼┤─       ◥◤└┴┘   """)
-ch("ShiftBats",     """        ║           ╔╦╗   C◇◆●   ╠╬╣═         ╚╩╝   """)
+ch("Bats",          """ ♭♮♯♩♪♫♬      ☠☢✗✆☎        ✧✦✓➔◢◣           ◥◤      """)
+ch("ShiftBats",     """                           ◇◆●                      """)
 ch("Sub",           """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
 
 load("Sym", [("0","space")])
@@ -157,7 +158,8 @@ modnotation={
 	"M": "Meta",
 	"A": "Alt",
 	"C": "Ctrl",
-	"S": "Shift"}
+	"S": "Shift",
+	"B": "Boxdrawings"}
 
 def chordmachine(gen):
 	for obj in gen:
@@ -227,6 +229,46 @@ def chordmachine(gen):
 		else:
 			yield obj
 
+w("Box",
+ ".       B-das=N B-das=2 B-das=3 B-das=4 .       SPACE   B-___R  B-L__R  B-L___  .       .       .       " +
+ ".       B-lef=d B-dow=d B-up=d  B-rig=d B-arc=Y B-_D__  B-_D_R  B-LD_R  B-LD__  back    del     .       " +
+ ".       B-lef=l B-dow=l B-up=l  B-rig=l B-arc=N B-_DU_  B-_DUR  B-LDUR  B-LDU_  ret     ret,lef .       " +
+ ".       B-lef=h B-dow=h B-up=h  B-rig=h .       B-__U_  B-__UR  B-L_UR  B-L_U_  .       .       .       " +
+ "           S4      S3      S2             SPACE             T2      T3      T4                          " )
+
+def boxdrawings(gen):
+	settings={
+		"lef":"l",
+		"dow":"l",
+		"up": "l",
+		"rig":"l",
+		"das":"N",
+		"arc":"N"}
+	for obj in gen:
+		if(obj["type"]=="chord"
+		   and len(obj["chord"])==2
+		   and obj["chord"][0]=="Boxdrawings"):
+			command=obj["chord"][1]
+			if("=" in command):
+				[var, val]=command.split("=")
+				settings[var]=val
+			elif(len(command)==4 and set(command)<=set("LDUR_")):
+				prop="".join([
+					settings["lef"] if "L" in command else "-",
+					settings["dow"] if "D" in command else "-",
+					settings["up"]  if "U" in command else "-",
+					settings["rig"] if "R" in command else "-",
+					settings["das"],
+					settings["arc"]])
+				boxobj=boxdrawings_bestmatch(prop)
+				if(boxobj):
+					yield {**obj,
+						"boxsettings": settings,
+						"boxobj": boxobj,
+						"chord":["." + boxobj["char"]]}
+		else:
+			yield obj
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
@@ -236,6 +278,7 @@ list_of_transformations = [
 	allow_repeat("physkey"),         # libkeyboa
 	events_to_chords("common_name"), # libkeyboa
 	chordmachine,                    # Customization from this file
+	boxdrawings,                     # Customization from this file
 	chords_to_events("common_name"), # libkeyboa
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
