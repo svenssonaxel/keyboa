@@ -199,32 +199,28 @@ def chordmachine(gen):
 			#interprete chord string expression
 			if(not isinstance(out,str) or len(out)==0):
 				raise Exception("Chord expression must be non-empty string")
-			if(len(out)==1):
-				yield {"type":"chord","chord":
-					[*sorted(outmods), out]}
-			else:
-				for item in out.split(","):
-					if(len(item)>0 and item[0]=="."):
-						for char in item[1:]:
-							yield {"type":"chord","chord":["."+char]}
-					else:
-						itemch=item.split("-")
-						itemmods=itemch[:-1]
-						itemkey=itemch[-1]
-						sendmods=set()
-						for mod in itemmods:
-							if mod in modnotation:
-								sendmods.add(modnotation[mod])
-							else:
-								sendmods.add(mod)
-						repeat=1
-						if("*" in itemkey):
-							mulindex=itemkey.index("*")
-							repeat=int(itemkey[:mulindex])
-							itemkey=itemkey[mulindex+1:]
-						for _ in range(repeat):
-							yield {"type":"chord","chord":
-								[*sorted(sendmods.union(outmods)), itemkey]}
+			for item in out.split(","):
+				if(len(item)>0 and item[0]=="."):
+					for char in item[1:]:
+						yield {"type":"chord","chord":["."+char]}
+				else:
+					itemch=item.split("-")
+					itemmods=itemch[:-1]
+					itemkey=itemch[-1]
+					sendmods=set()
+					for mod in itemmods:
+						if mod in modnotation:
+							sendmods.add(modnotation[mod])
+						else:
+							sendmods.add(mod)
+					repeat=1
+					if("*" in itemkey and itemkey.index("*")):
+						mulindex=itemkey.index("*")
+						repeat=int(itemkey[:mulindex])
+						itemkey=itemkey[mulindex+1:]
+					for _ in range(repeat):
+						yield {"type":"chord","chord":
+							[*sorted(sendmods.union(outmods)), itemkey]}
 		else:
 			yield obj
 
