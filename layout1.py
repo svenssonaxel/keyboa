@@ -161,6 +161,14 @@ modnotation={
 	"S": "Shift",
 	"B": "Boxdrawings"}
 
+def planelookup(key, plane, default=None):
+	fr=planes["from"]
+	pl=planes[plane] if plane in planes else []
+	i=fr.index(key) if key in fr else None
+	if(i!=None and i<len(pl) and pl[i]):
+		return pl[i]
+	return default
+
 def chordmachine(gen):
 	for obj in gen:
 		type=obj["type"]
@@ -171,11 +179,7 @@ def chordmachine(gen):
 			planemods=set()
 			nativemods=set()
 			for mod in inmods:
-				i=planes["from"].index(mod) if mod in planes["from"] else None
-				if(i!=None
-				   and i<len(planes["mods"])
-				   and planes["mods"][i]):
-					mod=planes["mods"][i]
+				mod=planelookup(mod, "mods", mod)
 				if(mod in nativemodifiers):
 					nativemods.add(mod)
 				else:
@@ -183,16 +187,11 @@ def chordmachine(gen):
 			out=None
 			outmods=set()
 			planename="".join(sorted(planemods))
-			i=planes["from"].index(inkey) if inkey in planes["from"] else None
 			for pre in planeprefixes:
-				pl="".join(pre)+planename
-				if(i!=None
-				   and pl in planes
-				   and set(pre)<=nativemods
-				   and i<len(planes[pl])
-				   and planes[pl][i]):
+				o=planelookup(inkey, "".join(pre)+planename, None)
+				if(o and set(pre)<=nativemods):
 					outmods=nativemods-set(pre)
-					out=planes[pl][i]
+					out=o
 					break
 			if(not out):
 				outmods=nativemods.union(planemods)
