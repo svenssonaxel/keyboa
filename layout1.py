@@ -39,8 +39,8 @@ w("from",
  "           S4      S3      S2             SPACE             T2      T3      T4                          " )
 
 w("mods",
- "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       Modlock .       " +
- "Super   .       WM      Nav2    Nav3    Nav4    .       .       Nav2    WM      .       Super   .       " +
+ "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       .       .       " +
+ "Super   .       WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      .       Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
  "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
@@ -170,15 +170,16 @@ def planelookup(key, plane, default=None):
 	return default
 
 def chordmachine(gen):
+	lockedmods=set()
 	for obj in gen:
 		type=obj["type"]
 		if(type=="chord"):
 			inchord=obj["chord"]
-			inmods=inchord[:-1]
+			inmods=set(inchord[:-1])
 			inkey=inchord[-1]
 			planemods=set()
 			nativemods=set()
-			for mod in inmods:
+			for mod in inmods.union(lockedmods):
 				mod=planelookup(mod, "mods", mod)
 				if(mod in nativemodifiers):
 					nativemods.add(mod)
@@ -199,28 +200,34 @@ def chordmachine(gen):
 			#interprete chord string expression
 			if(not isinstance(out,str) or len(out)==0):
 				raise Exception("Chord expression must be non-empty string")
-			for item in out.split(","):
-				if(len(item)>0 and item[0]=="."):
-					for char in item[1:]:
-						yield {"type":"chord","chord":["."+char]}
+			if("Modlock" in outmods):
+				if(out=="SPACE"):
+					lockedmods=set()
 				else:
-					itemch=item.split("-")
-					itemmods=itemch[:-1]
-					itemkey=itemch[-1]
-					sendmods=set()
-					for mod in itemmods:
-						if mod in modnotation:
-							sendmods.add(modnotation[mod])
-						else:
-							sendmods.add(mod)
-					repeat=1
-					if("*" in itemkey and itemkey.index("*")):
-						mulindex=itemkey.index("*")
-						repeat=int(itemkey[:mulindex])
-						itemkey=itemkey[mulindex+1:]
-					for _ in range(repeat):
-						yield {"type":"chord","chord":
-							[*sorted(sendmods.union(outmods)), itemkey]}
+					lockedmods.add(planelookup(out, "mods", out))
+			else:
+				for item in out.split(","):
+					if(len(item)>0 and item[0]=="."):
+						for char in item[1:]:
+							yield {"type":"chord","chord":["."+char]}
+					else:
+						itemch=item.split("-")
+						itemmods=itemch[:-1]
+						itemkey=itemch[-1]
+						sendmods=set()
+						for mod in itemmods:
+							if mod in modnotation:
+								sendmods.add(modnotation[mod])
+							else:
+								sendmods.add(mod)
+						repeat=1
+						if("*" in itemkey and itemkey.index("*")):
+							mulindex=itemkey.index("*")
+							repeat=int(itemkey[:mulindex])
+							itemkey=itemkey[mulindex+1:]
+						for _ in range(repeat):
+							yield {"type":"chord","chord":
+								[*sorted(sendmods.union(outmods)), itemkey]}
 		else:
 			yield obj
 
