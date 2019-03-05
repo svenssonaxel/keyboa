@@ -27,6 +27,14 @@ def output(gen):
 		print()
 		sys.stdout.flush()
 
+#A transformation that changes nothing while printing everything to stderr
+def debug(gen):
+	for obj in gen:
+		json.dump(obj["data"] if obj["type"]=="output" else obj, sys.stderr, allow_nan=False, indent=1)
+		#print() todo to stderr
+		sys.stderr.flush()
+		yield obj
+
 #Find out what keys are already down at the start of the stream, and release
 #them by sending keyup events encapsulated so that no transformation meddles
 #with them until the output
