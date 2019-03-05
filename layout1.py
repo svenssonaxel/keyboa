@@ -66,7 +66,7 @@ load("Sub",[("SPACE","₀")])
 w("Nav",
  ".       .       .       C-S-Tab C-Tab   .       .       .       10*Up   .       .       .       .       " +
  ".       Esc     Alt-F4  C-PgUp  C-PgDn  A-Home  .       Home    Up      End     Back    Del     .       " +
- ".       A-Left  A-Right S-Tab   Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Lef .       " +
+ ".       A-Left  A-Right S-Tab   Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Up,End .    " +
  ".       .       .       .       .       .       .       .       10*Down S-home,Back S-end,del . .       " +
  "           .       .       .              SPACE          SPACE,left .       .                           " )
 
@@ -95,6 +95,13 @@ load("Nav4",[
 	("U", "S-C-home"),
 	("P2","S-C-right,S-del"),
 	("P", "S-C-left,S-del")])
+
+w("WM",
+ ".       .       .       .       .       .       .       .       .       .       .       .       .       " +
+ ".       .       .       .       .       .       .       .       s-up    .       .       .       .       " +
+ ".       .       .       .       .       .       .       s-lef   s-dow   s-rig   .       .       .       " +
+ ".       s-1     s-2     s-3     s-4     .       .       .       A-F4    .       A-sp,N  .       .       " +
+ "           S4      S3      S2             SPACE             T2      T3      T4                          " )
 
 w("Num",
  ".       .       F12     F11     F10     .       .E      .A      .B      .C      .D      .F      .       " +
@@ -235,7 +242,7 @@ def chordmachine(gen):
 w("Box",
  ".       B-das=N B-das=2 B-das=3 B-das=4 .       SPACE   B-___R  B-L__R  B-L___  .       .       .       " +
  ".       B-lef=d B-dow=d B-up=d  B-rig=d B-arc=Y B-_D__  B-_D_R  B-LD_R  B-LD__  back    del     .       " +
- ".       B-lef=l B-dow=l B-up=l  B-rig=l B-arc=N B-_DU_  B-_DUR  B-LDUR  B-LDU_  ret     ret,lef .       " +
+ ".       B-lef=l B-dow=l B-up=l  B-rig=l B-arc=N B-_DU_  B-_DUR  B-LDUR  B-LDU_  ret     ret,up,end .    " +
  ".       B-lef=h B-dow=h B-up=h  B-rig=h .       B-__U_  B-__UR  B-L_UR  B-L_U_  .       .       .       " +
  "           S4      S3      S2             SPACE             T2      T3      T4                          " )
 
