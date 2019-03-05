@@ -118,5 +118,4 @@ def resolve_common_name(gen):
 
 #Test the mappings
 for vkey in range(256):
-	if(cn_vkey_map[vkey_cn_map[vkey]]!=vkey):
-		raise Exception("vkey " + str(vkey) + " failed to map back.")
+	assert cn_vkey_map[vkey_cn_map[vkey]]==vkey, "vkey " + str(vkey) + " failed to map back."

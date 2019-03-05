@@ -206,8 +206,7 @@ def chordmachine(gen):
 				outmods=nativemods.union(planemods)
 				out=inkey
 			#interprete chord string expression
-			if(not isinstance(out,str) or len(out)==0):
-				raise Exception("Chord expression must be non-empty string")
+			assert isinstance(out,str) and len(out)>0, "Chord expression must be non-empty string"
 			if("Modlock" in outmods):
 				if(out=="SPACE"):
 					lockedmods=set()
