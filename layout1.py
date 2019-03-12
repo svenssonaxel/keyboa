@@ -255,12 +255,34 @@ def chordmachine(gen):
 		else:
 			yield obj
 
+chorddispatches={
+#   Chord modifier  type value     data key
+	"Boxdrawings": ("boxdrawings", "command"),
+	"Printdate":   ("printdate",   "format")}
+
+def chord_dispatch(dispatch):
+	def ret(gen):
+		for obj in gen:
+			if(obj["type"]=="chord"
+			   and len(obj["chord"])==2
+			   and obj["chord"][0] in dispatch):
+				[dispatchkey, data] = obj["chord"]
+				(typevalue, datakey) = dispatch[dispatchkey]
+				yield {"type": typevalue, datakey: data}
+			else:
+				yield obj
+	return ret
+
 w("Box",
  ".       B-das=N B-das=2 B-das=3 B-das=4 .       SPACE   B-___R  B-L__R  B-L___  .       .       .       " +
  ".       B-lef=d B-dow=d B-up=d  B-rig=d B-arc=Y B-_D__  B-_D_R  B-LD_R  B-LD__  back    del     .       " +
  ".       B-lef=l B-dow=l B-up=l  B-rig=l B-arc=N B-_DU_  B-_DUR  B-LDUR  B-LDU_  ret     ret,up,end .    " +
  ".       B-lef=h B-dow=h B-up=h  B-rig=h .       B-__U_  B-__UR  B-L_UR  B-L_U_  .       .       .       " +
  "           S4      S3      S2             SPACE             T2      T3      T4                          " )
+
+def printstring(str):
+	for char in str:
+		yield {"type": "keypress", "unicode_codepoint": ord(char)}
 
 def boxdrawings(gen):
 	settings={
@@ -271,10 +293,8 @@ def boxdrawings(gen):
 		"das":"N",
 		"arc":"N"}
 	for obj in gen:
-		if(obj["type"]=="chord"
-		   and len(obj["chord"])==2
-		   and obj["chord"][0]=="Boxdrawings"):
-			command=obj["chord"][1]
+		if(obj["type"]=="boxdrawings"):
+			command=obj["command"]
 			if("=" in command):
 				[var, val]=command.split("=")
 				settings[var]=val
@@ -288,10 +308,7 @@ def boxdrawings(gen):
 					settings["arc"]])
 				boxobj=boxdrawings_bestmatch(prop)
 				if(boxobj):
-					yield {**obj,
-						"boxsettings": settings,
-						"boxobj": boxobj,
-						"chord":["." + boxobj["char"]]}
+					yield from printstring(boxobj["char"])
 		else:
 			yield obj
 
@@ -304,13 +321,10 @@ load("Date",[
 
 def printdate(gen):
 	for obj in gen:
-		if(obj["type"]=="chord"
-		   and len(obj["chord"])==2
-		   and obj["chord"][0]=="Printdate"):
-			format=obj["chord"][1]
+		if(obj["type"]=="printdate"):
+			format=obj["format"]
 			datestr=strftime(format.replace("_", "-"))
-			for char in datestr:
-				yield {**obj, "chord":["." + char]}
+			yield from printstring(datestr)
 		else:
 			yield obj
 
@@ -323,9 +337,10 @@ list_of_transformations = [
 	allow_repeat("physkey"),         # libkeyboa
 	events_to_chords("common_name"), # libkeyboa
 	chordmachine,                    # Customization from this file
+	chord_dispatch(chorddispatches), # Customization from this file
+	chords_to_events("common_name"), # libkeyboa
 	boxdrawings,                     # Customization from this file
 	printdate,                       # Customization from this file
-	chords_to_events("common_name"), # libkeyboa
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
 	sendkey_cleanup,                 # libkeyboa
