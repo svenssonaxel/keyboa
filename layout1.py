@@ -21,7 +21,7 @@
 from libkeyboa import *
 from layout1_commonname import *
 from boxdrawings import *
-from time import strftime
+from time import strftime, sleep
 
 planes={}
 def load(plane, iter):
@@ -113,10 +113,14 @@ load("Nav4",[
 
 w("WM",
  ".       .       .       .       .       .       .       .       .       .       .       .       .       " +
- ".       A-sp,X  .       .       .       .       .       .       s-up    .       .       .       .       " +
+ ".       .       .       .       .       .       .       .       s-up    .       .       .       .       " +
  ".       .       .       .       .       .       .       s-lef   s-dow   s-rig   .       .       .       " +
- ".       s-1     s-2     s-3     s-4     .       .       .       A-F4    .       A-sp,N  .       .       " +
+ ".       s-1     s-2     s-3     s-4     .       .       .       A-F4    .       .       .       .       " +
  "           S4      S3      S2             SPACE             T2      T3      T4                          " )
+
+load("WM",[
+	("Q", "A-sp,Wait-250,X"),
+	("M4","A-sp,Wait-250,N")])
 
 w("Num",
  ".       .       F12     F11     F10     .       .E      .A      .B      .C      .D      .F      .       " +
@@ -258,7 +262,8 @@ def chordmachine(gen):
 chorddispatches={
 #   Chord modifier  type value     data key
 	"Boxdrawings": ("boxdrawings", "command"),
-	"Printdate":   ("printdate",   "format")}
+	"Printdate":   ("printdate",   "format"),
+	"Wait":        ("wait",        "ms")}
 
 def chord_dispatch(dispatch):
 	def ret(gen):
@@ -328,6 +333,15 @@ def printdate(gen):
 		else:
 			yield obj
 
+def wait(gen):
+	for obj in gen:
+		if(obj["type"]=="wait"):
+			milliseconds=int(obj["ms"])
+			seconds=milliseconds/1000
+			sleep(seconds)
+		else:
+			yield obj
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
@@ -341,6 +355,7 @@ list_of_transformations = [
 	chords_to_events("common_name"), # libkeyboa
 	boxdrawings,                     # Customization from this file
 	printdate,                       # Customization from this file
+	wait,                            # Customization from this file
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
 	sendkey_cleanup,                 # libkeyboa
