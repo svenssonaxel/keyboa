@@ -232,6 +232,8 @@ def chordmachine(gen):
 					if(len(item)>0 and item[0]=="."):
 						for char in item[1:]:
 							yield {"type":"chord","chord":["."+char]}
+					elif(item in "*-"):
+						yield {"type":"chord","chord":["."+item]}
 					else:
 						itemch=item.split("-")
 						itemmods=itemch[:-1]
@@ -243,7 +245,7 @@ def chordmachine(gen):
 							else:
 								sendmods.add(mod)
 						repeat=1
-						if("*" in itemkey and itemkey.index("*")):
+						if("*" in itemkey):
 							mulindex=itemkey.index("*")
 							repeat=int(itemkey[:mulindex])
 							itemkey=itemkey[mulindex+1:]
