@@ -24,15 +24,13 @@ def input(_):
 def output(gen):
 	for obj in gen:
 		json.dump(obj["data"] if obj["type"]=="output" else obj, sys.stdout, allow_nan=False, indent=1)
-		print()
-		sys.stdout.flush()
+		print(file=sys.stdout, flush=True)
 
 #A transformation that changes nothing while printing everything to stderr
 def debug(gen):
 	for obj in gen:
 		json.dump(obj["data"] if obj["type"]=="output" else obj, sys.stderr, allow_nan=False, indent=1)
-		#print() todo to stderr
-		sys.stderr.flush()
+		print(file=sys.stderr, flush=True)
 		yield obj
 
 #Find out what keys are already down at the start of the stream, and release
@@ -57,6 +55,7 @@ def hashobj(obj):
 #- keyname_local: The name of the physical key in current localization.
 #- win_virtualkey_symbol: A symbol representing win_virtualkey
 #- win_virtualkey_description: A description/comment for win_virtualkey
+#- delay: Number of milliseconds since the last key event
 #Also add a few fields to the init message:
 #- keyboard_hash: A value that stays the same for the same physical keyboard and
 #  layout but likely changes otherwise, useful for making portable
@@ -69,6 +68,7 @@ def hashobj(obj):
 def enrich_input(gen):
 	initmsg = {}
 	physkey_keyname_dict = {}
+	prev_win_time=None
 	for obj in gen:
 		if obj["type"]=="init":
 			initmsg=obj
@@ -97,6 +97,9 @@ def enrich_input(gen):
 			if physkey in physkey_keyname_dict:
 				ret["keyname_local"]=physkey_keyname_dict[physkey]
 			ret={**ret,**vkeyinfo(ret["win_virtualkey"])}
+			if(prev_win_time!=None):
+				ret["delay"]=ret["win_time"]-prev_win_time
+			prev_win_time=ret["win_time"]
 			yield ret
 		else:
 			yield obj
