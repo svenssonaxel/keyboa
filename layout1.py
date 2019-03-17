@@ -3,6 +3,21 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 # License: See LICENSE
 
+# This is a rather involved example, including
+# - Any key functioning as both modifier and letter (chordmachine)
+# - Layout planes/layers, selectable using any number of modifiers (load, w, ch)
+# - Chords transformed to other chords (chordmachine)
+# - Notation for key combinations, series, and repetition (chordmachine)
+# - Key renaming and aliasing (layout1_commonname)
+# - Chords manipulating state (boxdrawing)
+# - Output depending on time (printdate)
+#
+# Run in cmd:
+#   listenkey -cel | python3 layout2.py | sendkey
+#
+# Or in cygwin:
+#   ./listenkey -cel | ./layout2.py | ./sendkey
+
 from libkeyboa import *
 from layout1_commonname import *
 from boxdrawings import *
