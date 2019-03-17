@@ -5,11 +5,11 @@
 
 import sys, json, functools
 
-#Run data in series through the supplied list of transformations
+# Run data in series through the supplied list of transformations
 def keyboa_run(tr):
 	return functools.reduce((lambda x, y: y(x)), tr, None)
 
-#Read events from stdin
+# Read events from stdin
 def input(_):
 	try:
 		for line in sys.stdin:
@@ -20,22 +20,22 @@ def input(_):
 	finally:
 		yield {"type":"exit"}
 
-#Output events to stdout
+# Output events to stdout
 def output(gen):
 	for obj in gen:
 		json.dump(obj["data"] if obj["type"]=="output" else obj, sys.stdout, allow_nan=False, indent=1)
 		print(file=sys.stdout, flush=True)
 
-#A transformation that changes nothing while printing everything to stderr
+# A transformation that changes nothing while printing everything to stderr
 def debug(gen):
 	for obj in gen:
 		json.dump(obj["data"] if obj["type"]=="output" else obj, sys.stderr, allow_nan=False, indent=1)
 		print(file=sys.stderr, flush=True)
 		yield obj
 
-#Find out what keys are already down at the start of the stream, and release
-#them by sending keyup events encapsulated so that no transformation meddles
-#with them until the output
+# Find out what keys are already down at the start of the stream, and release
+# them by sending keyup events encapsulated so that no transformation meddles
+# with them until the output
 def releaseall_at_init(gen):
 	for obj in gen:
 		yield obj
@@ -43,28 +43,28 @@ def releaseall_at_init(gen):
 			for key in obj["vkeysdown"]:
 				yield {"type": "output", "data": {"type": "keyup", "win_virtualkey": key}}
 
-#Dictionaries/lists aren't natively hashable
+# Dictionaries/lists aren't natively hashable
 def hashobj(obj):
 	return hash(json.dumps(obj,sort_keys=True,separators=(',',':')))
 
-#Add a few fields to key events:
-#- physkey: Based on scancode and extended flag. Identifies a physical key on
-#  the keyboard.
-#- keyid: Based on scancode, extended flag, and virtualkey. Identifies a
-#  physical key on the keyboard given a certain keyboard layout setting.
-#- keyname_local: The name of the physical key in current localization.
-#- win_virtualkey_symbol: A symbol representing win_virtualkey
-#- win_virtualkey_description: A description/comment for win_virtualkey
-#- delay: Number of milliseconds since the last key event
-#Also add a few fields to the init message:
-#- keyboard_hash: A value that stays the same for the same physical keyboard and
-#  layout but likely changes otherwise, useful for making portable
-#  configurations.
-#- keyboard_hw_hash: A value that stays the same for the same physical keyboard
-#  even under layout changes but likely changes otherwise, useful for making
-#  portable configurations.
-#- physkey_keyname_dict: A dictionary mapping physkey values to layout-specific
-#  key names.
+# Add a few fields to key events:
+# - physkey: Based on scancode and extended flag. Identifies a physical key on
+#   the keyboard.
+# - keyid: Based on scancode, extended flag, and virtualkey. Identifies a
+#   physical key on the keyboard given a certain keyboard layout setting.
+# - keyname_local: The name of the physical key in current localization.
+# - win_virtualkey_symbol: A symbol representing win_virtualkey
+# - win_virtualkey_description: A description/comment for win_virtualkey
+# - delay: Number of milliseconds since the last key event
+# Also add a few fields to the init message:
+# - keyboard_hash: A value that stays the same for the same physical keyboard and
+#   layout but likely changes otherwise, useful for making portable
+#   configurations.
+# - keyboard_hw_hash: A value that stays the same for the same physical keyboard
+#   even under layout changes but likely changes otherwise, useful for making
+#   portable configurations.
+# - physkey_keyname_dict: A dictionary mapping physkey values to layout-specific
+#   key names.
 def enrich_input(gen):
 	initmsg = {}
 	physkey_keyname_dict = {}
@@ -87,7 +87,7 @@ def enrich_input(gen):
 				"keyboard_hash": hashobj(kb_layout),
 				"keyboard_hw_hash": hashobj(kb_phys)}
 		elif obj["type"] in ["keydown", "keyup", "keypress"]:
-			ret={**obj} #Shallow copy
+			ret={**obj} # Shallow copy
 			ext="E" if obj["win_extended"] else "_"
 			hexsc=str.format('{:04X}', obj["win_scancode"])
 			hexvk=str.format('{:02X}', obj["win_virtualkey"])
@@ -104,12 +104,12 @@ def enrich_input(gen):
 		else:
 			yield obj
 
-#When a key is held down, the operating system sends repeated keydown events
-#with no intervening keyup event. Most applications recognize this as a
-#repetition. The events_to_chords transformation does not. Put the allow_repeat
-#transformation before events_to_chords in order to let repeated keys cause
-#repeated chords. The field argument designates what field to use for detection
-#of repetition. "physkey" or "win_virtualkey" probably works fine for that.
+# When a key is held down, the operating system sends repeated keydown events
+# with no intervening keyup event. Most applications recognize this as a
+# repetition. The events_to_chords transformation does not. Put the allow_repeat
+# transformation before events_to_chords in order to let repeated keys cause
+# repeated chords. The field argument designates what field to use for detection
+# of repetition. "physkey" or "win_virtualkey" probably works fine for that.
 def allow_repeat(field):
 	def ret(gen):
 		keysdown=set()
@@ -125,22 +125,23 @@ def allow_repeat(field):
 			yield obj
 	return ret
 
-#Convert key events to chords. This allows any key to act as a modifier.
-#An example:
-# Key event | Chord event
-#  A down   | -
-#  S down   | -
-#  J down   | -
-#  J up     | [A S J]
-#  A up     | -
-#  S up     | -
+# Convert key events to chords. This allows any key to act as a modifier.
+# An example:
+#  Key event | Chord event
+#   A down   | -
+#   S down   | -
+#   J down   | -
+#   J up     | [A S J]
+#   A up     | -
+#   S up     | -
 #
-#The field argument designates what field to use for naming the keys in a chord.
-#Note that all other fields are lost.
-#This transformation also generates keyup_all events when all keys are released.
-#This allows a subsequent chords_to_events transformation to leave modifiers
-#pressed between chords roughly in the same way the user does, which is
-#necessary e.g. for a functioning Alt+Tab switch.
+# The field argument designates what field to use for naming the keys in a
+# chord.
+# Note that all other fields are lost.
+# This transformation also generates keyup_all events when all keys are
+# released. This allows a subsequent chords_to_events transformation to leave
+# modifiers pressed between chords roughly in the same way the user does, which
+# is necessary e.g. for a functioning Alt+Tab switch.
 def events_to_chords(field):
 	def ret(gen):
 		keysdown=[]
@@ -158,7 +159,8 @@ def events_to_chords(field):
 				if(key in keysdown):
 					i=keysdown.index(key)
 					if(mods<=i):
-						yield {"type":"chord", "chord":keysdown[:i+1]}
+						yield {"type":"chord",
+						       "chord":keysdown[:i+1]}
 						mods=i
 					else:
 						mods-=1
@@ -174,18 +176,18 @@ def events_to_chords(field):
 				yield obj
 	return ret
 
-#Convert chords to key events.
-#An example:
-# Chord 
-#  Alt+Tab    | Alt down, Tab down, Tab up
-#  Alt+Tab    | Tab down, Tab up
-#  Ctrl+Alt+P | Ctrl down, P down, P up
-# (keyup_all) | Alt up
+# Convert chords to key events.
+# An example:
+#  Chord
+#   Alt+Tab    | Alt down, Tab down, Tab up
+#   Alt+Tab    | Tab down, Tab up
+#   Ctrl+Alt+P | Ctrl down, P down, P up
+#  (keyup_all) | Alt up
 #
-#The field argument designates what field to populate using the key name present
-#in the chord. This transformation leaves modifiers pressed until a keyup_all
-#event or a chord event that does not include it as a modifier. This allows e.g
-#a functioning Alt+Tab switch.
+# The field argument designates what field to populate using the key name
+# present in the chord. This transformation leaves modifiers pressed until a
+# keyup_all event or a chord event that does not include it as a modifier. This
+# allows e.g a functioning Alt+Tab switch.
 def chords_to_events(field):
 	def ret(gen):
 		keysdown=[]
@@ -202,49 +204,56 @@ def chords_to_events(field):
 				chordkey=chord[-1]
 				for key in reversed(keysdown):
 					if(not key in chordmods):
-						yield {"type":"keyup", field: key}
+						yield {"type":"keyup",
+						       field: key}
 						keysdown.remove(key)
 				for key in chordmods:
 					if(not key in keysdown):
-						yield {"type":"keydown", field: key}
+						yield {"type":"keydown",
+						       field: key}
 						keysdown.append(key)
 				repeat=1
 				if("repeat" in obj):
 					repeat=obj["repeat"]
 				for _ in range(repeat):
-					yield {"type":"keypress", field: chordkey}
+					yield {"type":"keypress",
+					       field: chordkey}
 			else:
 				yield obj
 	return ret
 
-#Removes events and fields not necessary for output to sendkey. As an exception,
-#events encapsulated by releaseall_at_init are still passed through.
+# Removes events and fields not necessary for output to sendkey. As an
+# exception, events encapsulated by releaseall_at_init are still passed through.
 def sendkey_cleanup(gen):
 	for obj in gen:
 		if(obj["type"] in ["keydown", "keyup", "keypress"]):
 			event={}
 			send=False
-			for field in ["type", "win_scancode", "win_virtualkey", "win_extended", "unicode_codepoint"]:
+			for field in ["type", "win_scancode", "win_virtualkey",
+			              "win_extended", "unicode_codepoint"]:
 				if(field in obj and obj[field]):
 					event[field]=obj[field]
-					if(field=="win_virtualkey" or field=="win_scancode" or field=="unicode_codepoint"):
+					if(field=="win_virtualkey"
+					   or field=="win_scancode"
+					   or field=="unicode_codepoint"):
 						send=True
 			if(send):
 				yield event
 		if(obj["type"]=="output"):
 			yield obj
 
-#If the AltGr key is present, it causes the following problems:
-#- It is reported as a combination of two key events.
-#- One of the key events has a different scancode, but the same virtualkey as
-#   left Ctrl.
-#- Sometimes when consuming events, one of the keyup events is absent.
-#The transformation altgr_workaround_input will detect whether AltGr is present,
-#remove the offending key event and inform altgr_workaround_output.
-#The transformation altgr_workaround_output will reinstate/create a correct key
-#event if AltGr is present.
-#The transformations between these two workarounds can then act on key events
-#for RMENU (virtualkey 0xA5=165), which will mean AltGr if and only if it is present.
+# If the AltGr key is present, it causes the following problems:
+# - It is reported as a combination of two key events.
+# - One of the key events has a different scancode, but the same virtualkey as
+#    left Ctrl.
+# - Sometimes when consuming events, one of the keyup events is absent.
+# The transformation altgr_workaround_input will detect whether AltGr is
+# present, remove the offending key event and inform altgr_workaround_output.
+# The transformation altgr_workaround_output will reinstate/create a correct key
+# event if AltGr is present.
+# The transformations between these two workarounds can then act on key events
+# for RMENU (virtualkey 0xA5=165), which will mean AltGr if and only if it is
+# present.
 
 def altgr_workaround_input(gen):
 	lctrl=0xA2
@@ -283,7 +292,8 @@ def altgr_workaround_output(gen):
 		     and obj["type"] in ["keydown", "keyup", "keypress"]
 		     and "win_virtualkey" in obj
 		     and obj["win_virtualkey"] in [lctrl, rmenu]):
-			sc=obj["win_scancode"] if "win_scancode" in obj else None
+			sc=(obj["win_scancode"]
+			    if "win_scancode" in obj else None)
 			vk=obj["win_virtualkey"]
 			type=obj["type"]
 			altgr_lctrl_event={
@@ -300,7 +310,7 @@ def altgr_workaround_output(gen):
 			elif(vk==rmenu and type in ["keydown", "keyup"]):
 				yield altgr_lctrl_event
 				yield obj
-			else: #means (vk==rmenu and type=="keypress")
+			else: # means (vk==rmenu and type=="keypress")
 				yield {**altgr_lctrl_event, "type": "keydown"}
 				yield {**obj, "type": "keydown"}
 				yield {**altgr_lctrl_event, "type": "keyup"}
@@ -308,7 +318,7 @@ def altgr_workaround_output(gen):
 		else:
 			yield obj
 
-#Remove all events from the event stream except the given types.
+# Remove all events from the event stream except the given types.
 def selecttypes(types):
 	def ret(gen):
 		for obj in gen:
@@ -316,7 +326,7 @@ def selecttypes(types):
 				yield obj
 	return ret
 
-#Remove all fields from every event except the given fields.
+# Remove all fields from every event except the given fields.
 def selectfields(fields):
 	def ret(gen):
 		for obj in gen:
@@ -327,10 +337,10 @@ def selectfields(fields):
 			yield y
 	return ret
 
-#The following is a table of windows virtual keys. It can be accessed through
-#the vkeyinfo function using either a numeric or symbolic virtual key. It
-#returns a dictionary with the fields win_virtualkey, win_virtualkey_symbol, and
-#win_virtualkey_description.
+# The following is a table of windows virtual keys. It can be accessed through
+# the vkeyinfo function using either a numeric or symbolic virtual key. It
+# returns a dictionary with the fields win_virtualkey, win_virtualkey_symbol,
+# and win_virtualkey_description.
 
 _vkeystable = [
 	#Vkey,  Symbol,                    Description
@@ -577,7 +587,8 @@ _vkeystable = [
 	(0xFE, "VK_OEM_CLEAR",            "Clear key")]
 
 _vkeysdict={}
-for (win_virtualkey, win_virtualkey_symbol, win_virtualkey_description) in _vkeystable:
+for (win_virtualkey, win_virtualkey_symbol,
+     win_virtualkey_description) in _vkeystable:
 	item={
 		"win_virtualkey": win_virtualkey,
 		"win_virtualkey_symbol": win_virtualkey_symbol,

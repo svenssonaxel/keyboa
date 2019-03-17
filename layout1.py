@@ -63,8 +63,8 @@ w("mods",
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
 ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
-ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔    ∀∃«»∈ℕℤℚℝℂ  """) #Inspired by the Knight keyboard
-ch("HyperSym",      """                【】⫷⫸«»‹›         ⸨⸩—    ⦕⦖⦓⦔ „“”‘’  """) #http://xahlee.info/comp/unicode_matching_brackets.html
+ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔    ∀∃«»∈ℕℤℚℝℂ  """) # Inspired by the Knight keyboard
+ch("HyperSym",      """                【】⫷⫸«»‹›         ⸨⸩—    ⦕⦖⦓⦔ „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
 ch("Math",          """             ¬⋀⋁∈ ⇒ ≈∞∅∝   ∀∫∂ ⊂⊃ ⇔    ≤ ∃  ⇐ℕℤℚℝℂ  """)
 ch("ShiftMath",     """          ≠   ⋂⋃∉ ∴ ≉       ∮  ⊏⊐      ≥ ∄  ∵∇      """)
 ch("Greek",         """               ςερτυθιοπ   ασδφγηξκλ´   ζχψωβνμ     """)
@@ -152,12 +152,12 @@ w("Phon",
  ".       .alfa   .sierra .delta   .foxtrot .golf   .hotel    .juliett .kilo   .lima   .oscar-echo .alpha-echo  .           " +
  ".       .zulu   .x-ray  .charlie .victor  .bravo  .november .mike    .       .       .           .            .           " )
 
-w("SuperGreek", #lower-case greek letters for latex
+w("SuperGreek", # lower-case greek letters for latex
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .         .\\varsigma .\\epsilon .\\rho     .\\tau     .\\upsilon .\\theta   .\\iota    .\\omicron .\\pi      .          .  """ +
 	""".          .\\alpha   .\\sigma   .\\delta   .\\phi     .\\gamma   .\\eta     .\\xi      .\\kappa   .\\lamda   .          .          .  """ +
 	""".          .\\zeta    .\\chi     .\\psi     .\\omega   .\\beta    .\\nu      .\\mu      .          .          .          .          .  """ )
-w("SuperShiftGreek", #upper-case greek letters for latex
+w("SuperShiftGreek", # upper-case greek letters for latex
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .          .          .\\Epsilon .\\Rho     .\\Tau     .\\Upsilon .\\Theta   .\\Iota    .\\Omicron .\\Pi      .          .  """ +
 	""".          .\\Alpha   .\\Sigma   .\\Delta   .\\Phi     .\\Gamma   .\\Eta     .\\Xi      .\\Kappa   .\\Lamda   .          .          .  """ +
@@ -171,9 +171,9 @@ w("Mirror",
 
 nativemodifiers=["Super", "Hyper", "Meta", "Alt", "Ctrl", "Shift"]
 
-#List and priority of native modifier combinations allowed as prefixes to plane
-#names. The empty list represents an exact match between non-native modifiers
-#and plane name.
+# List and priority of native modifier combinations allowed as prefixes to plane
+# names. The empty list represents an exact match between non-native modifiers
+# and plane name.
 planeprefixes=[
 	["Shift"],
 	["Hyper"],
@@ -224,7 +224,7 @@ def chordmachine(gen):
 			if(not out):
 				outmods=nativemods.union(planemods)
 				out=inkey
-			#interprete chord string expression
+			# interprete chord string expression
 			assert isinstance(out,str) and len(out)>0, "Chord expression must be non-empty string"
 			if("Modlock" in outmods):
 				if(out=="SPACE"):
@@ -260,7 +260,7 @@ def chordmachine(gen):
 			yield obj
 
 chorddispatches={
-#   Chord modifier  type value     data key
+	#Chord modifier  type value     data key
 	"Boxdrawings": ("boxdrawings", "command"),
 	"Printdate":   ("printdate",   "format"),
 	"Wait":        ("wait",        "ms")}

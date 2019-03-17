@@ -65,8 +65,8 @@ cn_vkey_map = {}
 def _alias(vsym, vkey):
 	cn_vkey_map[vsym]=vkey
 for vkey in range(256):
-	#vsym is the primary cn that goes into vkey_cn_map.
-	#cn_vkey_map in contrast holds aliases as well
+	# vsym is the primary cn that goes into vkey_cn_map.
+	# cn_vkey_map in contrast holds aliases as well
 	vsym=vkey
 	_alias(vsym, vkey)
 	i=vkeyinfo(vkey)
@@ -116,6 +116,6 @@ def resolve_common_name(gen):
 				ret={**ret, "unicode_codepoint":ord(cn[-1])}
 		yield ret
 
-#Test the mappings
+# Test the mappings
 for vkey in range(256):
 	assert cn_vkey_map[vkey_cn_map[vkey]]==vkey, "vkey " + str(vkey) + " failed to map back."

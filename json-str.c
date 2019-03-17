@@ -13,7 +13,7 @@
  * @param target A buffer able to hold the converted ASCII string. It is safe
  * to assume that the ASCII string will never be longer than the JSON string
  * value.
- * 
+ *
  * @return The number of converted characters if the conversion was successful.
  * A negative number if any part of the JSON string is illegally encoded or
  * encodes a null or non-ASCII character. ASCII characters encoded as \u00XX

@@ -147,7 +147,7 @@ void printinit(FILE* stream) {
 		}
 		fprintf(stream, "]");
 	}
-	
+
 	//Retrieve OEM scancode mappings
 	//https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-oemkeyscan
 	{
