@@ -220,10 +220,18 @@ def chordmachine(gen):
 				if(o and set(pre)<=nativemods):
 					outmods=nativemods-set(pre)
 					out=o
+					planename="".join(pre)+planename
 					break
 			if(not out):
 				outmods=nativemods.union(planemods)
+				planename=None
 				out=inkey
+			yield {"type":"ui","data":{
+				"chordmachine.planename": planename,
+				"chordmachine.nativemods":sorted(nativemods),
+				"chordmachine.planemods":sorted(planemods),
+				"chordmachine.outmods":sorted(outmods),
+				"chordmachine.out": str(out)}}
 			# interprete chord string expression
 			assert isinstance(out,str) and len(out)>0, "Chord expression must be non-empty string"
 			if("Modlock" in outmods):
@@ -231,6 +239,8 @@ def chordmachine(gen):
 					lockedmods=set()
 				else:
 					lockedmods.add(planelookup(out, "mods", out))
+				yield {"type":"ui","data":{
+					"chordmachine.lockedmods":sorted(lockedmods)}}
 			else:
 				for item in out.split(","):
 					if(len(item)>0 and item[0]=="."):
@@ -257,6 +267,13 @@ def chordmachine(gen):
 							yield {"type":"chord","chord":
 								[*sorted(sendmods.union(outmods)), itemkey]}
 		else:
+			if(type=="keyup_all"):
+				yield {"type":"ui","data":{
+					"chordmachine.planename": None,
+					"chordmachine.nativemods":None,
+					"chordmachine.planemods":None,
+					"chordmachine.outmods":None,
+					"chordmachine.out": None}}
 			yield obj
 
 chorddispatches={
@@ -314,6 +331,7 @@ def boxdrawings(gen):
 				boxobj=boxdrawings_bestmatch(prop)
 				if(boxobj):
 					yield from printstring(boxobj["char"])
+			yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
 		else:
 			yield obj
 
@@ -342,6 +360,83 @@ def wait(gen):
 		else:
 			yield obj
 
+def boxdrawings_ui(settings):
+	ret=["","","",""]
+	for y in range(4):
+		for x in range(4):
+			prop="".join([
+				settings["lef"] if x in [2,3] else "-",
+				settings["dow"] if y in [1,2] else "-",
+				settings["up"]  if y in [2,3] else "-",
+				settings["rig"] if x in [1,2] else "-",
+				settings["das"],
+				settings["arc"]])
+			boxobj=boxdrawings_bestmatch(prop)
+			ret[y]+=(boxobj["char"] if boxobj else " ")
+	return ret
+
+def color_ui(text, color):
+	return ("\033[3"+str([
+		"red","green","yellow","blue","magenta","cyan","white"
+		].index(color)+1)+"m"+text+"\033[0m")
+
+def termui(gen):
+	oldshow=""
+	olddata={}
+	defaultdata={
+		"events_to_chords.keysdown.common_name":[],
+		"chordmachine.lockedmods":[],
+		"chordmachine.nativemods":[],
+		"chordmachine.planemods":[],
+		"chordmachine.outmods":[],
+		"chordmachine.planename":None,
+		"chordmachine.out":"",
+		"chords_to_events.keysdown.common_name":[]}
+	for obj in gen:
+		if(obj["type"]=="ui"):
+			data={**defaultdata,
+			      **{key:value for (key, value)
+			         in {**olddata, **obj["data"]}.items()
+			         if value!=None}}
+			box=(
+			 boxdrawings_ui(data['boxdrawings'])
+			 if 'boxdrawings' in data else ["    "]*4)
+			physical=data["events_to_chords.keysdown.common_name"]
+			lockedmods=set(data["chordmachine.lockedmods"])
+			nativemods=set(data["chordmachine.nativemods"])
+			planemods=set(data["chordmachine.planemods"])
+			outmods=set(data["chordmachine.outmods"])
+			showlocked=lockedmods
+			shownative=(nativemods-lockedmods)&outmods
+			showplane=(planemods-lockedmods)&outmods
+			planename=data["chordmachine.planename"]
+			out=data["chordmachine.out"]
+			virtual=data["chords_to_events.keysdown.common_name"]
+			show=(box[0]+" "+
+			      " ".join(physical)+
+				  "\n"+
+			      box[1]+" "+
+				  (color_ui(" ".join(sorted(showlocked)),"green")+" "
+				   if len(showlocked)>0 else "")+
+				  (color_ui(" ".join(sorted(shownative)),"yellow")+" "
+				   if len(shownative)>0 else "")+
+				  (color_ui(" ".join(sorted(showplane)),"red")+" "
+				   if len(showplane)>0 else "")+
+				  (color_ui(planename+": ","cyan")
+				   if planename else "")+
+				  out+
+				  "\n"+
+				  box[2]+" "+
+				  (color_ui(" ".join(virtual),"blue")+" "
+				   if len(virtual)>0 else "")+
+				  "\n"+
+				  box[3]+" ")
+			if(show!=oldshow):
+				print("\033[2J\033[;H" + show, file=sys.stderr, flush=True, end='')
+			oldshow=show
+			olddata=data
+		yield obj
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
@@ -358,6 +453,7 @@ list_of_transformations = [
 	wait,                            # Customization from this file
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
+	termui,                          # Customization from this file
 	sendkey_cleanup,                 # libkeyboa
 	output]                          # libkeyboa
 

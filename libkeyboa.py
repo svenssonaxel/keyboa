@@ -145,6 +145,10 @@ def allow_repeat(field):
 def events_to_chords(field):
 	def ret(gen):
 		keysdown=[]
+		def updateui():
+			return {"type":"ui","data":{
+				"events_to_chords.keysdown."+field:[*keysdown]}}
+		yield updateui()
 		mods=0
 		for obj in gen:
 			type=obj["type"]
@@ -154,6 +158,7 @@ def events_to_chords(field):
 					pass
 				else:
 					keysdown.append(key)
+				yield updateui()
 			elif(type=="keyup"):
 				key=obj[field]
 				if(key in keysdown):
@@ -165,6 +170,7 @@ def events_to_chords(field):
 					else:
 						mods-=1
 					keysdown.remove(key)
+					yield updateui()
 					if(len(keysdown)==0):
 						yield {"type":"keyup_all"}
 				else:
@@ -191,6 +197,10 @@ def events_to_chords(field):
 def chords_to_events(field):
 	def ret(gen):
 		keysdown=[]
+		def updateui():
+			return {"type":"ui","data":{
+				"chords_to_events.keysdown."+field:[*keysdown]}}
+		yield updateui()
 		for obj in gen:
 			type=obj["type"]
 			if(type=="keyup_all"):
@@ -198,6 +208,7 @@ def chords_to_events(field):
 					yield {"type":"keyup", field: key}
 				yield obj
 				keysdown=[]
+				yield updateui()
 			elif(type=="chord"):
 				chord=obj["chord"]
 				chordmods=chord[:-1]
@@ -207,11 +218,13 @@ def chords_to_events(field):
 						yield {"type":"keyup",
 						       field: key}
 						keysdown.remove(key)
+						yield updateui()
 				for key in chordmods:
 					if(not key in keysdown):
 						yield {"type":"keydown",
 						       field: key}
 						keysdown.append(key)
+						yield updateui()
 				repeat=1
 				if("repeat" in obj):
 					repeat=obj["repeat"]
