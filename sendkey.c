@@ -106,8 +106,6 @@ void printhelp() {
 		" -o Also print events on stdout.\n"
 		" -p Pretty-print on stdout (implies -o).\n"
 		" -t Where win_time is not provided, use current time yet always increase it.\n"
-		" -s Silent: Print no log or error messages.\n"
-		" -v Increase verbosity\n"
 		" -h Print this help text and exit.\n\n"
 		"sendkey is part of keyboa, pre-release\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
@@ -126,14 +124,6 @@ int main(int argc, char* argv[]) {
 			case 'o': opt_o = true;  break;
 			case 'p': opt_p = true;  break;
 			case 't': opt_t = true;  break;
-			case 's':
-			global_sendkey_error_handler(true,
-				"Silent option", "Not implemented");
-			break;
-			case 'v':
-			global_sendkey_error_handler(true,
-				"Verbose option", "Not implemented");
-			break;
 			case 'h': printhelp();
 			default: abort();
 		}
