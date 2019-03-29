@@ -7,7 +7,7 @@
 #include "libsendkey.h"
 #include "sendkey-json-parser.c"
 
-bool opt_d, opt_o, opt_p;
+bool opt_d, opt_o, opt_p, opt_t;
 
 void printjson(struct keyevent *ke, FILE *stream) {
 	bool td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
@@ -24,6 +24,9 @@ void printjson(struct keyevent *ke, FILE *stream) {
 		fprintf(stream, ",\"win_virtualkey\":%u,\"win_extended\":%s",
 			   ke->virtualkey,
 			   ke->extended ? "true" : "false");
+	if(ke->time) {
+		fprintf(stream, ",\"win_time\":%u", ke->time);
+	}
 	if(ke->unicode_codepoint) {
 		fprintf(stream, ",\"unicode_codepoint\":%u", ke->unicode_codepoint);
 	}
@@ -47,6 +50,9 @@ void printprettyjson(struct keyevent *ke, FILE *stream) {
 		fprintf(stream, ",\n \"win_virtualkey\":    %5u,\n \"win_extended\":       %s",
 			   ke->virtualkey,
 			   ke->extended ? "true" : "false");
+	if(ke->time) {
+		fprintf(stream, ",\n \"win_time\": %u", ke->time);
+	}
 	if(ke->unicode_codepoint) {
 		fprintf(stream, ",\n \"unicode_codepoint\": %u", ke->unicode_codepoint);
 	}
@@ -99,6 +105,7 @@ void printhelp() {
 		" -d Dry run: Do not inject events.\n"
 		" -o Also print events on stdout.\n"
 		" -p Pretty-print on stdout (implies -o).\n"
+		" -t Where win_time is not provided, use current time yet always increase it.\n"
 		" -s Silent: Print no log or error messages.\n"
 		" -v Increase verbosity\n"
 		" -h Print this help text and exit.\n\n"
@@ -113,11 +120,12 @@ int main(int argc, char* argv[]) {
 	global_sendkey_error_handler = error_handler;
 	char* progname = argv[0];
 	int c;
-	while ((c = getopt (argc, argv, "doph")) != -1) {
+	while ((c = getopt (argc, argv, "dopth")) != -1) {
 		switch (c) {
 			case 'd': opt_d = true;  break;
 			case 'o': opt_o = true;  break;
 			case 'p': opt_p = true;  break;
+			case 't': opt_t = true;  break;
 			case 's':
 			global_sendkey_error_handler(true,
 				"Silent option", "Not implemented");
@@ -132,5 +140,5 @@ int main(int argc, char* argv[]) {
 	}
 	signal(SIGINT, quitsignal);
 	signal(SIGTERM, quitsignal);
-	sendkey_json_parser();
+	sendkey_json_parser(opt_t);
 }

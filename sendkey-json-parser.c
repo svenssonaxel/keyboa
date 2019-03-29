@@ -22,6 +22,9 @@ struct parse_context {
 	size_t hkeystart;
 	size_t hkeyend;
 	bool stopped;
+	bool filltime;
+	bool gottime;
+	DWORD maxtime;
 };
 
 int error_callback(jsonsl_t jsn,
@@ -61,8 +64,35 @@ void callback(jsonsl_t jsn,
 
 	//at end of top-level object
 	if(level == 1 && type == JSONSL_T_OBJECT && action == JSONSL_ACTION_POP) {
-		//handle keyevent
-		global_sendkey_keyevent_handler(ke);
+		if(pc->filltime) {
+			DWORD sendtime;
+			if(pc->gottime) {
+				sendtime=ke->time;
+			}
+			else {
+				sendtime=GetTickCount();
+				sendtime=max(sendtime, pc->maxtime+1);
+			}
+			//handle keyevent
+			ke->time = sendtime;
+			if(ke->eventtype==KEYEVENT_T_KEYPRESS) {
+				ke->eventtype=KEYEVENT_T_KEYDOWN;
+				global_sendkey_keyevent_handler(ke);
+				ke->eventtype=KEYEVENT_T_KEYUP;
+				sendtime++;
+				ke->time = sendtime;
+				global_sendkey_keyevent_handler(ke);
+				ke->eventtype=KEYEVENT_T_KEYPRESS;
+			}
+			else {
+				global_sendkey_keyevent_handler(ke);
+			}
+			pc->maxtime = max(sendtime, pc->maxtime);
+		}
+		else {
+			//handle keyevent
+			global_sendkey_keyevent_handler(ke);
+		}
 		pc->stopped = true;
 		jsonsl_stop(jsn);
 	}
@@ -160,9 +190,10 @@ void callback(jsonsl_t jsn,
 					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
 				}
 			}
-			else if(strcmp(keyname, "time")==0) {
+			else if(strcmp(keyname, "win_time")==0) {
 				if(ispint) {
 					ke->time = intval;
+					pc->gottime = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
@@ -181,13 +212,14 @@ void callback(jsonsl_t jsn,
 	}
 }
 
-void sendkey_json_parser() {
+void sendkey_json_parser(bool filltime) {
 	struct parse_context pc={};
 	jsonsl_char_t buffer[BUFFER_SIZE];
 	int charsize = sizeof(jsonsl_char_t);
 	pc.buffer_len = BUFFER_SIZE * (charsize);
 	pc.buffer = (void*) buffer;
 	pc.buffer_writeat = 0;
+	pc.filltime = filltime;
 	jsonsl_t jsn;
 	jsn = jsonsl_new(0x100);
 	jsonsl_enable_all_callbacks(jsn);
@@ -222,6 +254,7 @@ void sendkey_json_parser() {
 				pc.stopped = false;
 				pc.min_available -= (jsn->pos);
 				pc.min_needed=0;
+				pc.gottime = false;
 				jsonsl_reset(jsn);
 			}
 		}
