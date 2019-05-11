@@ -5,7 +5,7 @@ ifneq ($(shell echo $${OSTYPE}),cygwin)
 $(error Building only supported under Cygwin.)
 endif
 ifeq (,$(shell which i686-w64-mingw32-gcc))
-$(error mingw32 compiler not found. Install cygwin package mingw64-i686-gcc-cor)
+$(error mingw32 compiler not found. Install cygwin package mingw64-i686-gcc-core)
 endif
 
 VERSION = $(shell ./makeversion)
