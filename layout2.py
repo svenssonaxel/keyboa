@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
+# This file is part of keyboa version <VERSION>
 # License: See LICENSE
 
 # This is a minimal example of how to use libkeyboa. It switches Left Control

@@ -5,6 +5,7 @@
 #include <signal.h>
 #include "common.h"
 #include "liblistenkey.h"
+#include "version.h"
 
 bool opt_c, opt_C, opt_i, opt_e, opt_d, opt_f, opt_l, opt_L;
 int evcount;
@@ -215,8 +216,9 @@ void printhelp() {
 		"       15  Space\n"
 		"    16-23  Time (ms since system start), 8 hex digits\n\n"
 		" -h Print this help text and exit.\n\n"
-		"listenkey is part of keyboa, pre-release\n"
+		"listenkey is part of keyboa version %s\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
+		,KEYBOAVERSION
 	);
 	exit(0);
 }

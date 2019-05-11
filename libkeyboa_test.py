@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
+# This file is part of keyboa version <VERSION>
 # License: See LICENSE
 
 from libkeyboa import *

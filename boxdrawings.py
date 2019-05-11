@@ -1,4 +1,5 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
+# This file is part of keyboa version <VERSION>
 # License: See LICENSE
 
 # https://www.unicode.org/charts/PDF/U2500.pdf

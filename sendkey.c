@@ -6,6 +6,7 @@
 #include "common.h"
 #include "libsendkey.h"
 #include "sendkey-json-parser.c"
+#include "version.h"
 
 bool opt_d, opt_o, opt_p, opt_t;
 
@@ -107,8 +108,9 @@ void printhelp() {
 		" -p Pretty-print on stdout (implies -o).\n"
 		" -t Where win_time is not provided, use current time yet always increase it.\n"
 		" -h Print this help text and exit.\n\n"
-		"sendkey is part of keyboa, pre-release\n"
+		"sendkey is part of keyboa version %s\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
+		,KEYBOAVERSION
 	);
 	exit(0);
 }
