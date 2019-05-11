@@ -97,9 +97,12 @@ def enrich_input(gen):
 			if physkey in physkey_keyname_dict:
 				ret["keyname_local"]=physkey_keyname_dict[physkey]
 			ret={**ret,**vkeyinfo(ret["win_virtualkey"])}
-			if(prev_win_time!=None):
-				ret["delay"]=ret["win_time"]-prev_win_time
-			prev_win_time=ret["win_time"]
+			if("win_time" in ret):
+				if(prev_win_time!=None):
+					ret["delay"]=ret["win_time"]-prev_win_time
+				prev_win_time=ret["win_time"]
+			else:
+				prev_win_time=None
 			yield ret
 		else:
 			yield obj
@@ -206,9 +209,9 @@ def chords_to_events(field):
 			if(type=="keyup_all"):
 				for key in reversed(keysdown):
 					yield {"type":"keyup", field: key}
-				yield obj
 				keysdown=[]
 				yield updateui()
+				yield obj
 			elif(type=="chord"):
 				chord=obj["chord"]
 				chordmods=chord[:-1]
@@ -218,19 +221,18 @@ def chords_to_events(field):
 						yield {"type":"keyup",
 						       field: key}
 						keysdown.remove(key)
-						yield updateui()
 				for key in chordmods:
 					if(not key in keysdown):
 						yield {"type":"keydown",
 						       field: key}
 						keysdown.append(key)
-						yield updateui()
 				repeat=1
 				if("repeat" in obj):
 					repeat=obj["repeat"]
 				for _ in range(repeat):
 					yield {"type":"keypress",
 					       field: chordkey}
+				yield updateui()
 			else:
 				yield obj
 	return ret
@@ -336,6 +338,14 @@ def selecttypes(types):
 	def ret(gen):
 		for obj in gen:
 			if obj["type"] in types:
+				yield obj
+	return ret
+
+# Remove all events from the event stream of the given types.
+def selecttypesexcept(types):
+	def ret(gen):
+		for obj in gen:
+			if not obj["type"] in types:
 				yield obj
 	return ret
 
