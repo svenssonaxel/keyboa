@@ -15,10 +15,10 @@ default: release
 clean:
 	rm -rf *.exe *.pyc __pycache__/ release/ version.h
 
-release: listenkey.exe sendkey.exe *LICENSE *.py
+release: listenkey.exe sendkey.exe *LICENSE *.py README.md
 	mkdir -p release
 	cp $^ release/
-	sed -ri 's/<VERSION>/'"$(VERSION)"'/;' release/*.py
+	sed -ri 's/<VERSION>/'"$(VERSION)"'/;' release/*.py README.md
 	echo === Finished building keyboa version $(VERSION)
 
 listenkey.exe: listenkey.c liblistenkey.h json-str.c common.h version.h
