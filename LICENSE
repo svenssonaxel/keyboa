@@ -14,7 +14,14 @@
 
 
 
-	JSONSL is a JSON lexer that is included in this program. It is licensed as
-	indicated above, as well as under the licence found in jsonsl-LICENSE. This
-	applies to the files jsonsl.c and jsonsl.h. The complete source code for
-	JSONSL can be found at https://github.com/mnunberg/jsonsl
+	This program uses JSONSL, a JSON lexer. It is licensed under the license
+	found in jsonsl-LICENSE. This applies to the source code files jsonsl.c and
+	jsonsl.h. The complete source code for JSONSL can be found at
+	https://github.com/mnunberg/jsonsl
+
+
+
+	This program uses information derived from Unicode Data Files. This
+	information is included under the license "UNICODE, INC. LICENSE AGREEMENT
+	- DATA FILES AND SOFTWARE" which can be found at
+	https://www.unicode.org/license.html

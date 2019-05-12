@@ -1,8 +1,8 @@
-# Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 # This file is part of keyboa version <VERSION>
-# License: See LICENSE
 
-# https://www.unicode.org/charts/PDF/U2500.pdf
+# The information in this file is partly derived from
+# https://www.unicode.org/Public/12.1.0/ucd/NamesList.txt
+# See LICENSE file for more information.
 
 boxlist=[
 
