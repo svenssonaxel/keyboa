@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# A script that prints a string identifying the current version of the code
-# This is used in the build process as a fallback
+# Print a string identifying the current version of the code.
+# This is used in the build process.
 
 # projectversion=`git describe --tags --long`
 # cleanversion=${projectversion%%-*}
@@ -9,9 +9,17 @@
 revisioncount=`git log --oneline | wc -l`
 ts=`date +%Y%m%d.%H%M%S`
 id=`git rev-parse --short HEAD`
+tag=`git tag --points-at HEAD`
 
 if git diff --quiet --exit-code HEAD; then
-	echo $id-$revisioncount-snapshot
+	if [ -z "$tag" ]; then
+		# clean working dir but untagged commit
+		echo snapshot-$id-$revisioncount
+	else
+		# clean working dir on tagged commit
+		echo $tag
+	fi
 else
-	echo $ts-dev
+	# dirty working dir
+	echo dev-$ts
 fi
