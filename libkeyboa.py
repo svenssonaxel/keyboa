@@ -4,7 +4,7 @@
 # This file is part of keyboa version <VERSION>
 # License: See LICENSE
 
-import sys, json, functools
+import sys, json, functools, time
 
 # Run data in series through the supplied list of transformations
 def keyboa_run(tr):
@@ -359,6 +359,24 @@ def selectfields(fields):
 				if field in fields:
 					y[field]=obj[field]
 			yield y
+	return ret
+
+# Limit the rate of events to n events per second by making sure the delay
+# between any two events is at least 1/n seconds. This does not insert any
+# delay between events that already are sufficiently spread out. If filter is
+# given, only apply to events that match that predicate.
+def ratelimit(n, filter = lambda _: True):
+	def ret(gen):
+		minimum_delay=1/n
+		last_time=0
+		for obj in gen:
+			if filter(obj):
+				this_time=time.monotonic()
+				wait=last_time+minimum_delay-this_time
+				last_time=this_time
+				if(wait>0):
+					time.sleep(wait)
+			yield obj
 	return ret
 
 # The following is a table of windows virtual keys. It can be accessed through

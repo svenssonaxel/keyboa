@@ -438,6 +438,13 @@ def termui(gen):
 			olddata=data
 		yield obj
 
+def ratelimit_filter(obj):
+	if obj["type"] in ["keydown", "keypress"] \
+	   and "common_name" in obj \
+	   and obj["common_name"] in ["Up", "Down", "PgUp", "PgDn"]:
+			return True
+	return False
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
@@ -452,6 +459,7 @@ list_of_transformations = [
 	boxdrawings,                     # Customization from this file
 	printdate,                       # Customization from this file
 	wait,                            # Customization from this file
+	ratelimit(30, ratelimit_filter), # libkeyboa
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
 	termui,                          # Customization from this file
