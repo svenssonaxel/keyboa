@@ -53,7 +53,7 @@ w("from",
  "Q2      Q       W       E       R       T       Y       U       I       O       P       P2      P3      " +
  "A2      A       S       D       F       G       H       J       K       L       L2      L3      L4      " +
  "Z2      Z       X       C       V       B       N       M       M2      M3      M4      M5      .       " +
- "           S4      S3      S2             SPACE             T2      T3      T4                          " )
+ "           S4      S3      S2             SPACE             D2      D3      D4                          " )
 
 w("mods",
  "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       .       .       " +
@@ -117,7 +117,7 @@ w("WM",
  ".       .       .       .       .       .       .       .       s-up    .       .       .       .       " +
  ".       .       .       .       .       .       .       s-lef   s-dow   s-rig   .       .       .       " +
  ".       s-1     s-2     s-3     s-4     .       .       .       A-F4    .       .       .       .       " +
- "           S4      S3      S2             SPACE             T2      T3      T4                          " )
+ "           S4      S3      S2             SPACE             D2      D3      D4                          " )
 
 load("WM",[
 	("Q", "A-sp,Wait-250,X"),
@@ -301,7 +301,7 @@ w("Box",
  ".       B-lef=d B-dow=d B-up=d  B-rig=d B-arc=Y B-_D__  B-_D_R  B-LD_R  B-LD__  back    del     .       " +
  ".       B-lef=l B-dow=l B-up=l  B-rig=l B-arc=N B-_DU_  B-_DUR  B-LDUR  B-LDU_  ret     ret,up,end .    " +
  ".       B-lef=h B-dow=h B-up=h  B-rig=h .       B-__U_  B-__UR  B-L_UR  B-L_U_  .       .       .       " +
- "           S4      S3      S2             SPACE             T2      T3      T4                          " )
+ "           S4      S3      S2             SPACE             D2      D3      D4                          " )
 
 def printstring(str):
 	for char in str:

@@ -25,9 +25,9 @@ _commonname_mapping={
 	"OEM_MINUS":    "M4",
 	"RSHIFT":       "M5",
 
-	"RMENU":        "T2",
-	"APPS":         "T3",
-	"RCONTROL":     "T4",
+	"RMENU":        "D2",
+	"APPS":         "D3",
+	"RCONTROL":     "D4",
 
 	"LMENU":        "S2",
 	"LWIN":         "S3",
