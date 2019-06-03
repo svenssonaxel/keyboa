@@ -14,10 +14,10 @@
 # - Output depending on time (printdate)
 #
 # Run in cmd:
-#   listenkey -cel | python3 layout2.py | sendkey
+#   listenkey -cel | python3 layout1.py | sendkey
 #
 # Or in cygwin:
-#   ./listenkey -cel | ./layout2.py | ./sendkey
+#   ./listenkey -cel | ./layout1.py | ./sendkey
 
 from libkeyboa import *
 from layout1_commonname import *
