@@ -445,6 +445,12 @@ def ratelimit_filter(obj):
 			return True
 	return False
 
+key_timeouts={
+	"S3": 10,
+	"L": 10,
+	"S2": 15,
+	"Q2": 5}
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
@@ -452,6 +458,8 @@ list_of_transformations = [
 	enrich_input,                    # libkeyboa
 	add_common_name,                 # common_name
 	allow_repeat("physkey"),         # libkeyboa
+	unstick_keys("common_name",      # libkeyboa
+		key_timeouts),
 	events_to_chords("common_name"), # libkeyboa
 	chordmachine,                    # Customization from this file
 	chord_dispatch(chorddispatches), # Customization from this file

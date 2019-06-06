@@ -129,6 +129,38 @@ def allow_repeat(field):
 			yield obj
 	return ret
 
+# Workaround for keys getting stuck.
+def unstick_keys(field, timeouts):
+	def ret(gen):
+		key_history_state=[]
+		for obj in gen:
+			type=obj["type"]
+			this_time=time.monotonic()
+			alreadyup=False
+			for (deadline, key, event) in key_history_state:
+				if(this_time>deadline):
+					if(type=="keyup" and obj[field]==key):
+						alreadyup=True
+					yield {**event, "type":"keyup", "noop":True}
+			key_history_state=[*filter(lambda x: x[0]<=deadline, key_history_state)]
+			if(alreadyup):
+				continue
+			if(type=="keydown"):
+				key=obj[field]
+				if(key in timeouts):
+					key_history_state=sorted([*filter(lambda x: x[1]!=key, key_history_state), (this_time+timeouts[key], key, obj)])
+			if(type=="keyup"):
+				key=obj[field]
+				key_history_state=[*filter(lambda x: x[1]!=key, key_history_state)]
+				if(obj[field] in timeouts):
+					# Probably switched from a privileged window, so we tunnel
+					# a key release through the rest of the processing, since
+					# it is otherwise likely to be silenced.
+					yield {"type":"output","data":obj}
+			yield obj
+	return ret
+
+
 # Convert key events to chords. This allows any key to act as a modifier.
 # An example:
 #  Key event | Chord event
@@ -168,9 +200,10 @@ def events_to_chords(field):
 				if(key in keysdown):
 					i=keysdown.index(key)
 					if(mods<=i):
-						yield {"type":"chord",
-						       "chord":keysdown[:i+1]}
-						mods=i
+						if("noop" not in obj):
+							yield {"type":"chord",
+							       "chord":keysdown[:i+1]}
+							mods=i
 					else:
 						mods-=1
 					keysdown.remove(key)
