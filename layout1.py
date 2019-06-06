@@ -65,7 +65,7 @@ w("mods",
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
 ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
 ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔    ∀∃«»∈ℕℤℚℝℂ  """) # Inspired by the Knight keyboard
-ch("HyperSym",      """                【】⫷⫸«»‹›         ⸨⸩—    ⦕⦖⦓⦔ „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
+ch("HyperSym",      """              ⫷⫸【】  ‹›«»         ⸨⸩—         „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
 ch("Math",          """             ¬⋀⋁∈ ⇒ ≈∞∅∝   ∀∫∂ ⊂⊃ ⇔    ≤ ∃  ⇐ℕℤℚℝℂ  """)
 ch("ShiftMath",     """          ≠   ⋂⋃∉ ∴ ≉       ∮  ⊏⊐      ≥ ∄  ∵∇      """)
 ch("Greek",         """               ςερτυθιοπ   ασδφγηξκλ´   ζχψωβνμ     """)
@@ -83,14 +83,14 @@ w("Nav",
  ".       .       .       C-S-Tab C-Tab   .       .       .       10*Up   .       .       .       .       " +
  ".       Esc     Alt-F4  C-PgUp  C-PgDn  A-Home  .       Home    Up      End     Back    Del     .       " +
  ".       A-Left  A-Right S-Tab   Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Up,End .    " +
- ".       .       .       .       .       .       .       .       10*Down S-home,Back S-end,del . .       " +
+ ".       .       .       .       .       .       .       Ins     10*Down S-home,Back S-end,del . .       " +
  "           .       .       .              SPACE          SPACE,left .       .                           " )
 
 w("Nav2",
  ".       .       .       .       .       .       .       .       10*PgUp .       .       .       .       " +
  ".       .       .       C-A-lef C-A-rig .       .       C-Home  PgUp    C-End   C-Back  C-Del   .       " +
  ".       .       .       S-A-Tab A-Tab   .       .       C-Left  PgDn    C-Right S-Ret   .       .       " +
- ".       .       .       .       .       .       .       .       10*PgDn .       .       S-end,S-rig,S-del " )
+ ".       .       .       .       .       .       .       .       10*PgDn .       S-end,S-rig,S-del .     " )
 
 load("Nav3",[
 	("I", "S-up"),
@@ -117,17 +117,17 @@ w("WM",
  ".       .       .       .       .       .       .       .       s-up    .       .       .       .       " +
  ".       .       .       .       .       .       .       s-lef   s-dow   s-rig   .       .       .       " +
  ".       s-1     s-2     s-3     s-4     .       .       .       A-F4    .       .       .       .       " +
- "           S4      S3      S2             SPACE             D2      D3      D4                          " )
+ "           .       .       .              SPACE             .       .       .                           " )
 
 load("WM",[
 	("Q", "A-sp,Wait-250,X"),
 	("M4","A-sp,Wait-250,N")])
 
 w("Num",
- ".       .       F12     F11     F10     .       .E      .A      .B      .C      .D      .F      .       " +
+ ".       .       F12     F11     F10     .       .e      .a      .b      .c      .d      .f      .       " +
  ".       F12     F9      F8      F7      .       )       7       8       9       back    /       .       " +
- ".       F11     F6      F5      F4      ]       (       4       5       6       ret     *       .       " +
- ".       F10     F3      F2      F1      [       +       1       2       3       -       :       .       " +
+ ".       F11     F6      F5      F4      [       (       4       5       6       ret     *       .       " +
+ ".       F10     F3      F2      F1      ]       +       1       2       3       -       :       .       " +
  "           .       .      space             0               M3      M2     .                            " )
 
 load("Shell",[
@@ -301,7 +301,7 @@ w("Box",
  ".       B-lef=d B-dow=d B-up=d  B-rig=d B-arc=Y B-_D__  B-_D_R  B-LD_R  B-LD__  back    del     .       " +
  ".       B-lef=l B-dow=l B-up=l  B-rig=l B-arc=N B-_DU_  B-_DUR  B-LDUR  B-LDU_  ret     ret,up,end .    " +
  ".       B-lef=h B-dow=h B-up=h  B-rig=h .       B-__U_  B-__UR  B-L_UR  B-L_U_  .       .       .       " +
- "           S4      S3      S2             SPACE             D2      D3      D4                          " )
+ "           .       .       .              SPACE             .       .       .                           " )
 
 def printstring(str):
 	for char in str:
