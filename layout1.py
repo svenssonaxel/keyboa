@@ -128,7 +128,7 @@ w("Num",
  ".       F12     F9      F8      F7      .       )       7       8       9       back    /       .       " +
  ".       F11     F6      F5      F4      [       (       4       5       6       ret     *       .       " +
  ".       F10     F3      F2      F1      ]       +       1       2       3       -       :       .       " +
- "           .       .      space             0               M3      M2     .                            " )
+ "           .       .      space             0               Period  Comma  .                            " )
 
 load("Shell",[
 	("Y", """C-A,C-K,.cd "$dir3",Ret"""),

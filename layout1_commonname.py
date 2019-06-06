@@ -54,6 +54,8 @@ _aliases={
 	"ins":          "INSERT",
 	"sp":           "SPACE",
 	"SpaceBar":     "SPACE",
+	"Comma":        "OEM_COMMA",
+	"Period":       "OEM_PERIOD",
 	"Caps":         "CAPITAL",
 	"CapsLock":     "CAPITAL",
 	"lef":          "LEFT",
