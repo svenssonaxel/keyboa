@@ -478,4 +478,5 @@ list_of_transformations = [
 	sendkey_cleanup,                 # libkeyboa
 	output]                          # libkeyboa
 
-keyboa_run(list_of_transformations)
+if(__name__=="__main__"):
+	keyboa_run(list_of_transformations)
