@@ -219,6 +219,45 @@ def events_to_chords(field):
 				yield obj
 	return ret
 
+# Macro record/playback functionality. Macros are sequences of chords.
+# In normal mode:
+#   modifier + record begins recording.
+#   modifier + KEY performs playback of macro saved under KEY.
+# While recording a macro:
+#   modifier + record cancels recording.
+#   modifier + KEY finishes recording and saves the macro under KEY.
+def macro(modifier, record):
+	def activation(obj):
+		return (
+			obj["type"]=="chord"
+			and len(obj["chord"])==2
+			and obj["chord"][0]==modifier)
+	def ret(gen):
+		macros={}
+		for obj in gen:
+			if(activation(obj)):
+				key=obj["chord"][1]
+				if(key==record):
+					newmacro=[]
+					yield {"type":"ui","data":{"macro.recording": True}}
+					for obj in gen:
+						if(activation(obj)):
+							key=obj["chord"][1]
+							if(key!=record): # modifier + record used as cancel
+								macros[key]=newmacro
+							break
+						elif(obj["type"]=="chord"): # record only chords
+							newmacro.append(obj)
+						yield obj
+					yield {"type":"ui","data":{"macro.recording": False}}
+				elif(key in macros):
+					yield {"type":"ui","data":{"macro.playback": True}}
+					yield from macros[key]
+					yield {"type":"ui","data":{"macro.playback": False}}
+			else:
+				yield obj
+	return ret
+
 # Convert chords to key events.
 # An example:
 #  Chord

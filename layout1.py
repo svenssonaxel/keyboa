@@ -392,7 +392,9 @@ def termui(gen):
 		"chordmachine.outmods":[],
 		"chordmachine.planename":None,
 		"chordmachine.out":"",
-		"chords_to_events.keysdown.common_name":[]}
+		"chords_to_events.keysdown.common_name":[],
+		"macro.recording":False,
+		"macro.playback":False}
 	for obj in gen:
 		if(obj["type"]=="ui"):
 			data={**defaultdata,
@@ -413,6 +415,7 @@ def termui(gen):
 			planename=data["chordmachine.planename"]
 			out=data["chordmachine.out"]
 			virtual=data["chords_to_events.keysdown.common_name"]
+			macrostate="RECORDING" if data["macro.recording"] else ("PLAYBACK" if data["macro.playback"] else "")
 			show=(box[0]+" "+
 			      " ".join(physical)+
 				  "\n"+
@@ -431,7 +434,7 @@ def termui(gen):
 				  (color_ui(" ".join(virtual),"blue")+" "
 				   if len(virtual)>0 else "")+
 				  "\n"+
-				  box[3]+" ")
+				  box[3]+" "+color_ui(macrostate, "red"))
 			if(show!=oldshow):
 				print("\033[2J\033[;H" + show, file=sys.stderr, flush=True, end='')
 			oldshow=show
@@ -461,6 +464,7 @@ list_of_transformations = [
 	unstick_keys("common_name",      # libkeyboa
 		key_timeouts),
 	events_to_chords("common_name"), # libkeyboa
+	macro("Q", "SPACE"),             # libkeyboa
 	chordmachine,                    # Customization from this file
 	chord_dispatch(chorddispatches), # Customization from this file
 	chords_to_events("common_name"), # libkeyboa
