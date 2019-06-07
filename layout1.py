@@ -442,9 +442,9 @@ def termui(gen):
 		yield obj
 
 def ratelimit_filter(obj):
-	if obj["type"] in ["keydown", "keypress"] \
-	   and "common_name" in obj \
-	   and obj["common_name"] in ["Up", "Down", "PgUp", "PgDn"]:
+	if(obj["type"] in ["keydown", "keypress"]
+	   and "common_name" in obj
+	   and obj["common_name"] in ["Up", "Down", "PgUp", "PgDn"]):
 			return True
 	return False
 
