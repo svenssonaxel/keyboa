@@ -11,6 +11,11 @@ $(error mingw32 compiler not found. Install cygwin package mingw64-i686-gcc-core
 endif
 
 VERSION = $(shell ./makeversion)
+VERSION_H = \#define KEYBOAVERSION "$(VERSION)"
+
+ifneq ($(shell [ -e version.h ] && cat version.h),$(VERSION_H))
+$(shell rm version.h)
+endif
 
 default: release
 
@@ -30,6 +35,6 @@ sendkey.exe: sendkey.c libsendkey.h sendkey-json-parser.c json-str.c common.h ve
 	$(CC) -o sendkey.exe sendkey.c
 
 version.h:
-	echo '#define KEYBOAVERSION "'$(VERSION)'"' > version.h
+	echo '$(VERSION_H)' > version.h
 
 .PHONY: default
