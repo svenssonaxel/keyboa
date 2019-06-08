@@ -33,10 +33,16 @@ listenkey.exe and sendkey.exe are standalone applications. Run `listenkey -h` an
 
 See `layout1.py` and `layout2.py` for examples of how to write and run a processor.
 
-## Warning
+## Warnings
+
+### Use with care
 
 listenkey.exe with the -c option will prevent key events from reaching the applications. Unless you use it in combination with the -e or -d option, you run the risk of partly losing control of your computer. This particular foot gun is necessary for the core functionality, so it will stay this way. The recommended and conservative use is to always have the -e option turned on. This way, if your processor hits a snag you can always press Esc to exit listenkey.exe. In order to make use of this option, you will need a layout that doesn't require using the Esc key.
 
-## Known bugs
+### Known bugs
 
 For security reasons, Windows does not allow all key event to be scoped up by an application like keyboa is attempting to do. Sometimes, a key down event can be sent to keyboa while the key up event is withheld. This can for example happen when Win+L is pressed to lock the desktop, or when switching to an application running with elevated privileges. From the perspective of your processor, this will look like a key being held down indefinitely. There is library functionality that attempts to compensate for this situation (unstick_keys), but it is not perfect.
+
+### Alpha stage code
+
+This code is in alpha stage, and the API will not be stable before release of version 2.0.0.
