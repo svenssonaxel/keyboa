@@ -5,10 +5,10 @@
 # License: See LICENSE
 
 # This is a rather involved example, including
-# - Any key functioning as both modifier and letter (chordmachine)
+# - Any key functioning as both modifier and letter (events_to_chords)
 # - Layout planes/layers, selectable using any number of modifiers (load, w, ch)
-# - Chords transformed to other chords (chordmachine)
-# - Notation for key combinations, series, and repetition (chordmachine)
+# - Chords transformed to other operations (chords_to_scripts)
+# - Notation for key combinations, series, and repetition (scripts_to_chords)
 # - Key renaming and aliasing (layout1_commonname)
 # - Chords manipulating state (boxdrawing)
 # - Output depending on time (printdate)
@@ -170,15 +170,15 @@ w("Mirror",
  "L3      L2      L       K       J       H       G       F       D       S       A       .       .       " +
  ".       M4      M3      M2      M       N       B       V       C       X       Z       Z2      .       " )
 
-nativemodifiers=["Super", "Hyper", "Meta", "Alt", "Ctrl", "Shift"]
+nativemods=set(["Super", "Hyper", "Meta", "Alt", "Ctrl", "Shift"])
 
 # List and priority of native modifier combinations allowed as prefixes to plane
 # names. The empty list represents an exact match between non-native modifiers
 # and plane name.
 planeprefixes=[
-	["Shift"],
-	["Hyper"],
-	[]]
+	{"Shift"},
+	{"Hyper"},
+	set()]
 
 modnotation={
 	"s": "Super",
@@ -197,84 +197,155 @@ def planelookup(key, plane, default=None):
 		return pl[i]
 	return default
 
-def chordmachine(gen):
-	lockedmods=set()
+def enrich_chord(modifierplane):
+	def ret(gen):
+		for obj in gen:
+			type=obj["type"]
+			if(type=="chord"):
+				inchord=obj["chord"]
+				inmods=set(inchord[:-1])
+				key=inchord[-1]
+				downmods=set()
+				for mod in inmods:
+					mod=planelookup(mod, modifierplane, mod)
+					downmods.add(mod)
+				info={"key": key, "downmods": downmods}
+				yield {"type":"ui","data":info}
+				yield {**obj, **info}
+			else:
+				if(type=="keyup_all"):
+					yield {"type":"ui","data":{"downmods": set()}}
+				yield obj
+	return ret
+
+def modlock(modifierplane, modlockname, clearkey):
+	def ret(gen):
+		lockedmods=set()
+		for obj in gen:
+			type=obj["type"]
+			if(type=="chord"):
+				downmods=obj["downmods"]
+				key=obj["key"]
+				modfromkey=planelookup(key, modifierplane, key)
+				if(modlockname in downmods):
+					if(key==clearkey):
+						lockedmods=set()
+					else:
+						lockedmods.add(modfromkey)
+					yield {"type":"ui","data":{
+						"lockedmods":lockedmods}}
+				else:
+					yield {**obj, "lockedmods":lockedmods}
+			else:
+				yield obj
+	return ret
+
+# Generate a stream of (effectivemods, planename) tuples. Note that this
+# generator is not part of the pipeline, but repeatedly created and consumed by
+# chords_to_scripts
+def modifier_sets(downmods, lockedmods):
+	# depends on global variables nativemods and planeprefixes
+	# Loop through native modifier sets allowed as prefixes to plane name
+	for planeprefix in planeprefixes:
+		# For every planeprefix, there are two possible ways to find plane and
+		# effective modifiers.
+		downplanemods=downmods.difference(nativemods)
+		downnativemods=downmods.intersection(nativemods)
+		lockedplanemods=lockedmods.difference(nativemods)
+		lockednativemods=lockedmods.intersection(nativemods)
+
+		# 1) locked plane
+		#   - All plane and locked mods are used to select plane.
+		#   - All downnativemods are used to select plane unless also in lockednativemods.
+		#   - All downnativemods not used to select plane, are in effect.
+		if(planeprefix == lockednativemods.union(downnativemods)):
+			planename = \
+				"".join(sorted(planeprefix)) + \
+					"".join(sorted(lockedplanemods.union(downplanemods)))
+			effectivemods = \
+				downnativemods.intersection(lockednativemods)
+			yield (effectivemods, planename)
+
+		# 2) explicit plane
+		#   - All downplanemods are used to select plane.
+		#   - All downnativemods necessary are used to select plane.
+		#   - All downnativemods not used to select plane, are in effect.
+		#   - All lockedmods are rendered ineffective.
+		if(planeprefix <= downnativemods):
+			planename = \
+				"".join(sorted(planeprefix)) + \
+					"".join(sorted(downplanemods))
+			effectivemods = \
+				downnativemods.difference(planeprefix)
+			yield (effectivemods, planename)
+
+def chords_to_scripts(gen):
 	for obj in gen:
 		type=obj["type"]
 		if(type=="chord"):
-			inchord=obj["chord"]
-			inmods=set(inchord[:-1])
-			inkey=inchord[-1]
-			planemods=set()
-			nativemods=set()
-			for mod in inmods.union(lockedmods):
-				mod=planelookup(mod, "mods", mod)
-				if(mod in nativemodifiers):
-					nativemods.add(mod)
-				else:
-					planemods.add(mod)
-			out=None
+			lockedmods=obj["lockedmods"]
+			downmods=obj["downmods"]
+			inkey=obj["key"]
 			outmods=set()
-			planename="".join(sorted(planemods))
-			for pre in planeprefixes:
-				o=planelookup(inkey, "".join(pre)+planename, None)
-				if(o and set(pre)<=nativemods):
-					outmods=nativemods-set(pre)
-					out=o
-					planename="".join(pre)+planename
+			out=None
+			for (outmods_candidate, planename_candidate) in modifier_sets(downmods, lockedmods):
+				out_candidate=planelookup(inkey, planename_candidate, None)
+				if(out_candidate):
+					outmods=outmods_candidate
+					planename=planename_candidate
+					out=out_candidate
 					break
 			if(not out):
-				outmods=nativemods.union(planemods)
+				outmods=downmods
 				planename=None
 				out=inkey
 			yield {"type":"ui","data":{
-				"chordmachine.planename": planename,
-				"chordmachine.nativemods":sorted(nativemods),
-				"chordmachine.planemods":sorted(planemods),
-				"chordmachine.outmods":sorted(outmods),
-				"chordmachine.out": str(out)}}
-			# interprete chord string expression
-			assert isinstance(out,str) and len(out)>0, "Chord expression must be non-empty string"
-			if("Modlock" in outmods):
-				if(out=="SPACE"):
-					lockedmods=set()
-				else:
-					lockedmods.add(planelookup(out, "mods", out))
-				yield {"type":"ui","data":{
-					"chordmachine.lockedmods":sorted(lockedmods)}}
-			else:
-				for item in out.split(","):
-					if(len(item)>0 and item[0]=="."):
-						for char in item[1:]:
-							yield {"type":"chord","chord":["."+char]}
-					elif(item in "*-"):
-						yield {"type":"chord","chord":["."+item]}
-					else:
-						repeat=1
-						if("*" in item):
-							mulindex=item.index("*")
-							repeat=int(item[:mulindex])
-							item=item[mulindex+1:]
-						itemch=item.split("-")
-						itemmods=itemch[:-1]
-						itemkey=itemch[-1]
-						sendmods=set()
-						for mod in itemmods:
-							if mod in modnotation:
-								sendmods.add(modnotation[mod])
-							else:
-								sendmods.add(mod)
-						for _ in range(repeat):
-							yield {"type":"chord","chord":
-								[*sorted(sendmods.union(outmods)), itemkey]}
+				"scriptmods": outmods,
+				"planename": planename,
+				"script": str(out)}}
+			assert isinstance(out,str) and len(out)>0, "Script must be non-empty string"
+			yield {"type": "script",
+				"script": out,
+				"scriptmods": outmods}
 		else:
 			if(type=="keyup_all"):
 				yield {"type":"ui","data":{
-					"chordmachine.planename": None,
-					"chordmachine.nativemods":None,
-					"chordmachine.planemods":None,
-					"chordmachine.outmods":None,
-					"chordmachine.out": None}}
+					"scriptmods": set(),
+					"planename": None,
+					"script": None}}
+			yield obj
+
+def scripts_to_chords(gen):
+	for obj in gen:
+		type=obj["type"]
+		if(type=="script"):
+			script=obj["script"]
+			scriptmods=obj["scriptmods"]
+			for item in script.split(","):
+				if(len(item)>0 and item[0]=="."):
+					for char in item[1:]:
+						yield {"type":"chord","chord":["."+char]}
+				elif(item in "*-"):
+					yield {"type":"chord","chord":["."+item]}
+				else:
+					repeat=1
+					if("*" in item):
+						mulindex=item.index("*")
+						repeat=int(item[:mulindex])
+						item=item[mulindex+1:]
+					itemch=item.split("-")
+					itemmods=itemch[:-1]
+					itemkey=itemch[-1]
+					sendmods=set()
+					for mod in itemmods:
+						if mod in modnotation:
+							sendmods.add(modnotation[mod])
+						else:
+							sendmods.add(mod)
+					for _ in range(repeat):
+						yield {"type":"chord","chord":
+							[*sorted(sendmods.union(scriptmods)), itemkey]}
+		else:
 			yield obj
 
 chorddispatches={
@@ -405,10 +476,10 @@ def termui(gen):
 			 boxdrawings_ui(data['boxdrawings'])
 			 if 'boxdrawings' in data else ["    "]*4)
 			physical=data["events_to_chords.keysdown.common_name"]
-			lockedmods=set(data["chordmachine.lockedmods"])
-			nativemods=set(data["chordmachine.nativemods"])
-			planemods=set(data["chordmachine.planemods"])
-			outmods=set(data["chordmachine.outmods"])
+			lockedmods=data["chordmachine.lockedmods"]
+			nativemods=data["chordmachine.nativemods"]
+			planemods=data["chordmachine.planemods"]
+			outmods=data["chordmachine.outmods"]
 			showlocked=lockedmods
 			shownative=(nativemods-lockedmods)&outmods
 			showplane=(planemods-lockedmods)&outmods
@@ -464,8 +535,13 @@ list_of_transformations = [
 	unstick_keys("common_name",      # libkeyboa
 		key_timeouts),
 	events_to_chords("common_name"), # libkeyboa
+	enrich_chord("mods"),            # Customization from this file
+	modlock("mods",                  # Customization from this file
+		"Modlock",
+		"SPACE"),
 	macro("Q", "SPACE"),             # libkeyboa
-	chordmachine,                    # Customization from this file
+	chords_to_scripts,               # Customization from this file
+	scripts_to_chords,               # Customization from this file
 	chord_dispatch(chorddispatches), # Customization from this file
 	chords_to_events("common_name"), # libkeyboa
 	boxdrawings,                     # Customization from this file
@@ -474,7 +550,7 @@ list_of_transformations = [
 	ratelimit(30, ratelimit_filter), # libkeyboa
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
-	termui,                          # Customization from this file
+	#termui,                          # Customization from this file
 	sendkey_cleanup,                 # libkeyboa
 	output]                          # libkeyboa
 
