@@ -204,11 +204,12 @@ def enrich_chord(modifierplane):
 				inchord=obj["chord"]
 				inmods=set(inchord[:-1])
 				key=inchord[-1]
+				keyasmod=planelookup(key, modifierplane, key)
 				downmods=set()
 				for mod in inmods:
 					mod=planelookup(mod, modifierplane, mod)
 					downmods.add(mod)
-				info={"key": key, "downmods": downmods}
+				info={"key": key, "downmods": downmods, "keyasmod": keyasmod}
 				yield {"type":"ui","data":info}
 				yield {**obj, **info}
 			else:
@@ -217,7 +218,7 @@ def enrich_chord(modifierplane):
 				yield obj
 	return ret
 
-def modlock(modifierplane, modlockname, clearkey):
+def modlock(modlockname, clearkey):
 	def ret(gen):
 		lockedmods=set()
 		for obj in gen:
@@ -225,12 +226,12 @@ def modlock(modifierplane, modlockname, clearkey):
 			if(type=="chord"):
 				downmods=obj["downmods"]
 				key=obj["key"]
-				modfromkey=planelookup(key, modifierplane, key)
+				keyasmod=obj["keyasmod"]
 				if(modlockname in downmods):
 					if(key==clearkey):
 						lockedmods=set()
 					else:
-						lockedmods.add(modfromkey)
+						lockedmods.add(keyasmod)
 					yield {"type":"ui","data":{
 						"lockedmods":lockedmods}}
 				else:
@@ -534,10 +535,8 @@ list_of_transformations = [
 		key_timeouts),
 	events_to_chords("common_name"), # libkeyboa
 	enrich_chord("mods"),            # Customization from this file
-	modlock("mods",                  # Customization from this file
-		"Modlock",
-		"SPACE"),
 	macro("Q", "SPACE"),             # libkeyboa
+	modlock("Modlock", "SPACE"),     # Customization from this file
 	chords_to_scripts,               # Customization from this file
 	scripts_to_chords,               # Customization from this file
 	boxdrawings("b"),                # Customization from this file
