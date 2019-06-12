@@ -214,7 +214,7 @@ def enrich_chord(modifierplane):
 				yield {**obj, **info}
 			else:
 				if(type=="keyup_all"):
-					yield {"type":"ui","data":{"downmods": set()}}
+					yield {"type":"ui","data":{"key": None, "downmods": set()}}
 				yield obj
 	return ret
 
@@ -457,12 +457,12 @@ def termui(gen):
 	olddata={}
 	defaultdata={
 		"events_to_chords.keysdown.common_name":[],
-		"chordmachine.lockedmods":[],
-		"chordmachine.nativemods":[],
-		"chordmachine.planemods":[],
-		"chordmachine.outmods":[],
-		"chordmachine.planename":None,
-		"chordmachine.out":"",
+		"planename":None,
+		"scriptmods":set(),
+		"script":None,
+		"downmods":set(),
+		"key":None,
+		"lockedmods":set(),
 		"chords_to_events.keysdown.common_name":[],
 		"macro.recording":False,
 		"macro.playback":False}
@@ -476,36 +476,41 @@ def termui(gen):
 			 boxdrawings_ui(data['boxdrawings'])
 			 if 'boxdrawings' in data else ["    "]*4)
 			physical=data["events_to_chords.keysdown.common_name"]
-			lockedmods=data["chordmachine.lockedmods"]
-			nativemods=data["chordmachine.nativemods"]
-			planemods=data["chordmachine.planemods"]
-			outmods=data["chordmachine.outmods"]
-			showlocked=lockedmods
-			shownative=(nativemods-lockedmods)&outmods
-			showplane=(planemods-lockedmods)&outmods
-			planename=data["chordmachine.planename"]
-			out=data["chordmachine.out"]
+			lockedmods=data["lockedmods"]
+			downmods=data["downmods"]
+			key=data["key"]
+			planename=data["planename"]
+			scriptmods=data["scriptmods"]
+			script=data["script"]
+			shownative=downmods.intersection(nativemods)
+			showplane=downmods.difference(nativemods)
 			virtual=data["chords_to_events.keysdown.common_name"]
 			macrostate="RECORDING" if data["macro.recording"] else ("PLAYBACK" if data["macro.playback"] else "")
-			show=(box[0]+" "+
-			      " ".join(physical)+
-				  "\n"+
-			      box[1]+" "+
-				  (color_ui(" ".join(sorted(showlocked)),"green")+" "
-				   if len(showlocked)>0 else "")+
-				  (color_ui(" ".join(sorted(shownative)),"yellow")+" "
-				   if len(shownative)>0 else "")+
-				  (color_ui(" ".join(sorted(showplane)),"red")+" "
-				   if len(showplane)>0 else "")+
-				  (color_ui(planename+": ","cyan")
-				   if planename else "")+
-				  out+
-				  "\n"+
-				  box[2]+" "+
-				  (color_ui(" ".join(virtual),"blue")+" "
-				   if len(virtual)>0 else "")+
-				  "\n"+
-				  box[3]+" "+color_ui(macrostate, "red"))
+			line0=" ".join(physical)
+			scriptline = (
+				(color_ui(planename+": ","cyan")
+				 if planename else "")+
+				(color_ui(" ".join(sorted(scriptmods)),"yellow")+" "
+				    if len(scriptmods)>0 else "")+
+				(script
+				 if script else ""))
+			nonscriptline = (
+				(color_ui(" ".join(sorted(showplane)),"red")+" "
+				 if len(showplane)>0 else "")+
+				(color_ui(" ".join(sorted(shownative)),"yellow")+" "
+				 if len(shownative)>0 else "")+
+				(key if key else ""))
+			line1 = (
+				(color_ui(" ".join(sorted(lockedmods)),"green")+" "
+				 if len(lockedmods)>0 else "")+
+				(scriptline if script else nonscriptline))
+			line2=(color_ui(" ".join(virtual),"blue")+" "
+				   if len(virtual)>0 else "")
+			line3=color_ui(macrostate, "red")
+			show=(box[0]+" "+line0+"\n"+
+			      box[1]+" "+line1+"\n"+
+				  box[2]+" "+line2+"\n"+
+				  box[3]+" "+line3)
 			if(show!=oldshow):
 				print("\033[2J\033[;H" + show, file=sys.stderr, flush=True, end='')
 			oldshow=show
@@ -550,7 +555,7 @@ list_of_transformations = [
 	ratelimit(30, ratelimit_filter), # libkeyboa
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
-	#termui,                          # Customization from this file
+	termui,                          # Customization from this file
 	sendkey_cleanup,                 # libkeyboa
 	output]                          # libkeyboa
 
