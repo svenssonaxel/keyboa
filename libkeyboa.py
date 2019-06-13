@@ -30,7 +30,14 @@ def output(gen):
 # A transformation that changes nothing while printing everything to stderr
 def debug(gen):
 	for obj in gen:
-		json.dump(obj["data"] if obj["type"]=="output" else obj, sys.stderr, allow_nan=False, indent=1)
+		print(obj, file=sys.stderr, flush=True)
+		yield obj
+
+# A transformation that changes nothing while printing everything to stderr in
+# json format
+def debug_json(gen):
+	for obj in gen:
+		json.dump(obj, sys.stderr, allow_nan=False, indent=1)
 		print(file=sys.stderr, flush=True)
 		yield obj
 
