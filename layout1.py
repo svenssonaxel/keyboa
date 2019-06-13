@@ -213,8 +213,6 @@ def enrich_chord(modifierplane):
 				yield {"type":"ui","data":info}
 				yield {**obj, **info}
 			else:
-				if(type=="keyup_all"):
-					yield {"type":"ui","data":{"key": None, "downmods": set()}}
 				yield obj
 	return ret
 
@@ -233,7 +231,10 @@ def modlock(modlockname, clearkey):
 					else:
 						lockedmods.add(keyasmod)
 					yield {"type":"ui","data":{
-						"lockedmods":lockedmods}}
+						"lockedmods":lockedmods,
+						"scriptmods": set(),
+						"planename": modlockname,
+						"script": "CLEAR" if key==clearkey else keyasmod}}
 				else:
 					yield {**obj, "lockedmods":lockedmods}
 			else:
@@ -308,11 +309,6 @@ def chords_to_scripts(gen):
 				"script": out,
 				"scriptmods": outmods}
 		else:
-			if(type=="keyup_all"):
-				yield {"type":"ui","data":{
-					"scriptmods": set(),
-					"planename": None,
-					"script": None}}
 			yield obj
 
 def scripts_to_chords(gen):
@@ -426,6 +422,20 @@ def wait(modifier):
 				yield obj
 	return ret
 
+def macro_ui(gen):
+	macrorecording=False
+	for obj in gen:
+		type=obj["type"]
+		mt=macrotest(obj) if type=="chord" else False
+		if(mt):
+			yield {"type":"ui", "data":{
+				"scriptmods": set(),
+				"planename": "Macro",
+				"script": (
+					"RECORD/CANCEL"
+					if mt==True else mt)}}
+		yield obj
+
 def boxdrawings_ui(settings):
 	ret=["","","",""]
 	for y in range(4):
@@ -448,58 +458,54 @@ def color_ui(text, color):
 
 def termui(gen):
 	oldshow=""
-	olddata={}
-	defaultdata={
-		"events_to_chords.keysdown.common_name":[],
+	on_keyup_all={
 		"planename":None,
 		"scriptmods":set(),
-		"script":None,
-		"downmods":set(),
-		"key":None,
+		"script":None}
+	defaultdata={
+		**on_keyup_all,
+		"events_to_chords.keysdown.common_name":[],
 		"lockedmods":set(),
 		"chords_to_events.keysdown.common_name":[],
 		"macro.recording":False,
 		"macro.playback":False}
+	olddata=defaultdata
 	for obj in gen:
-		if(obj["type"]=="ui"):
+		type=obj["type"]
+		update=False
+		if(type=="ui"):
+			update=True
 			data={**defaultdata,
-			      **{key:value for (key, value)
-			         in {**olddata, **obj["data"]}.items()
-			         if value!=None}}
+				**{key:value for (key, value)
+					in {**olddata, **obj["data"]}.items()
+					if value!=None}}
+		if(type=="keyup_all"):
+			update=True
+			data={**olddata, **on_keyup_all}
+		if(update):
 			box=(
 			 boxdrawings_ui(data['boxdrawings'])
 			 if 'boxdrawings' in data else ["    "]*4)
 			physical=data["events_to_chords.keysdown.common_name"]
 			lockedmods=data["lockedmods"]
-			downmods=data["downmods"]
-			key=data["key"]
 			planename=data["planename"]
 			scriptmods=data["scriptmods"]
 			script=data["script"]
-			shownative=downmods.intersection(nativemods)
-			showplane=downmods.difference(nativemods)
 			virtual=data["chords_to_events.keysdown.common_name"]
 			macrostate="RECORDING" if data["macro.recording"] else ("PLAYBACK" if data["macro.playback"] else "")
 			line0=" ".join(physical)
-			scriptline = (
+			line1=(
 				(color_ui(planename+": ","cyan")
 				 if planename else "")+
 				(color_ui(" ".join(sorted(scriptmods)),"yellow")+" "
 				    if len(scriptmods)>0 else "")+
 				(script
 				 if script else ""))
-			nonscriptline = (
-				(color_ui(" ".join(sorted(showplane)),"red")+" "
-				 if len(showplane)>0 else "")+
-				(color_ui(" ".join(sorted(shownative)),"yellow")+" "
-				 if len(shownative)>0 else "")+
-				(key if key else ""))
-			line1 = (
+			line2=(
 				(color_ui(" ".join(sorted(lockedmods)),"green")+" "
 				 if len(lockedmods)>0 else "")+
-				(scriptline if script else nonscriptline))
-			line2=(color_ui(" ".join(virtual),"blue")+" "
-				   if len(virtual)>0 else "")
+				(color_ui(" ".join(virtual),"blue")+" "
+				 if len(virtual)>0 else ""))
 			line3=color_ui(macrostate, "red")
 			show=(box[0]+" "+line0+"\n"+
 			      box[1]+" "+line1+"\n"+
@@ -550,6 +556,7 @@ list_of_transformations = [
 	events_to_chords("common_name"), # libkeyboa
 	enrich_chord("mods"),            # Customization from this file
 	modlock("Modlock", "SPACE"),     # Customization from this file
+	macro_ui,                        # Customization from this file
 	macro(macrotest),                # libkeyboa
 	chords_to_scripts,               # Customization from this file
 	scripts_to_chords,               # Customization from this file
