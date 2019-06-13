@@ -233,9 +233,25 @@ def events_to_chords(field):
 # - False otherwise
 # In normal mode, macrotest can playback or begin recording.
 # While recording a macro, macrotest can cancel or save recording.
-def macro(macrotest):
+# If filename is given, it is used to persist macros between sessions.
+def macro(macrotest, filename=None):
+	class SJSONEncoder(json.JSONEncoder):
+		def default(self, o):
+			if isinstance(o, set):
+				return {'__set__': sorted(o)}
+			raise Exception("Unknown object type")
+	def SJSON_decode_object(o):
+		if '__set__' in o:
+			return set(o['__set__'])
+		return o
 	def ret(gen):
 		macros={}
+		if(filename):
+			try:
+				with open(filename, "r") as file:
+					macros=json.loads(file.read(),
+						object_hook=SJSON_decode_object)
+			except: pass
 		for obj in gen:
 			mt=macrotest(obj) if obj["type"]=="chord" else False
 			if(mt):
@@ -247,6 +263,14 @@ def macro(macrotest):
 						if(mt2):
 							if(mt2!=True):
 								macros[mt2]=newmacro
+								if(filename):
+									with open(filename, "w") as file:
+										sjsonstr=json.dumps(
+											macros,
+											separators=(',',':'),
+											sort_keys=True,
+											cls=SJSONEncoder)
+										file.write(sjsonstr)
 							break
 						elif(obj["type"]=="chord"): # record only chords
 							newmacro.append(obj)

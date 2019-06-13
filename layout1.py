@@ -23,6 +23,7 @@ from libkeyboa import *
 from layout1_commonname import *
 from boxdrawings import *
 from time import strftime, sleep
+from sys import argv
 
 planes={}
 def load(plane, iter):
@@ -535,14 +536,21 @@ key_timeouts={
 # - True if the chord means begin/cancel recording
 # - False otherwise
 def macrotest(obj):
-	if(activation(obj, "Macro")):
-		key=obj["chord"][1]
-		if(key=="SPACE"):
-			return True
-		else:
-			return key
-	else:
-		return False
+	inchord=obj["chord"]
+	inmods=set(inchord[:-1])
+	inmods_wo_macro=filter(
+		lambda key: planelookup(key, "mods", key)!="Macro",
+		inmods)
+	downmods=obj["downmods"]
+	key=inchord[-1]
+	if(downmods=={"Macro"} and key=="SPACE"): return True
+	if("Macro" in downmods):
+		return ",".join([*sorted(inmods_wo_macro),key])
+	return False
+
+macrosavefile="layout1-macros.txt"
+if(len(argv)>=2):
+	macrosavefile=argv[1]
 
 list_of_transformations = [
 	input,                           # libkeyboa
@@ -557,7 +565,8 @@ list_of_transformations = [
 	enrich_chord("mods"),            # Customization from this file
 	modlock("Modlock", "SPACE"),     # Customization from this file
 	macro_ui,                        # Customization from this file
-	macro(macrotest),                # libkeyboa
+	macro(macrotest,                 # libkeyboa
+		macrosavefile),
 	chords_to_scripts,               # Customization from this file
 	scripts_to_chords,               # Customization from this file
 	boxdrawings("b"),                # Customization from this file
