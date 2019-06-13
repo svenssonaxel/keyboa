@@ -220,39 +220,34 @@ def events_to_chords(field):
 	return ret
 
 # Macro record/playback functionality. Macros are sequences of chords.
-# In normal mode:
-#   modifier + record begins recording.
-#   modifier + KEY performs playback of macro saved under KEY.
-# While recording a macro:
-#   modifier + record cancels recording.
-#   modifier + KEY finishes recording and saves the macro under KEY.
-def macro(modifier, record):
-	def activation(obj):
-		return (
-			obj["type"]=="chord"
-			and len(obj["chord"])==2
-			and obj["chord"][0]==modifier)
+# macrotest is a function of a chord returning:
+# - The name for the macro if the chord means save/playback
+# - True if the chord means begin/cancel recording
+# - False otherwise
+# In normal mode, macrotest can playback or begin recording.
+# While recording a macro, macrotest can cancel or save recording.
+def macro(macrotest):
 	def ret(gen):
 		macros={}
 		for obj in gen:
-			if(activation(obj)):
-				key=obj["chord"][1]
-				if(key==record):
+			mt=macrotest(obj) if obj["type"]=="chord" else False
+			if(mt):
+				if(mt==True):
 					newmacro=[]
 					yield {"type":"ui","data":{"macro.recording": True}}
 					for obj in gen:
-						if(activation(obj)):
-							key=obj["chord"][1]
-							if(key!=record): # modifier + record used as cancel
-								macros[key]=newmacro
+						mt2=macrotest(obj) if obj["type"]=="chord" else False
+						if(mt2):
+							if(mt2!=True):
+								macros[mt2]=newmacro
 							break
 						elif(obj["type"]=="chord"): # record only chords
 							newmacro.append(obj)
 						yield obj
 					yield {"type":"ui","data":{"macro.recording": False}}
-				elif(key in macros):
+				elif(mt in macros):
 					yield {"type":"ui","data":{"macro.playback": True}}
-					yield from macros[key]
+					yield from macros[mt]
 					yield {"type":"ui","data":{"macro.playback": False}}
 			else:
 				yield obj

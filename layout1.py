@@ -57,7 +57,7 @@ w("from",
 
 w("mods",
  "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       .       .       " +
- "Super   .       WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Date    Super   .       " +
+ "Super   Macro   WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Date    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
  "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
@@ -524,6 +524,20 @@ key_timeouts={
 	"S2": 15,
 	"Q2": 5}
 
+# macrotest is a function of a chord returning:
+# - The name for the macro if the chord means save/playback
+# - True if the chord means begin/cancel recording
+# - False otherwise
+def macrotest(obj):
+	if(activation(obj, "Macro")):
+		key=obj["chord"][1]
+		if(key=="SPACE"):
+			return True
+		else:
+			return key
+	else:
+		return False
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
@@ -535,8 +549,8 @@ list_of_transformations = [
 		key_timeouts),
 	events_to_chords("common_name"), # libkeyboa
 	enrich_chord("mods"),            # Customization from this file
-	macro("Q", "SPACE"),             # libkeyboa
 	modlock("Modlock", "SPACE"),     # Customization from this file
+	macro(macrotest),                # libkeyboa
 	chords_to_scripts,               # Customization from this file
 	scripts_to_chords,               # Customization from this file
 	boxdrawings("b"),                # Customization from this file
