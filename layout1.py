@@ -426,6 +426,7 @@ def wait(modifier):
 def macro_ui(gen):
 	macrorecording=False
 	for obj in gen:
+		yield obj
 		type=obj["type"]
 		mt=macrotest(obj) if type=="chord" else False
 		if(mt):
@@ -435,7 +436,6 @@ def macro_ui(gen):
 				"script": (
 					"RECORD/CANCEL"
 					if mt==True else mt)}}
-		yield obj
 
 def boxdrawings_ui(settings):
 	ret=["","","",""]
@@ -468,8 +468,8 @@ def termui(gen):
 		"events_to_chords.keysdown.common_name":[],
 		"lockedmods":set(),
 		"chords_to_events.keysdown.common_name":[],
-		"macro.recording":False,
-		"macro.playback":False}
+		"macro.state":"waiting",
+		"macro.transition":None}
 	olddata=defaultdata
 	for obj in gen:
 		type=obj["type"]
@@ -493,7 +493,16 @@ def termui(gen):
 			scriptmods=data["scriptmods"]
 			script=data["script"]
 			virtual=data["chords_to_events.keysdown.common_name"]
-			macrostate="RECORDING" if data["macro.recording"] else ("PLAYBACK" if data["macro.playback"] else "")
+			macrostate=("RECORDING" if data["macro.state"]=="recording"
+				else ("PLAYBACK" if data["macro.state"]=="playback" else ""))
+			if(planename=="Macro"):
+				script={
+					"record": "RECORD",
+					"cancel": "CANCEL",
+					"save": "SAVE: "+script,
+					"playback": "PLAYBACK: "+script,
+					"finishplayback": "DONE: "+script
+					}[data["macro.transition"]]
 			line0=" ".join(physical)
 			line1=(
 				(color_ui(planename+": ","cyan")

@@ -234,6 +234,13 @@ def events_to_chords(field):
 # In normal mode, macrotest can playback or begin recording.
 # While recording a macro, macrotest can cancel or save recording.
 # If filename is given, it is used to persist macros between sessions.
+# ui events are generated to communicate state and state transitions.
+# TRANSITION     ( FROMSTATE -> TOSTATE   )
+# record         ( waiting   -> recording )
+# save           ( recording -> waiting   )
+# cancel         ( recording -> waiting   )
+# playback       ( waiting   -> playback  )
+# finishplayback ( waiting   -> playback  )
 def macro(macrotest, filename=None):
 	class SJSONEncoder(json.JSONEncoder):
 		def default(self, o):
@@ -252,12 +259,16 @@ def macro(macrotest, filename=None):
 					macros=json.loads(file.read(),
 						object_hook=SJSON_decode_object)
 			except: pass
+		yield {"type":"ui","data":{
+			"macro.state": "waiting"}}
 		for obj in gen:
 			mt=macrotest(obj) if obj["type"]=="chord" else False
 			if(mt):
 				if(mt==True):
 					newmacro=[]
-					yield {"type":"ui","data":{"macro.recording": True}}
+					yield {"type":"ui","data":{
+						"macro.state": "recording",
+						"macro.transition": "record"}}
 					for obj in gen:
 						mt2=macrotest(obj) if obj["type"]=="chord" else False
 						if(mt2):
@@ -271,15 +282,25 @@ def macro(macrotest, filename=None):
 											sort_keys=True,
 											cls=SJSONEncoder)
 										file.write(sjsonstr)
+								yield {"type":"ui","data":{
+									"macro.state": "waiting",
+									"macro.transition": "save"}}
+							else:
+								yield {"type":"ui","data":{
+									"macro.state": "waiting",
+									"macro.transition": "cancel"}}
 							break
 						elif(obj["type"]=="chord"): # record only chords
 							newmacro.append(obj)
 						yield obj
-					yield {"type":"ui","data":{"macro.recording": False}}
 				elif(mt in macros):
-					yield {"type":"ui","data":{"macro.playback": True}}
+					yield {"type":"ui","data":{
+						"macro.state": "playback",
+						"macro.transition": "playback"}}
 					yield from macros[mt]
-					yield {"type":"ui","data":{"macro.playback": False}}
+					yield {"type":"ui","data":{
+						"macro.state": "waiting",
+						"macro.transition": "finishplayback"}}
 			else:
 				yield obj
 	return ret
