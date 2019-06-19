@@ -23,6 +23,7 @@ from libkeyboa import *
 from layout1_commonname import *
 from boxdrawings import *
 from time import strftime, sleep
+from datetime import datetime, timedelta
 from sys import argv
 
 planes={}
@@ -395,6 +396,10 @@ def boxdrawings(modifier):
 	return ret
 
 load("Date",[
+	("K", "Printdate-TZ_increase"),
+	("J", "Printdate-TZ_decrease"),
+	("Z", "Printdate-TZ_UTC"),
+	("L", "Printdate-TZ_local"),
 	("D", "Printdate-%Y_%m_%d"),
 	("C", "Printdate-%y%m%d"),
 	("T", "Printdate-%H:%M"),
@@ -403,11 +408,28 @@ load("Date",[
 
 def printdate(modifier):
 	def ret(gen):
+		TZ=None
 		for obj in gen:
 			if(activation(obj, modifier)):
-				format=obj["chord"][1]
-				datestr=strftime(format.replace("_", "-"))
-				yield from printstring(datestr)
+				command_or_format=obj["chord"][1]
+				if("%" in command_or_format):
+					format=command_or_format
+					datestr=strftime(format.replace("_", "-"),
+						(datetime.now().timetuple())
+						if TZ==None else
+						((datetime.utcnow()+timedelta(hours=TZ)).timetuple()))
+					yield from printstring(datestr)
+				else:
+					command=command_or_format
+					if(command=="TZ_increase"):
+						TZ=min((TZ or 0)+1, 12)
+					elif(command=="TZ_decrease"):
+						TZ=max((TZ or 0)-1, -12)
+					elif(command=="TZ_UTC"):
+						TZ=0
+					elif(command=="TZ_local"):
+						TZ=None
+					yield {"type":"ui","data":{"printdate.timezone":TZ}}
 			else:
 				yield obj
 	return ret
@@ -465,6 +487,7 @@ def termui(gen):
 		"script":None}
 	defaultdata={
 		**on_keyup_all,
+		"printdate.timezone":None,
 		"events_to_chords.keysdown.common_name":[],
 		"lockedmods":set(),
 		"chords_to_events.keysdown.common_name":[],
@@ -495,6 +518,8 @@ def termui(gen):
 			virtual=data["chords_to_events.keysdown.common_name"]
 			macrostate=("RECORDING" if data["macro.state"]=="recording"
 				else ("PLAYBACK" if data["macro.state"]=="playback" else ""))
+			tz=data["printdate.timezone"]
+			tzstr="local" if tz==None else ("UTC" + (("%+i" % tz) if tz!=0 else ""))
 			if(planename=="Macro"):
 				script={
 					"record": "RECORD",
@@ -516,7 +541,7 @@ def termui(gen):
 				 if len(lockedmods)>0 else "")+
 				(color_ui(" ".join(virtual),"blue")+" "
 				 if len(virtual)>0 else ""))
-			line3=color_ui(macrostate, "red")
+			line3=color_ui(tzstr.ljust(7), "blue") + color_ui(macrostate, "red")
 			show=(box[0]+" "+line0+"\n"+
 			      box[1]+" "+line1+"\n"+
 				  box[2]+" "+line2+"\n"+
