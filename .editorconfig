@@ -3,7 +3,7 @@
 
 root = true
 
-[{*.c,*.h,*.py,Makefile}]
+[{*.c,*.h,*.py,*.csv,Makefile}]
 end_of_line = lf
 insert_final_newline = true
 charset = utf-8

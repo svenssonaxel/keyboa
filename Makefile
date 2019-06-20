@@ -22,7 +22,7 @@ default: release
 clean:
 	rm -rf *.exe *.pyc __pycache__/ release/ version.h
 
-release: listenkey.exe sendkey.exe *LICENSE *.py README.md
+release: listenkey.exe sendkey.exe *LICENSE *.py *.csv README.md
 	mkdir -p release
 	cp $^ release/
 	sed -ri 's/<VERSION>/'"$(VERSION)"'/;' release/*.py README.md
