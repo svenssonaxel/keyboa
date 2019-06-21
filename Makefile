@@ -22,7 +22,7 @@ default: release
 clean:
 	rm -rf *.exe *.pyc __pycache__/ release/ version.h
 
-release: listenkey.exe sendkey.exe *LICENSE *.py *.csv README.md
+release: listenkey.exe sendkey.exe *LICENSE *.py win_vkeys.csv keysyms.csv README.md
 	mkdir -p release
 	cp $^ release/
 	sed -ri 's/<VERSION>/'"$(VERSION)"'/;' release/*.py README.md
@@ -33,6 +33,9 @@ listenkey.exe: listenkey.c liblistenkey.h json-str.c common.h version.h
 
 sendkey.exe: sendkey.c libsendkey.h sendkey-json-parser.c json-str.c common.h version.h jsonsl.c jsonsl.h
 	$(CC) -o sendkey.exe sendkey.c
+
+keysyms.csv: keysym/*
+	(cd keysym; sed -rf mkcsv.sed *keysym*.h) | sort -g > keysyms.csv
 
 version.h:
 	echo '$(VERSION_H)' > version.h
