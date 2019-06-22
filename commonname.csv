@@ -1,0 +1,256 @@
+# Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
+# License: See LICENSE
+#
+# This is a list linking together corresponding
+# - Platform independent key names, "commonname"
+# - Windows VKeys
+# - X11 keysyms
+#
+# This list is a derivative work of PyAutoGUI, commit ID 7bf4d71.
+# See https://github.com/asweigart/pyautogui
+# PyAutoGUI is licensed as follows:
+#
+# ==============================================================================
+# Copyright (c) 2014, Al Sweigart
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the PyAutoGUI nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# ==============================================================================
+#
+#
+#
+# A selection of commonname/keysym mappings taken from
+# pyautogui/_pyautogui_x11.py lines 171-293
+#
+#commonname,        keysym,      vkey
+ backspace,         BackSpace,
+ tab,               Tab,
+ enter,             Return,
+ return,            Return,
+ shift,             Shift_L,
+ ctrl,              Control_L,
+ alt,               Alt_L,
+ pause,             Pause,
+ capslock,          Caps_Lock,
+ esc,               Escape,
+ escape,            Escape,
+ pgup,              Page_Up,
+ pgdn,              Page_Down,
+ pageup,            Page_Up,
+ pagedown,          Page_Down,
+ end,               End,
+ home,              Home,
+ left,              Left,
+ up,                Up,
+ right,             Right,
+ down,              Down,
+ select,            Select,
+ print,             Print,
+ execute,           Execute,
+ prtsc,             Print,
+ prtscr,            Print,
+ prntscrn,          Print,
+ printscreen,       Print,
+ insert,            Insert,
+ del,               Delete,
+ delete,            Delete,
+ help,              Help,
+ winleft,           Super_L,
+ winright,          Super_R,
+ apps,              Super_L,
+ num0,              KP_0,
+ num1,              KP_1,
+ num2,              KP_2,
+ num3,              KP_3,
+ num4,              KP_4,
+ num5,              KP_5,
+ num6,              KP_6,
+ num7,              KP_7,
+ num8,              KP_8,
+ num9,              KP_9,
+ multiply,          KP_Multiply,
+ add,               KP_Add,
+ separator,         KP_Separator,
+ subtract,          KP_Subtract,
+ decimal,           KP_Decimal,
+ divide,            KP_Divide,
+ f1,                F1,
+ f2,                F2,
+ f3,                F3,
+ f4,                F4,
+ f5,                F5,
+ f6,                F6,
+ f7,                F7,
+ f8,                F8,
+ f9,                F9,
+ f10,               F10,
+ f11,               F11,
+ f12,               F12,
+ f13,               F13,
+ f14,               F14,
+ f15,               F15,
+ f16,               F16,
+ f17,               F17,
+ f18,               F18,
+ f19,               F19,
+ f20,               F20,
+ f21,               F21,
+ f22,               F22,
+ f23,               F23,
+ f24,               F24,
+ numlock,           Num_Lock,
+ scrolllock,        Scroll_Lock,
+ shiftleft,         Shift_L,
+ shiftright,        Shift_R,
+ ctrlleft,          Control_L,
+ ctrlright,         Control_R,
+ altleft,           Alt_L,
+ altright,          Alt_R,
+ space,             space,
+#
+#
+#
+# A selection of commonname/vkey mappings taken from
+# pyautogui/_pyautogui_win.py lines 117-259
+#
+#commonname,        keysym,      vkey
+ backspace,         ,            VK_BACK
+ super,             ,            VK_LWIN
+ tab,               ,            VK_TAB
+ clear,             ,            VK_CLEAR
+ enter,             ,            VK_RETURN
+ return,            ,            VK_RETURN
+ shift,             ,            VK_SHIFT
+ ctrl,              ,            VK_CONTROL
+ alt,               ,            VK_MENU
+ pause,             ,            VK_PAUSE
+ capslock,          ,            VK_CAPITAL
+ kana,              ,            VK_KANA
+ hanguel,           ,            VK_HANGUEL
+ hangul,            ,            VK_HANGUL
+ junja,             ,            VK_JUNJA
+ final,             ,            VK_FINAL
+ hanja,             ,            VK_HANJA
+ kanji,             ,            VK_KANJI
+ esc,               ,            VK_ESCAPE
+ escape,            ,            VK_ESCAPE
+ convert,           ,            VK_CONVERT
+ nonconvert,        ,            VK_NONCONVERT
+ accept,            ,            VK_ACCEPT
+ modechange,        ,            VK_MODECHANGE
+ space,             ,            VK_SPACE
+ pgup,              ,            VK_PRIOR
+ pgdn,              ,            VK_NEXT
+ pageup,            ,            VK_PRIOR
+ pagedown,          ,            VK_NEXT
+ end,               ,            VK_END
+ home,              ,            VK_HOME
+ left,              ,            VK_LEFT
+ up,                ,            VK_UP
+ right,             ,            VK_RIGHT
+ down,              ,            VK_DOWN
+ select,            ,            VK_SELECT
+ print,             ,            VK_PRINT
+ execute,           ,            VK_EXECUTE
+ prtsc,             ,            VK_SNAPSHOT
+ prtscr,            ,            VK_SNAPSHOT
+ prntscrn,          ,            VK_SNAPSHOT
+ printscreen,       ,            VK_SNAPSHOT
+ insert,            ,            VK_INSERT
+ del,               ,            VK_DELETE
+ delete,            ,            VK_DELETE
+ help,              ,            VK_HELP
+ win,               ,            VK_LWIN
+ winleft,           ,            VK_LWIN
+ winright,          ,            VK_RWIN
+ apps,              ,            VK_APPS
+ sleep,             ,            VK_SLEEP
+ num0,              ,            VK_NUMPAD0
+ num1,              ,            VK_NUMPAD1
+ num2,              ,            VK_NUMPAD2
+ num3,              ,            VK_NUMPAD3
+ num4,              ,            VK_NUMPAD4
+ num5,              ,            VK_NUMPAD5
+ num6,              ,            VK_NUMPAD6
+ num7,              ,            VK_NUMPAD7
+ num8,              ,            VK_NUMPAD8
+ num9,              ,            VK_NUMPAD9
+ multiply,          ,            VK_MULTIPLY
+ add,               ,            VK_ADD
+ separator,         ,            VK_SEPARATOR
+ subtract,          ,            VK_SUBTRACT
+ decimal,           ,            VK_DECIMAL
+ divide,            ,            VK_DIVIDE
+ f1,                ,            VK_F1
+ f2,                ,            VK_F2
+ f3,                ,            VK_F3
+ f4,                ,            VK_F4
+ f5,                ,            VK_F5
+ f6,                ,            VK_F6
+ f7,                ,            VK_F7
+ f8,                ,            VK_F8
+ f9,                ,            VK_F9
+ f10,               ,            VK_F10
+ f11,               ,            VK_F11
+ f12,               ,            VK_F12
+ f13,               ,            VK_F13
+ f14,               ,            VK_F14
+ f15,               ,            VK_F15
+ f16,               ,            VK_F16
+ f17,               ,            VK_F17
+ f18,               ,            VK_F18
+ f19,               ,            VK_F19
+ f20,               ,            VK_F20
+ f21,               ,            VK_F21
+ f22,               ,            VK_F22
+ f23,               ,            VK_F23
+ f24,               ,            VK_F24
+ numlock,           ,            VK_NUMLOCK
+ scrolllock,        ,            VK_SCROLL
+ shiftleft,         ,            VK_LSHIFT
+ shiftright,        ,            VK_RSHIFT
+ ctrlleft,          ,            VK_LCONTROL
+ ctrlright,         ,            VK_RCONTROL
+ altleft,           ,            VK_LMENU
+ altright,          ,            VK_RMENU
+ browserback,       ,            VK_BROWSER_BACK
+ browserforward,    ,            VK_BROWSER_FORWARD
+ browserrefresh,    ,            VK_BROWSER_REFRESH
+ browserstop,       ,            VK_BROWSER_STOP
+ browsersearch,     ,            VK_BROWSER_SEARCH
+ browserfavorites,  ,            VK_BROWSER_FAVORITES
+ browserhome,       ,            VK_BROWSER_HOME
+ volumemute,        ,            VK_VOLUME_MUTE
+ volumedown,        ,            VK_VOLUME_DOWN
+ volumeup,          ,            VK_VOLUME_UP
+ nexttrack,         ,            VK_MEDIA_NEXT_TRACK
+ prevtrack,         ,            VK_MEDIA_PREV_TRACK
+ stop,              ,            VK_MEDIA_STOP
+ playpause,         ,            VK_MEDIA_PLAY_PAUSE
+ launchmail,        ,            VK_LAUNCH_MAIL
+ launchmediaselect, ,            VK_LAUNCH_MEDIA_SELECT
+ launchapp1,        ,            VK_LAUNCH_APP1
+ launchapp2,        ,            VK_LAUNCH_APP2

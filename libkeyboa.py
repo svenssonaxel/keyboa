@@ -691,3 +691,28 @@ def keysyminfo(x):
 		return _keysymsdict[x]
 	except KeyError:
 		return {}
+
+# Use the table of common names in commonname.csv to add information to
+# - A new dictionary _commonnamesdict
+# - _keysymsdict
+# - _vkeysdict
+
+_commonnamesdict={}
+for (commonname, keysym_symbol, vkey_symbol) in [
+		(x, None if y=="" else y, None if z=="" else z)
+		for [x, y, z]
+		in fromcsv("commonname.csv")]:
+	item=(_commonnamesdict[commonname]
+		  if commonname in _commonnamesdict
+		  else {"commonname": commonname})
+	if(len(commonname)<len(item["commonname"])):
+		item["commonname"]=commonname
+	keysym_obj=keysyminfo(keysym_symbol)
+	if(keysym_obj):
+		keysym_obj["commonname_obj"]=item
+		item["keysym_obj"]=keysym_obj
+	vkey_obj=vkeyinfo(vkey_symbol)
+	if(vkey_obj):
+		vkey_obj["commonname_obj"]=item
+		item["vkey_obj"]=vkey_obj
+	_commonnamesdict[commonname]=item

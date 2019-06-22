@@ -25,3 +25,9 @@
 	information is included under the license "UNICODE, INC. LICENSE AGREEMENT
 	- DATA FILES AND SOFTWARE" which can be found at
 	https://www.unicode.org/license.html
+
+
+
+	This program includes commonname.csv, a data file that is a derivative work
+	of PyAutoGUI, which is Copyright (c) 2014, Al Sweigart. See the top of that
+	file for copyright and licensing information.
