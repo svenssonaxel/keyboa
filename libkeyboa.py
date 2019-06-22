@@ -10,22 +10,154 @@ import sys, json, functools, time, csv
 def keyboa_run(tr):
 	return functools.reduce((lambda x, y: y(x)), tr, None)
 
-# Read events from stdin
+# Read events from stdin. Auto-detect source format and adjust accordingly.
+# Supported formats are:
+# - The JSON output of listenkey.exe
+# - The format of x11vnc -pipeinput
+# After detecting the format, inform any downstream output processor so it can
+# match output format, then begin producing events from source.
 def input(_):
 	try:
-		for line in sys.stdin:
+		firstline=sys.stdin.readline()
+		if(firstline.startswith('{')):
+			# listenkey.exe format
 			obj=json.loads(line)
+			# listenkey.exe may or may not print an init message. At a minimum,
+			# the output generator needs to know what format to print.
+			if(not obj["type"]=="init"):
+				yield {
+					"type": "init",
+					"platform": "windows"}
 			yield obj
+			for line in sys.stdin:
+				obj=json.loads(line)
+				yield obj
+		elif(firstline.startswith('#')):
+			# x11vnc format
+			yield {
+				"type": "init",
+				"platform": "vnc"}
+			for line in sys.stdin:
+				if(line.startswith('#')): # comment
+					pass
+				elif(line.startswith('Pointer ')):
+					line=line.split(" ")
+					line[1:5]=map(int, line[1:5])
+					[_, client_id, xpos, ypos, mask, hint] = line
+					buttonid=1
+					buttonsdown=set()
+					while(mask>0):
+						if(mask&1):
+							buttonsdown.add(buttonid)
+							buttonid+=1
+							mask-=1
+						mask/=2
+					yield {
+						"type": "pointerstate",
+						"vnc_client_id": int(client_id),
+						"vnc_xpos": int(xpos),
+						"vnc_ypos": int(ypos),
+						"vnc_buttonsdown": buttonsdown,
+						"vnc_hint": hint}
+				elif(line.startswith('Keysym ')):
+					line=line.split(" ")
+					line[1:4]=map(int, line[1:4])
+					[_, client_id, down, keysym, keysym_name, hint] = line
+					yield {
+						"type": "keydown" if down else "keyup",
+						"vnc_client_id": int(client_id),
+						"vnc_keysym": int(keysym),
+						"vnc_keysym_name": keysym_name,
+						"vnc_hint": hint}
+				else:
+					raise Exception("Unknown x11vnc event")
+		else:
+			raise Exception("Unknown format")
 	except KeyboardInterrupt:
 		pass
 	finally:
 		yield {"type":"exit"}
 
-# Output events to stdout
+# Output events to stdout. Detect format announced by input() and adjust
+# accordingly.
+# Supported formats are:
+# - The JSON format for sendkey.exe
+# - The format of x11vnc -pipeinput
 def output(gen):
+	platform=None
 	for obj in gen:
-		json.dump(obj["data"] if obj["type"]=="output" else obj, sys.stdout, allow_nan=False, indent=1)
-		print(file=sys.stdout, flush=True)
+		type=obj["type"]
+		if(type not in [
+				"init",
+				"keydown",
+				"keyup",
+				"keypress",
+				"pointerstate"]):
+			continue
+		if(platform==None):
+			if(type=="init"):
+				platform=obj["platform"]
+			else:
+				raise Exception("Missing init message. Instead, the type is: "+type)
+		elif(platform=="windows"):
+			if(obj["type"]=="output"):
+				obj=obj["data"]
+			if(obj["type"] in ["keydown", "keyup", "keypress"]):
+				event={}
+				send=False
+				for field in ["type", "win_scancode", "win_virtualkey",
+				              "win_extended", "unicode_codepoint"]:
+					if(field in obj and obj[field]):
+						event[field]=obj[field]
+						if(field in ["win_virtualkey",
+									 "win_scancode",
+									 "unicode_codepoint"]):
+							send=True
+				if(send):
+					json.dump(event, sys.stdout, allow_nan=False, indent=1)
+					print(file=sys.stdout, flush=True)
+		elif(platform=="vnc"):
+			if(obj["type"]=="output"):
+				obj=obj["data"]
+			type=obj["type"]
+			if(type in ["keydown", "keyup", "keypress"]):
+				for down in [1, 0]:
+					if(type=="keypress" or type==["keydown", "keyup"][down]):
+						try:
+							print(" ".join([
+								"Keysym",
+								str(obj["vnc_client_id"]),
+								str(down),
+								str(obj["vnc_keysym"]),
+								str(obj["vnc_keysym_name"]),
+								str(obj["vnc_hint"])]),
+								  flush=True)
+						except Exception as e:
+							print("Error trying to output "+type+" event")
+							raise e
+			elif(type=="pointerstate"):
+				try:
+					buttonsdown=obj["vnc_buttonsdown"]
+					buttonid=1
+					mask=0
+					while(len(buttonsdown)>0):
+						if(buttonid in buttonsdown):
+							mask&=2**buttonid
+							buttonsdown.remove(buttonid)
+						buttonid+=1
+					print(" ".join([
+						"Pointer",
+						str(obj["vnc_client_id"]),
+						str(obj["vnc_xpos"]),
+						str(obj["vnc_ypos"]),
+						str(mask),
+						obj["vnc_hint"]]),
+						  flush=True)
+				except Exception as e:
+					print("Error trying to output "+type+" event")
+					raise e
+		else:
+			raise Exception("Unknown platform")
 
 # A transformation that changes nothing while printing everything to stderr
 def debug(gen):
@@ -41,13 +173,15 @@ def debug_json(gen):
 		print(file=sys.stderr, flush=True)
 		yield obj
 
-# Find out what keys are already down at the start of the stream, and release
-# them by sending keyup events encapsulated so that no transformation meddles
-# with them until the output
+# Only has effect on windows.
+# If possible, find out what keys are already down at the start of the stream,
+# and release them by sending keyup events encapsulated so that no
+# transformation meddles with them until the output
 def releaseall_at_init(gen):
 	for obj in gen:
 		yield obj
-		if(obj["type"]=="init"):
+		if(obj["type"]=="init" and
+		   "vkeysdown" in obj):
 			for key in obj["vkeysdown"]:
 				yield {"type": "output", "data": {"type": "keyup", "win_virtualkey": key}}
 
@@ -55,6 +189,7 @@ def releaseall_at_init(gen):
 def hashobj(obj):
 	return hash(json.dumps(obj,sort_keys=True,separators=(',',':')))
 
+# Only has effect on windows.
 # Add a few fields to key events:
 # - physkey: Based on scancode and extended flag. Identifies a physical key on
 #   the keyboard.
@@ -64,7 +199,7 @@ def hashobj(obj):
 # - win_virtualkey_symbol: A symbol representing win_virtualkey
 # - win_virtualkey_description: A description/comment for win_virtualkey
 # - delay: Number of milliseconds since the last key event
-# Also add a few fields to the init message:
+# Add a few fields to the init message if possible:
 # - keyboard_hash: A value that stays the same for the same physical keyboard and
 #   layout but likely changes otherwise, useful for making portable
 #   configurations.
@@ -78,7 +213,9 @@ def enrich_input(gen):
 	physkey_keyname_dict = {}
 	prev_win_time=None
 	for obj in gen:
-		if obj["type"]=="init":
+		if(obj["type"]=="init" and obj["platform"]=="windows" and
+		   set(["platform","keyboard_type","keyboard_subtype","function_keys",
+				"OEMCP","key_names","oem_mapping"]) < obj.keys()):
 			initmsg=obj
 			for q in obj["key_names"]:
 				ext="E" if q["extended"] else "_"
@@ -94,7 +231,9 @@ def enrich_input(gen):
 				"physkey_keyname_dict":physkey_keyname_dict,
 				"keyboard_hash": hashobj(kb_layout),
 				"keyboard_hw_hash": hashobj(kb_phys)}
-		elif obj["type"] in ["keydown", "keyup", "keypress"]:
+		elif(obj["type"] in ["keydown", "keyup", "keypress"] and
+			 set(["win_extended", "win_scancode", "win_virtualkey"]) <
+			 obj.keys()):
 			ret={**obj} # Shallow copy
 			ext="E" if obj["win_extended"] else "_"
 			hexsc=str.format('{:04X}', obj["win_scancode"])
@@ -356,26 +495,6 @@ def chords_to_events(field):
 			else:
 				yield obj
 	return ret
-
-# Removes events and fields not necessary for output to sendkey. As an
-# exception, events encapsulated by releaseall_at_init are still passed through.
-def sendkey_cleanup(gen):
-	for obj in gen:
-		if(obj["type"] in ["keydown", "keyup", "keypress"]):
-			event={}
-			send=False
-			for field in ["type", "win_scancode", "win_virtualkey",
-			              "win_extended", "unicode_codepoint"]:
-				if(field in obj and obj[field]):
-					event[field]=obj[field]
-					if(field=="win_virtualkey"
-					   or field=="win_scancode"
-					   or field=="unicode_codepoint"):
-						send=True
-			if(send):
-				yield event
-		if(obj["type"]=="output"):
-			yield obj
 
 # If the AltGr key is present, it causes the following problems:
 # - It is reported as a combination of two key events.

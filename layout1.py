@@ -611,7 +611,6 @@ list_of_transformations = [
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
 	termui,                          # Customization from this file
-	sendkey_cleanup,                 # libkeyboa
 	output]                          # libkeyboa
 
 if(__name__=="__main__"):
