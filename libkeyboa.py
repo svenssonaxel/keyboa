@@ -659,38 +659,47 @@ def vkeyinfo(vkey):
 # symbolic keysym. It returns a dictionary with the fields keysym,
 # keysym_symbol, keysym_description and keysym_unicode_codepoint
 _keysymsdict={}
+def _keysymobj_compareby(obj):
+	return [
+		obj["keysym_description"]=="deprecated",
+		obj["keysym_description"].startswith("Alias for "),
+		obj["keysym_description"].startswith("Same as "),
+		len(obj["keysym_symbol"])]
 for (keysym, keysym_symbol, keysym_description, keysym_unicode_codepoint) in [
-		(int(n, 16), s, None if d=="" else d, None if u=="" else int(u, 16))
+		(int(n, 16), s, d, None if u=="" else int(u, 16))
 		for [n, s, d, u]
 		in fromcsv("keysyms.csv")]:
 	item={"keysym": keysym,
 		  "keysym_symbol": keysym_symbol,
 		  "keysym_description": keysym_description,
 		  "keysym_unicode_codepoint": keysym_unicode_codepoint}
-	if(keysym in _keysymsdict):
-		orig=_keysymsdict[keysym]
-		if([orig["keysym_description"]=="deprecated",
-			len(orig["keysym_symbol"])] <
-		   [item["keysym_description"]=="deprecated",
-			len(item["keysym_symbol"])]):
-			continue
-	_keysymsdict[keysym]=item
-	for prefix in ["", "XKB_KEY_", "XK_"]:
-		if keysym_symbol.startswith(prefix):
-			kss=keysym_symbol[len(prefix):]
-			repl=_keysymsdict[kss] if(kss in _keysymsdict) else item
-			if(len(kss)<len(repl["keysym_symbol"])):
-				repl["keysym_symbol"]=kss
-			if(not repl["keysym_description"] and
-			   item["keysym_description"]):
-				repl["keysym_description"]=item["keysym_description"]
-			_keysymsdict[kss]=repl
+	save=_keysymsdict[keysym] if keysym in _keysymsdict else item
+	if(_keysymobj_compareby(item) <
+	   _keysymobj_compareby(save)):
+		save["keysym_symbol"]=item["keysym_symbol"]
+		save["keysym_description"]=item["keysym_description"]
+		save["keysym_unicode_codepoint"]=item["keysym_unicode_codepoint"]
+	_keysymsdict[keysym]=save
+	_keysymsdict[keysym_symbol]=save
 
 def keysyminfo(x):
-	try:
-		return _keysymsdict[x]
-	except KeyError:
-		return {}
+	if(isinstance(x,int)):
+		try: return _keysymsdict[x]
+		except KeyError: pass
+	if(isinstance(x,str)):
+		for (prefix, replacement) in [
+				("", ""),
+				("XKB_KEY_", ""),
+				("apXK_", "ap"),
+				("SunXK_", "Sun"),
+				("hpXK_", "hp"),
+				("DXK_", "D"),
+				("osfXK_", "osf"),
+				("XF86XK_", "XF86")]:
+			if(x.startswith(prefix)):
+				try: return _keysymsdict[replacement+x[(len(prefix)):]]
+				except KeyError: pass
+	return {}
 
 # Use the table of common names in commonname.csv to add information to
 # - A new dictionary _commonnamesdict
