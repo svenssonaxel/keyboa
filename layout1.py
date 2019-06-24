@@ -66,6 +66,11 @@ w("mods",
  "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
 
+load("modes",[
+	("X", "+X11,-Win"),
+	("W", "+Win,-X11"),
+	("L", "^Latex")])
+
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
 ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
 ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔    ∀∃«»∈ℕℤℚℝℂ  """) # Inspired by the Knight keyboard
@@ -158,12 +163,12 @@ w("Phon",
  ".       .alfa   .sierra .delta   .foxtrot .golf   .hotel    .juliett .kilo   .lima   .oscar-echo .alpha-echo  .           " +
  ".       .zulu   .x-ray  .charlie .victor  .bravo  .november .mike    .       .       .           .            .           " )
 
-w("SuperGreek", # lower-case greek letters for latex
+w("Latex-Greek", # lower-case greek letters for latex
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .         .\\varsigma .\\epsilon .\\rho     .\\tau     .\\upsilon .\\theta   .\\iota    .\\omicron .\\pi      .          .  """ +
 	""".          .\\alpha   .\\sigma   .\\delta   .\\phi     .\\gamma   .\\eta     .\\xi      .\\kappa   .\\lamda   .          .          .  """ +
 	""".          .\\zeta    .\\chi     .\\psi     .\\omega   .\\beta    .\\nu      .\\mu      .          .          .          .          .  """ )
-w("SuperShiftGreek", # upper-case greek letters for latex
+w("Latex-ShiftGreek", # upper-case greek letters for latex
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .          .          .\\Epsilon .\\Rho     .\\Tau     .\\Upsilon .\\Theta   .\\Iota    .\\Omicron .\\Pi      .          .  """ +
 	""".          .\\Alpha   .\\Sigma   .\\Delta   .\\Phi     .\\Gamma   .\\Eta     .\\Xi      .\\Kappa   .\\Lamda   .          .          .  """ +
@@ -185,6 +190,14 @@ planeprefixes=[
 	{"Hyper"},
 	set()]
 
+# List and priority of mode combinations to ignore. The empty list represents
+# using all modes.
+modesignored=[
+	set(),
+	{"Win", "X11"},
+	{"Latex"},
+	{"Win", "X11", "Latex"}]
+
 modnotation={
 	"s": "Super",
 	"H": "Hyper",
@@ -201,7 +214,7 @@ def planelookup(key, plane, default=None):
 		return pl[i]
 	return default
 
-def enrich_chord(modifierplane):
+def enrich_chord(modifierplane, modeplane):
 	def ret(gen):
 		for obj in gen:
 			type=obj["type"]
@@ -210,18 +223,23 @@ def enrich_chord(modifierplane):
 				inmods=set(inchord[:-1])
 				key=inchord[-1]
 				keyasmod=planelookup(key, modifierplane, key)
+				keyasmode=planelookup(key, modeplane, key)
 				downmods=set()
 				for mod in inmods:
 					mod=planelookup(mod, modifierplane, mod)
 					downmods.add(mod)
-				info={"key": key, "downmods": downmods, "keyasmod": keyasmod}
+				info={
+					"key": key,
+					"downmods": downmods,
+					"keyasmod": keyasmod,
+					"keyasmode": keyasmode}
 				yield {"type":"ui","data":info}
 				yield {**obj, **info}
 			else:
 				yield obj
 	return ret
 
-def modlock(modlockname, clearkey):
+def modlock(modlockset, modlockname, clearkey):
 	def ret(gen):
 		lockedmods=set()
 		for obj in gen:
@@ -230,7 +248,7 @@ def modlock(modlockname, clearkey):
 				downmods=obj["downmods"]
 				key=obj["key"]
 				keyasmod=obj["keyasmod"]
-				if(modlockname in downmods):
+				if(modlockset==downmods):
 					if(key==clearkey):
 						lockedmods=set()
 					else:
@@ -246,11 +264,53 @@ def modlock(modlockname, clearkey):
 				yield obj
 	return ret
 
+def modeswitch(modeswitchset, modeswitchname):
+	def ret(gen):
+		modes=set()
+		for obj in gen:
+			type=obj["type"]
+			if(type=="init"):
+				modes.add({"windows": "Win", "VNC": "X11"}[obj["platform"]])
+				yield {"type":"ui","data":{"modes": modes}}
+			if(type=="chord"):
+				downmods=obj["downmods"]
+				keyasmode=obj["keyasmode"]
+				if(modeswitchset==downmods and keyasmode):
+					for cmd in keyasmode.split(","):
+						pm=cmd[0]
+						mode=cmd[1:]
+						if(pm=="^"):
+							pm="-" if mode in modes else "+"
+						if(pm=="+"):
+							modes=modes.union({mode})
+						if(pm=="-"):
+							modes=modes.difference({mode})
+					yield {"type":"ui","data":{
+						"modes": modes,
+						"scriptmods": set(),
+						"planename": modeswitchname,
+						"script": keyasmode}}
+				else:
+					yield {**obj, "modes": modes}
+			else:
+				yield obj
+	return ret
+
 # Generate a stream of (effectivemods, planename) tuples. Note that this
 # generator is not part of the pipeline, but repeatedly created and consumed by
 # chords_to_scripts
-def modifier_sets(downmods, lockedmods):
-	# depends on global variables nativemods and planeprefixes
+def modifier_sets(downmods, lockedmods, modes):
+	# depends on global variables nativemods, planeprefixes and modesignored
+	#
+	# First, establish a list of mode prefixes
+	modeprefixes=[]
+	for mignore in modesignored:
+		effectivemodes=modes.difference(mignore)
+		modeprefix=(
+			("".join(sorted(effectivemodes))+"-")
+			if len(effectivemodes)>0 else "")
+		if(modeprefix not in modeprefixes):
+			modeprefixes.append(modeprefix)
 	# Loop through native modifier sets allowed as prefixes to plane name
 	for planeprefix in planeprefixes:
 		# For every planeprefix, there are two possible ways to find plane and
@@ -265,12 +325,12 @@ def modifier_sets(downmods, lockedmods):
 		#   - All downnativemods are used to select plane unless also in lockednativemods.
 		#   - All downnativemods not used to select plane, are in effect.
 		if(planeprefix == lockednativemods.union(downnativemods)):
-			planename = \
-				"".join(sorted(planeprefix)) + \
-					"".join(sorted(lockedplanemods.union(downplanemods)))
-			effectivemods = \
-				downnativemods.intersection(lockednativemods)
-			yield (effectivemods, planename)
+			planename = (
+				"".join(sorted(planeprefix)) +
+				"".join(sorted(lockedplanemods.union(downplanemods))))
+			effectivemods = downnativemods.intersection(lockednativemods)
+			for modeprefix in modeprefixes:
+				yield (effectivemods, modeprefix + planename)
 
 		# 2) explicit plane
 		#   - All downplanemods are used to select plane.
@@ -278,23 +338,25 @@ def modifier_sets(downmods, lockedmods):
 		#   - All downnativemods not used to select plane, are in effect.
 		#   - All lockedmods are rendered ineffective.
 		if(planeprefix <= downnativemods):
-			planename = \
-				"".join(sorted(planeprefix)) + \
-					"".join(sorted(downplanemods))
-			effectivemods = \
-				downnativemods.difference(planeprefix)
-			yield (effectivemods, planename)
+			planename = (
+				"".join(sorted(planeprefix)) +
+				"".join(sorted(downplanemods)))
+			effectivemods = downnativemods.difference(planeprefix)
+			for modeprefix in modeprefixes:
+				yield (effectivemods, modeprefix + planename)
 
 def chords_to_scripts(gen):
 	for obj in gen:
 		type=obj["type"]
 		if(type=="chord"):
 			lockedmods=obj["lockedmods"]
+			modes=obj["modes"]
 			downmods=obj["downmods"]
 			inkey=obj["key"]
 			outmods=set()
 			out=None
-			for (outmods_candidate, planename_candidate) in modifier_sets(downmods, lockedmods):
+			for (outmods_candidate, planename_candidate) in \
+			     modifier_sets(downmods, lockedmods, modes):
 				out_candidate=planelookup(inkey, planename_candidate, None)
 				if(out_candidate):
 					outmods=outmods_candidate
@@ -533,6 +595,7 @@ def termui(gen):
 		"printdate.timezone":None,
 		"events_to_chords.keysdown.common_name":[],
 		"lockedmods":set(),
+		"modes":set(),
 		"chords_to_events.keysdown.common_name":[],
 		"macro.state":"waiting",
 		"macro.transition":None,
@@ -556,6 +619,7 @@ def termui(gen):
 			 if 'boxdrawings' in data else ["    "]*4)
 			physical=data["events_to_chords.keysdown.common_name"]
 			lockedmods=data["lockedmods"]
+			modes=data["modes"]
 			planename=data["planename"]
 			scriptmods=data["scriptmods"]
 			script=data["script"]
@@ -584,9 +648,11 @@ def termui(gen):
 				(script
 				 if script else ""))
 			line2=(
+				(color_ui(" ".join(sorted(modes))+" ", "blue")
+				 if len(modes)>0 else "")+
 				(color_ui(" ".join(sorted(lockedmods)),"green")+" "
 				 if len(lockedmods)>0 else "")+
-				(color_ui(" ".join(virtual),"blue")+" "
+				(color_ui(" ".join(virtual),"white")+" "
 				 if len(virtual)>0 else ""))
 			line3=(
 				color_ui(tzstr.ljust(7), "blue") +
@@ -646,8 +712,12 @@ list_of_transformations = [
 	unstick_keys("common_name",      # libkeyboa
 		key_timeouts),
 	events_to_chords("common_name"), # libkeyboa
-	enrich_chord("mods"),            # Customization from this file
-	modlock("Modlock", "SPACE"),     # Customization from this file
+	enrich_chord("mods", "modes"),   # Customization from this file
+	modlock({"Modlock"},             # Customization from this file
+		"Modlock",
+		"SPACE"),
+	modeswitch({"Modlock","Ctrl"},   # Customization from this file
+		"Modeswitch"),
 	macro_ui,                        # Customization from this file
 	macro(macrotest,                 # libkeyboa
 		macrosavefile),
