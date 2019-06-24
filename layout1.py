@@ -12,6 +12,7 @@
 # - Key renaming and aliasing (layout1_commonname)
 # - Chords manipulating state (boxdrawing)
 # - Output depending on time (printdate)
+# - Input characters by unicode codepoint (unicode_input)
 #
 # Run in cmd:
 #   listenkey -cel | python3 layout1.py | sendkey
@@ -25,6 +26,7 @@ from boxdrawings import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
 from sys import argv
+from unicodedata import name as unicodename
 
 planes={}
 def load(plane, iter):
@@ -78,7 +80,8 @@ ch("Bats",          """ ♭♮♯♩♪♫♬      ☠☢✗✆☎        ✧✦
 ch("ShiftBats",     """                                                    """)
 ch("Sub",           """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
 
-load("Sym", [("0","space")])
+load("Sym", [("0","space"),
+             ("Z2","begin_unicode_input")])
 load("Sub",[("SPACE","₀")])
 
 w("Nav",
@@ -395,6 +398,46 @@ def boxdrawings(modifier):
 				yield obj
 	return ret
 
+def unicode_input(gen):
+	def resolve(str):
+		if(str=="" or len(str)>6): return ""
+		try: return chr(int(str,16))
+		except ValueError: return ""
+	def charname(str):
+		try: return unicodename(resolve(str))
+		except ValueError: return ""
+		except TypeError: return ""
+	for obj in gen:
+		if(obj["type"]=="chord" and obj["chord"]==["begin_unicode_input"]):
+			str=""
+			yield {"type":"ui","data":{"unicode_input":str}}
+			hexchars="0123456789abcdef"
+			for obj in gen:
+				if(obj["type"]=="chord" and len(obj["chord"])==1):
+					s=obj["chord"][0].lower()
+					if(s in hexchars):
+						str+=s
+					elif(len(s)==2 and s[1] in hexchars):
+						str+=s[1]
+					elif(s=="back"):
+						str=str[:-1]
+					elif(s=="esc"):
+						break
+					else:
+						yield from printstring(resolve(str))
+						yield {"type":"ui","data":{
+							"planename":"Unicode",
+							"script":charname(str)}}
+						if(s!="ret"):
+							yield obj
+						break
+				else: yield obj
+				res=resolve(str)
+				yield {"type":"ui","data":{
+					"unicode_input": (str + " " + charname(str)).strip()}}
+			yield {"type":"ui","data":{"unicode_input":None}}
+		else: yield obj
+
 load("Date",[
 	("K", "Printdate-TZ_increase"),
 	("J", "Printdate-TZ_decrease"),
@@ -492,7 +535,8 @@ def termui(gen):
 		"lockedmods":set(),
 		"chords_to_events.keysdown.common_name":[],
 		"macro.state":"waiting",
-		"macro.transition":None}
+		"macro.transition":None,
+		"unicode_input": None}
 	olddata=defaultdata
 	for obj in gen:
 		type=obj["type"]
@@ -520,6 +564,9 @@ def termui(gen):
 				else ("PLAYBACK" if data["macro.state"]=="playback" else ""))
 			tz=data["printdate.timezone"]
 			tzstr="local" if tz==None else ("UTC" + (("%+i" % tz) if tz!=0 else ""))
+			unicode_input_state=(
+				"" if data["unicode_input"]==None else
+				("0x"+data["unicode_input"]))
 			if(planename=="Macro"):
 				script={
 					"record": "RECORD",
@@ -541,7 +588,10 @@ def termui(gen):
 				 if len(lockedmods)>0 else "")+
 				(color_ui(" ".join(virtual),"blue")+" "
 				 if len(virtual)>0 else ""))
-			line3=color_ui(tzstr.ljust(7), "blue") + color_ui(macrostate, "red")
+			line3=(
+				color_ui(tzstr.ljust(7), "blue") +
+				color_ui(macrostate.ljust(10), "red") +
+				color_ui(unicode_input_state, "magenta"))
 			show=(box[0]+" "+line0+"\n"+
 			      box[1]+" "+line1+"\n"+
 				  box[2]+" "+line2+"\n"+
@@ -604,6 +654,7 @@ list_of_transformations = [
 	chords_to_scripts,               # Customization from this file
 	scripts_to_chords,               # Customization from this file
 	boxdrawings("b"),                # Customization from this file
+	unicode_input,                   # Customization from this file
 	printdate("Printdate"),          # Customization from this file
 	wait("Wait"),                    # Customization from this file
 	chords_to_events("common_name"), # libkeyboa
