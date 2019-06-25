@@ -629,8 +629,8 @@ def termui(gen):
 			data={**olddata, **on_keyup_all}
 		if(update):
 			box=(
-			 boxdrawings_ui(data['boxdrawings'])
-			 if 'boxdrawings' in data else ["    "]*4)
+			 boxdrawings_ui(data["boxdrawings"])
+			 if ("boxdrawings" in data and "Box" in modes) else [""]*4)
 			physical=data["events_to_chords.keysdown.common_name"]
 			lockedmods=data["lockedmods"]
 			modes=data["modes"]
