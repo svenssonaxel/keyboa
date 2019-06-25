@@ -60,16 +60,18 @@ w("from",
  "           S4      S3      S2             SPACE             D2      D3      D4                          " )
 
 w("mods",
- "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       .       .       " +
+ "Bats    Sub     WM2     mods    .       .       .       .       .       WM2     .       .       .       " +
  "Super   Macro   WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Date    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
- "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
+ "Shell   Shift   Meta    Num     Math    .       .       Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
 
 load("modes",[
 	("X", "+X11,-Win"),
 	("W", "+Win,-X11"),
-	("L", "^Latex")])
+	("L", "^Latex"),
+	("C", "^Cyr,-Box"),
+	("B", "^Box,-Cyr")])
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
 ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
@@ -79,10 +81,9 @@ ch("Math",          """             ¬⋀⋁∈ ⇒ ≈∞∅∝   ∀∫∂ ⊂
 ch("ShiftMath",     """          ≠   ⋂⋃∉ ∴ ≉       ∮  ⊏⊐      ≥ ∄  ∵∇      """)
 ch("Greek",         """               ςερτυθιοπ   ασδφγηξκλ´   ζχψωβνμ     """)
 ch("ShiftGreek",    """               ¨ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒΝΜ     """)
-ch("Cyr",           """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
-ch("ShiftCyr",      """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
+ch("Cyr-",          """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
+ch("Cyr-Shift",     """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
 ch("Bats",          """ ♭♮♯♩♪♫♬      ☠☢✗✆☎        ✧✦✓➔◢◣◇◆●        ◥◤      """)
-ch("ShiftBats",     """                                                    """)
 ch("Sub",           """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
 
 load("Sym", [("0","space"),
@@ -157,12 +158,6 @@ load("Shell",[
 	("E", """S-pgup"""),
 	("D", """S-pgdn""")])
 
-w("Phon",
- ".       .       .       .        .        .       .         .        .       .       .           .            .           " +
- ".       .quebec .whisky .echo    .romeo   .tango  .yankee   .uniform .india  .oscar  .papa       .alpha-oscar .           " +
- ".       .alfa   .sierra .delta   .foxtrot .golf   .hotel    .juliett .kilo   .lima   .oscar-echo .alpha-echo  .           " +
- ".       .zulu   .x-ray  .charlie .victor  .bravo  .november .mike    .       .       .           .            .           " )
-
 w("Latex-Greek", # lower-case greek letters for latex
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .         .\\varsigma .\\epsilon .\\rho     .\\tau     .\\upsilon .\\theta   .\\iota    .\\omicron .\\pi      .          .  """ +
@@ -190,13 +185,13 @@ planeprefixes=[
 	{"Hyper"},
 	set()]
 
-# List and priority of mode combinations to ignore. The empty list represents
-# using all modes.
-modesignored=[
-	set(),
-	{"Win", "X11"},
-	{"Latex"},
-	{"Win", "X11", "Latex"}]
+# List and priority of mode combinations together with allowed effective mods.
+# The empty set represents ignoring all modes.
+modespriority=[
+	({"Box"},set()),
+	({"Cyr"},set()),
+	({"Latex"},set()),
+	(set(),nativemods)]
 
 modnotation={
 	"s": "Super",
@@ -300,17 +295,16 @@ def modeswitch(modeswitchset, modeswitchname):
 # generator is not part of the pipeline, but repeatedly created and consumed by
 # chords_to_scripts
 def modifier_sets(downmods, lockedmods, modes):
-	# depends on global variables nativemods, planeprefixes and modesignored
+	# depends on global variables nativemods, planeprefixes and modespriority
 	#
 	# First, establish a list of mode prefixes
 	modeprefixes=[]
-	for mignore in modesignored:
-		effectivemodes=modes.difference(mignore)
+	for (effectivemodes, allowedeffectivemods) in modespriority:
 		modeprefix=(
 			("".join(sorted(effectivemodes))+"-")
 			if len(effectivemodes)>0 else "")
-		if(modeprefix not in modeprefixes):
-			modeprefixes.append(modeprefix)
+		if(effectivemodes<=modes and modeprefix not in modeprefixes):
+			modeprefixes.append((modeprefix, allowedeffectivemods))
 	# Loop through native modifier sets allowed as prefixes to plane name
 	for planeprefix in planeprefixes:
 		# For every planeprefix, there are two possible ways to find plane and
@@ -329,8 +323,9 @@ def modifier_sets(downmods, lockedmods, modes):
 				"".join(sorted(planeprefix)) +
 				"".join(sorted(lockedplanemods.union(downplanemods))))
 			effectivemods = downnativemods.intersection(lockednativemods)
-			for modeprefix in modeprefixes:
-				yield (effectivemods, modeprefix + planename)
+			for (modeprefix, allowedeffectivemods) in modeprefixes:
+				if(effectivemods<=allowedeffectivemods):
+					yield (effectivemods, modeprefix + planename)
 
 		# 2) explicit plane
 		#   - All downplanemods are used to select plane.
@@ -342,8 +337,9 @@ def modifier_sets(downmods, lockedmods, modes):
 				"".join(sorted(planeprefix)) +
 				"".join(sorted(downplanemods)))
 			effectivemods = downnativemods.difference(planeprefix)
-			for modeprefix in modeprefixes:
-				yield (effectivemods, modeprefix + planename)
+			for (modeprefix, allowedeffectivemods) in modeprefixes:
+				if(effectivemods<=allowedeffectivemods):
+					yield (effectivemods, modeprefix + planename)
 
 def chords_to_scripts(gen):
 	for obj in gen:
@@ -411,7 +407,7 @@ def scripts_to_chords(gen):
 		else:
 			yield obj
 
-w("Box",
+w("Box-",
  ".       b-das=N b-das=2 b-das=3 b-das=4 .       SPACE   b-___R  b-L__R  b-L___  .       .       .       " +
  ".       b-lef=d b-dow=d b-up=d  b-rig=d b-arc=Y b-_D__  b-_D_R  b-LD_R  b-LD__  back    del     .       " +
  ".       b-lef=l b-dow=l b-up=l  b-rig=l b-arc=N b-_DU_  b-_DUR  b-LDUR  b-LDU_  ret     ret,up,end .    " +
