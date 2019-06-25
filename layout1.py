@@ -488,9 +488,9 @@ def termui(gen):
 	defaultdata={
 		**on_keyup_all,
 		"printdate.timezone":None,
-		"events_to_chords.keysdown.common_name":[],
+		"events_to_chords.keysdown.commonname":[],
 		"lockedmods":set(),
-		"chords_to_events.keysdown.common_name":[],
+		"chords_to_events.keysdown.commonname":[],
 		"macro.state":"waiting",
 		"macro.transition":None}
 	olddata=defaultdata
@@ -510,12 +510,12 @@ def termui(gen):
 			box=(
 			 boxdrawings_ui(data['boxdrawings'])
 			 if 'boxdrawings' in data else ["    "]*4)
-			physical=data["events_to_chords.keysdown.common_name"]
+			physical=data["events_to_chords.keysdown.commonname"]
 			lockedmods=data["lockedmods"]
 			planename=data["planename"]
 			scriptmods=data["scriptmods"]
 			script=data["script"]
-			virtual=data["chords_to_events.keysdown.common_name"]
+			virtual=data["chords_to_events.keysdown.commonname"]
 			macrostate=("RECORDING" if data["macro.state"]=="recording"
 				else ("PLAYBACK" if data["macro.state"]=="playback" else ""))
 			tz=data["printdate.timezone"]
@@ -554,8 +554,8 @@ def termui(gen):
 
 def ratelimit_filter(obj):
 	if(obj["type"] in ["keydown", "keypress"]
-	   and "common_name" in obj
-	   and obj["common_name"] in ["Up", "Down", "PgUp", "PgDn"]):
+	   and "commonname" in obj
+	   and obj["commonname"] in ["up", "down", "pgup", "pgdn"]):
 			return True
 	return False
 
@@ -591,11 +591,11 @@ list_of_transformations = [
 	releaseall_at_init,              # libkeyboa
 	altgr_workaround_input,          # libkeyboa
 	enrich_input,                    # libkeyboa
-	add_common_name,                 # common_name
+	add_commonname,                  # libkeyboa
 	allow_repeat("physkey"),         # libkeyboa
-	unstick_keys("common_name",      # libkeyboa
+	unstick_keys("commonname",       # libkeyboa
 		key_timeouts),
-	events_to_chords("common_name"), # libkeyboa
+	events_to_chords("commonname"),  # libkeyboa
 	enrich_chord("mods"),            # Customization from this file
 	modlock("Modlock", "SPACE"),     # Customization from this file
 	macro_ui,                        # Customization from this file
@@ -606,9 +606,9 @@ list_of_transformations = [
 	boxdrawings("b"),                # Customization from this file
 	printdate("Printdate"),          # Customization from this file
 	wait("Wait"),                    # Customization from this file
-	chords_to_events("common_name"), # libkeyboa
+	chords_to_events("commonname"),  # libkeyboa
 	ratelimit(30, ratelimit_filter), # libkeyboa
-	resolve_common_name,             # common_name
+	resolve_commonname,              # libkeyboa
 	altgr_workaround_output,         # libkeyboa
 	termui,                          # Customization from this file
 	output]                          # libkeyboa

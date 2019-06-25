@@ -62,12 +62,12 @@ def input(_):
 				elif(line.startswith('Keysym ')):
 					line=line.split(" ")
 					line[1:4]=map(int, line[1:4])
-					[_, client_id, down, keysym, keysym_name, hint] = line
+					[_, client_id, down, keysym, keysym_symbol, hint] = line
 					yield {
 						"type": "keydown" if down else "keyup",
 						"vnc_client_id": int(client_id),
-						"vnc_keysym": int(keysym),
-						"vnc_keysym_name": keysym_name,
+						"x11_keysym": int(keysym),
+						"x11_keysym_symbol": keysym_symbol,
 						"vnc_hint": hint}
 				else:
 					raise Exception("Unknown x11vnc event")
@@ -77,6 +77,43 @@ def input(_):
 		pass
 	finally:
 		yield {"type":"exit"}
+
+def add_commonname(gen):
+	for obj in gen:
+		if(obj["type"] in ["keydown", "keyup", "keypress"]):
+			if("win_virtualkey" in obj):
+				vko=vkeyinfo(obj["win_virtualkey"])
+				obj={**obj,"commonname":
+					 vko["commonname_obj"]["commonname"]
+					 if("commonname_obj" in vko)
+					 else vko["win_virtualkey_symbol"]}
+			elif("x11_keysym" in obj):
+				kso=keysyminfo(obj["x11_keysym"])
+				obj={**obj,"commonname":
+					 kso["commonname_obj"]["commonname"]
+					 if("commonname_obj" in kso)
+					 else kso["x11_keysym_symbol"]}
+		yield obj
+
+def resolve_commonname(gen):
+	for obj in gen:
+		if(obj["type"] in ["keydown", "keyup", "keypress"] and
+		   "commonname" in obj):
+			ret={**obj} # Shallow copy
+			cn=obj["commonname"]
+			if(cn in _commonnamesdict):
+				cno=_commonnamesdict[cn]
+				if("vkey_obj" in cno):
+					ret={**ret,**cno["vkey_obj"]}
+				if("keysym_obj" in cno):
+					ret={**ret,**cno["keysym_obj"]}
+			else:
+				ret={**ret,
+					 **vkeyinfo(cn),
+					 **keysyminfo(cn)}
+			yield ret
+		else:
+			yield obj
 
 # Output events to stdout. Detect format announced by input() and adjust
 # accordingly.
@@ -126,14 +163,13 @@ def output(gen):
 						try:
 							print(" ".join([
 								"Keysym",
-								str(obj["vnc_client_id"]),
+								str(obj["vnc_client_id"])
+									if "vnc_client_id" in obj else "0",
 								str(down),
-								str(obj["vnc_keysym"]),
-								str(obj["vnc_keysym_name"]),
-								str(obj["vnc_hint"])]),
+								str(obj["x11_keysym"])]),
 								  flush=True)
 						except Exception as e:
-							print("Error trying to output "+type+" event")
+							print("Error trying to output "+type+" event: "+str(obj),file=sys.stderr)
 							raise e
 			elif(type=="pointerstate"):
 				try:
@@ -147,11 +183,11 @@ def output(gen):
 						buttonid+=1
 					print(" ".join([
 						"Pointer",
-						str(obj["vnc_client_id"]),
+						str(obj["vnc_client_id"])
+							if "vnc_client_id" in obj else "0",
 						str(obj["vnc_xpos"]),
 						str(obj["vnc_ypos"]),
-						str(mask),
-						obj["vnc_hint"]]),
+						str(mask)]),
 						  flush=True)
 				except Exception as e:
 					print("Error trying to output "+type+" event")
@@ -656,29 +692,29 @@ def vkeyinfo(vkey):
 
 # Use the table of linux/vnc keysyms in keysyms.csv to build a dictionary.
 # It can be accessed through the keysyminfo function using either a numeric or
-# symbolic keysym. It returns a dictionary with the fields keysym,
-# keysym_symbol, keysym_description and keysym_unicode_codepoint
+# symbolic keysym. It returns a dictionary with the fields x11_keysym,
+# x11_keysym_symbol, x11_keysym_description and unicode_codepoint
 _keysymsdict={}
 def _keysymobj_compareby(obj):
 	return [
-		obj["keysym_description"]=="deprecated",
-		obj["keysym_description"].startswith("Alias for "),
-		obj["keysym_description"].startswith("Same as "),
-		len(obj["keysym_symbol"])]
-for (keysym, keysym_symbol, keysym_description, keysym_unicode_codepoint) in [
+		obj["x11_keysym_description"]=="deprecated",
+		obj["x11_keysym_description"].startswith("Alias for "),
+		obj["x11_keysym_description"].startswith("Same as "),
+		len(obj["x11_keysym_symbol"])]
+for (keysym, keysym_symbol, keysym_description, unicode_codepoint) in [
 		(int(n, 16), s, d, None if u=="" else int(u, 16))
 		for [n, s, d, u]
 		in fromcsv("keysyms.csv")]:
-	item={"keysym": keysym,
-		  "keysym_symbol": keysym_symbol,
-		  "keysym_description": keysym_description,
-		  "keysym_unicode_codepoint": keysym_unicode_codepoint}
+	item={"x11_keysym": keysym,
+		  "x11_keysym_symbol": keysym_symbol,
+		  "x11_keysym_description": keysym_description,
+		  "unicode_codepoint": unicode_codepoint}
 	save=_keysymsdict[keysym] if keysym in _keysymsdict else item
 	if(_keysymobj_compareby(item) <
 	   _keysymobj_compareby(save)):
-		save["keysym_symbol"]=item["keysym_symbol"]
-		save["keysym_description"]=item["keysym_description"]
-		save["keysym_unicode_codepoint"]=item["keysym_unicode_codepoint"]
+		save["x11_keysym_symbol"]=item["x11_keysym_symbol"]
+		save["x11_keysym_description"]=item["x11_keysym_description"]
+		save["unicode_codepoint"]=item["unicode_codepoint"]
 	_keysymsdict[keysym]=save
 	_keysymsdict[keysym_symbol]=save
 
@@ -714,14 +750,14 @@ for (commonname, keysym_symbol, vkey_symbol) in [
 	item=(_commonnamesdict[commonname]
 		  if commonname in _commonnamesdict
 		  else {"commonname": commonname})
-	if(len(commonname)<len(item["commonname"])):
-		item["commonname"]=commonname
 	keysym_obj=keysyminfo(keysym_symbol)
 	if(keysym_obj):
 		keysym_obj["commonname_obj"]=item
-		item["keysym_obj"]=keysym_obj
+		if("keysym_obj" not in item):
+			item["keysym_obj"]=keysym_obj
 	vkey_obj=vkeyinfo(vkey_symbol)
 	if(vkey_obj):
 		vkey_obj["commonname_obj"]=item
-		item["vkey_obj"]=vkey_obj
+		if("vkey_obj" not in item):
+			item["vkey_obj"]=vkey_obj
 	_commonnamesdict[commonname]=item

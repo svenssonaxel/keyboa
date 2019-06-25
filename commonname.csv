@@ -6,7 +6,7 @@
 # - Windows VKeys
 # - X11 keysyms
 #
-# This list is a derivative work of PyAutoGUI, commit ID 7bf4d71.
+# Much of this file is a derivative work of PyAutoGUI, commit ID 7bf4d71.
 # See https://github.com/asweigart/pyautogui
 # PyAutoGUI is licensed as follows:
 #
@@ -254,3 +254,65 @@
  launchmediaselect, ,            VK_LAUNCH_MEDIA_SELECT
  launchapp1,        ,            VK_LAUNCH_APP1
  launchapp2,        ,            VK_LAUNCH_APP2
+#
+#
+#
+# Mapping of letter keys. Since a keysym refers to a character rather than a
+# key, both capital and small letter keysyms exist. The capital ones are mapped
+# back to the small (only) commonname. This makes the round trip
+# keysym->commonname->keysym lossy, but that's ok since commonname is only
+# trying to refer to keys.
+#
+#commonname,        keysym,      vkey
+ a,                 a,           A
+ b,                 b,           B
+ c,                 c,           C
+ d,                 d,           D
+ e,                 e,           E
+ f,                 f,           F
+ g,                 g,           G
+ h,                 h,           H
+ i,                 i,           I
+ j,                 j,           J
+ k,                 k,           K
+ l,                 l,           L
+ m,                 m,           M
+ n,                 n,           N
+ o,                 o,           O
+ p,                 p,           P
+ q,                 q,           Q
+ r,                 r,           R
+ s,                 s,           S
+ t,                 t,           T
+ u,                 u,           U
+ v,                 v,           V
+ w,                 w,           W
+ x,                 x,           X
+ y,                 y,           Y
+ z,                 z,           Z
+ a,                 A,
+ b,                 B,
+ c,                 C,
+ d,                 D,
+ e,                 E,
+ f,                 F,
+ g,                 G,
+ h,                 H,
+ i,                 I,
+ j,                 J,
+ k,                 K,
+ l,                 L,
+ m,                 M,
+ n,                 N,
+ o,                 O,
+ p,                 P,
+ q,                 Q,
+ r,                 R,
+ s,                 S,
+ t,                 T,
+ u,                 U,
+ v,                 V,
+ w,                 W,
+ x,                 X,
+ y,                 Y,
+ z,                 Z,
