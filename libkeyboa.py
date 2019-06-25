@@ -226,6 +226,48 @@ def events_to_chords(field):
 				yield obj
 	return ret
 
+# Load state from file
+def loadstate(filename):
+	state=None
+	def SJSON_decode_object(o):
+		if '__set__' in o:
+			return set(o['__set__'])
+		return o
+	try:
+		with open(filename, "r") as file:
+			state=json.loads(file.read(),
+				object_hook=SJSON_decode_object)
+	except: pass
+	def ret(gen):
+		if(state): yield {"type":"loadstate","data":state}
+		for obj in gen: yield obj
+	return ret
+
+# Save state to file
+def savestate(filename):
+	class SJSONEncoder(json.JSONEncoder):
+		def default(self, o):
+			if isinstance(o, set):
+				return {'__set__': sorted(o)}
+			raise Exception("Unknown object type")
+	def ret(gen):
+		state={}
+		for obj in gen:
+			yield obj
+			type=obj["type"]
+			if(type=="loadstate"):
+				state=obj["data"]
+			if(type=="savestate"):
+				state={**state,**(obj["data"])}
+				with open(filename, "w") as file:
+					sjsonstr=json.dumps(
+						state,
+						separators=(',',':'),
+						sort_keys=True,
+						cls=SJSONEncoder)
+					file.write(sjsonstr)
+	return ret
+
 # Macro record/playback functionality. Macros are sequences of chords.
 # macrotest is a function of a chord returning:
 # - The name for the macro if the chord means save/playback
@@ -233,7 +275,7 @@ def events_to_chords(field):
 # - False otherwise
 # In normal mode, macrotest can playback or begin recording.
 # While recording a macro, macrotest can cancel or save recording.
-# If filename is given, it is used to persist macros between sessions.
+# If statekey is given, it is used to persist macros between sessions.
 # ui events are generated to communicate state and state transitions.
 # TRANSITION     ( FROMSTATE -> TOSTATE   )
 # record         ( waiting   -> recording )
@@ -241,27 +283,15 @@ def events_to_chords(field):
 # cancel         ( recording -> waiting   )
 # playback       ( waiting   -> playback  )
 # finishplayback ( waiting   -> playback  )
-def macro(macrotest, filename=None):
-	class SJSONEncoder(json.JSONEncoder):
-		def default(self, o):
-			if isinstance(o, set):
-				return {'__set__': sorted(o)}
-			raise Exception("Unknown object type")
-	def SJSON_decode_object(o):
-		if '__set__' in o:
-			return set(o['__set__'])
-		return o
+def macro(macrotest, statekey=None):
 	def ret(gen):
 		macros={}
-		if(filename):
-			try:
-				with open(filename, "r") as file:
-					macros=json.loads(file.read(),
-						object_hook=SJSON_decode_object)
-			except: pass
 		yield {"type":"ui","data":{
 			"macro.state": "waiting"}}
 		for obj in gen:
+			if(obj["type"]=="loadstate" and statekey and
+			   statekey in obj["data"]):
+				macros=obj["data"][statekey]
 			mt=macrotest(obj) if obj["type"]=="chord" else False
 			if(mt):
 				if(mt==True):
@@ -274,14 +304,9 @@ def macro(macrotest, filename=None):
 						if(mt2):
 							if(mt2!=True):
 								macros[mt2]=newmacro
-								if(filename):
-									with open(filename, "w") as file:
-										sjsonstr=json.dumps(
-											macros,
-											separators=(',',':'),
-											sort_keys=True,
-											cls=SJSONEncoder)
-										file.write(sjsonstr)
+								if(statekey):
+									yield {"type":"savestate",
+										"data":{statekey:macros}}
 								yield {"type":"ui","data":{
 									"macro.state": "waiting",
 									"macro.transition": "save"}}

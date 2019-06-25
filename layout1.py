@@ -241,6 +241,9 @@ def modlock(modlockset, modlockname, clearkey):
 		lockedmods=set()
 		for obj in gen:
 			type=obj["type"]
+			if(type=="loadstate" and "lockedmods" in obj["data"]):
+				lockedmods=obj["data"]["lockedmods"]
+				yield {"type":"ui","data":{"lockedmods":lockedmods}}
 			if(type=="chord"):
 				downmods=obj["downmods"]
 				key=obj["key"]
@@ -255,6 +258,7 @@ def modlock(modlockset, modlockname, clearkey):
 						"scriptmods": set(),
 						"planename": modlockname,
 						"script": "CLEAR" if key==clearkey else keyasmod}}
+					yield {"type":"savestate","data":{"lockedmods":lockedmods}}
 				else:
 					yield {**obj, "lockedmods":lockedmods}
 			else:
@@ -266,8 +270,9 @@ def modeswitch(modeswitchset, modeswitchname):
 		modes=set()
 		for obj in gen:
 			type=obj["type"]
-			if(type=="init"):
-				modes.add({"windows": "Win", "VNC": "X11"}[obj["platform"]])
+			if(type=="loadstate" and "modes" in obj["data"]):
+				modes=obj["data"]["modes"]
+			if(type in ["loadstate","init"]):
 				yield {"type":"ui","data":{"modes": modes}}
 			if(type=="chord"):
 				downmods=obj["downmods"]
@@ -287,6 +292,7 @@ def modeswitch(modeswitchset, modeswitchname):
 						"scriptmods": set(),
 						"planename": modeswitchname,
 						"script": keyasmode}}
+					yield {"type":"savestate","data":{"modes":modes}}
 				else:
 					yield {**obj, "modes": modes}
 			else:
@@ -437,11 +443,18 @@ def boxdrawings(modifier):
 			"das":"N",
 			"arc":"N"}
 		for obj in gen:
+			if(obj["type"]=="loadstate" and "boxdrawing_state" in obj["data"]):
+				settings=obj["data"]["boxdrawing_state"]
+				yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
 			if(activation(obj, modifier)):
 				command=obj["chord"][1]
 				if("=" in command):
 					[var, val]=command.split("=")
 					settings[var]=val
+					yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
+					yield {
+						"type":"savestate",
+						"data":{"boxdrawing_state":settings}}
 				elif(len(command)==4 and set(command)<=set("LDUR_")):
 					prop="".join([
 						settings["lef"] if "L" in command else "-",
@@ -453,7 +466,6 @@ def boxdrawings(modifier):
 					boxobj=boxdrawings_bestmatch(prop)
 					if(boxobj):
 						yield from printstring(boxobj["char"])
-				yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
 			else:
 				yield obj
 	return ret
@@ -513,6 +525,9 @@ def printdate(modifier):
 	def ret(gen):
 		TZ=None
 		for obj in gen:
+			if(obj["type"]=="loadstate" and "timezone" in obj["data"]):
+				TZ=obj["data"]["timezone"]
+				yield {"type":"ui","data":{"printdate.timezone":TZ}}
 			if(activation(obj, modifier)):
 				command_or_format=obj["chord"][1]
 				if("%" in command_or_format):
@@ -533,6 +548,7 @@ def printdate(modifier):
 					elif(command=="TZ_local"):
 						TZ=None
 					yield {"type":"ui","data":{"printdate.timezone":TZ}}
+					yield {"type":"savestate","data":{"timezone":TZ}}
 			else:
 				yield obj
 	return ret
@@ -698,15 +714,16 @@ def macrotest(obj):
 		return ",".join([*sorted(inmods_wo_macro),key])
 	return False
 
-macrosavefile="layout1-macros.txt"
+statesavefile="layout1-state.json"
 if(len(argv)>=2):
-	macrosavefile=argv[1]
+	statesavefile=argv[1]
 
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
 	altgr_workaround_input,          # libkeyboa
 	enrich_input,                    # libkeyboa
+	loadstate(statesavefile),        # libkeyboa
 	add_common_name,                 # common_name
 	allow_repeat("physkey"),         # libkeyboa
 	unstick_keys("common_name",      # libkeyboa
@@ -719,8 +736,7 @@ list_of_transformations = [
 	modeswitch({"Modlock","Ctrl"},   # Customization from this file
 		"Modeswitch"),
 	macro_ui,                        # Customization from this file
-	macro(macrotest,                 # libkeyboa
-		macrosavefile),
+	macro(macrotest, "macros"),      # libkeyboa
 	chords_to_scripts,               # Customization from this file
 	scripts_to_chords,               # Customization from this file
 	boxdrawings("b"),                # Customization from this file
@@ -732,6 +748,7 @@ list_of_transformations = [
 	resolve_common_name,             # common_name
 	altgr_workaround_output,         # libkeyboa
 	termui,                          # Customization from this file
+	savestate(statesavefile),        # libkeyboa
 	sendkey_cleanup,                 # libkeyboa
 	output]                          # libkeyboa
 
