@@ -71,7 +71,9 @@ load("modes",[
 	("W", "+Win,-X11"),
 	("L", "^Latex"),
 	("C", "^Cyr,-Box"),
-	("B", "^Box,-Cyr")])
+	("B", "^Box,-Cyr"),
+	("R", "+RedactUI"),
+	("4", "-RedactUI")])
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
 ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
@@ -658,6 +660,8 @@ def termui(gen):
 			      box[1]+" "+line1+"\n"+
 				  box[2]+" "+line2+"\n"+
 				  box[3]+" "+line3)
+			if("RedactUI" in modes):
+				show=color_ui("\n ***", "blue")
 			if(show!=oldshow):
 				print("\033[2J\033[;H" + show, file=sys.stderr, flush=True, end='')
 			oldshow=show
