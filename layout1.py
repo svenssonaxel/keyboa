@@ -69,7 +69,7 @@ w("mods",
 load("modes",[
 	("X", "+X11,-Win"),
 	("W", "+Win,-X11"),
-	("L", "^Latex"),
+	("T", "^TeX"),
 	("C", "^Cyr,-Box"),
 	("B", "^Box,-Cyr"),
 	("R", "+RedactUI"),
@@ -160,12 +160,12 @@ load("Shell",[
 	("E", """S-pgup"""),
 	("D", """S-pgdn""")])
 
-w("Latex-Greek", # lower-case greek letters for latex
+w("TeX-Greek", # lower-case greek letters for TeX
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .         .\\varsigma .\\epsilon .\\rho     .\\tau     .\\upsilon .\\theta   .\\iota    .\\omicron .\\pi      .          .  """ +
 	""".          .\\alpha   .\\sigma   .\\delta   .\\phi     .\\gamma   .\\eta     .\\xi      .\\kappa   .\\lamda   .          .          .  """ +
 	""".          .\\zeta    .\\chi     .\\psi     .\\omega   .\\beta    .\\nu      .\\mu      .          .          .          .          .  """ )
-w("Latex-ShiftGreek", # upper-case greek letters for latex
+w("TeX-ShiftGreek", # upper-case greek letters for Tex
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .          .          .\\Epsilon .\\Rho     .\\Tau     .\\Upsilon .\\Theta   .\\Iota    .\\Omicron .\\Pi      .          .  """ +
 	""".          .\\Alpha   .\\Sigma   .\\Delta   .\\Phi     .\\Gamma   .\\Eta     .\\Xi      .\\Kappa   .\\Lamda   .          .          .  """ +
@@ -192,7 +192,7 @@ planeprefixes=[
 modespriority=[
 	({"Box"},set()),
 	({"Cyr"},set()),
-	({"Latex"},set()),
+	({"TeX"},set()),
 	(set(),nativemods)]
 
 modnotation={
