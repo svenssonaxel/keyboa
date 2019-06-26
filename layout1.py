@@ -593,10 +593,23 @@ def boxdrawings_ui(settings):
 			ret[y]+=(boxobj["char"] if boxobj else " ")
 	return ret
 
+# Class for terminal text that keeps track of rendered length
+class Tt():
+	def __init__(self, txt="", txtlen=None):
+		self.txt=txt
+		self.len=len(txt) if txtlen==None else txtlen
+	def __add__(self, other):
+		return ((self+Tt(other)) if isinstance(other,str) else
+			Tt(self.txt+other.txt,self.len+other.len))
+	def __str__(self): return self.txt
+	def __len__(self): return self.len
+
+# Colored terminal text.
 def color_ui(text, color):
-	return ("\033[3"+str([
+	return Tt(("\033[3"+str([
 		"red","green","yellow","blue","magenta","cyan","white"
-		].index(color)+1)+"m"+text+"\033[0m")
+		].index(color)+1)+"m"+text+"\033[0m"),
+		len(text))
 
 def termui(gen):
 	oldshow=""
@@ -615,6 +628,7 @@ def termui(gen):
 		"macro.transition":None,
 		"unicode_input": None}
 	olddata=defaultdata
+	maxlen=0
 	for obj in gen:
 		type=obj["type"]
 		update=False
@@ -628,9 +642,9 @@ def termui(gen):
 			update=True
 			data={**olddata, **on_keyup_all}
 		if(update):
-			box=(
+			box=[Tt(x+" ") for x in (
 			 boxdrawings_ui(data["boxdrawings"])
-			 if ("boxdrawings" in data and "Box" in modes) else [""]*4)
+			 if ("boxdrawings" in data and "Box" in modes) else [""]*4)]
 			physical=data["events_to_chords.keysdown.common_name"]
 			lockedmods=data["lockedmods"]
 			modes=data["modes"]
@@ -653,33 +667,38 @@ def termui(gen):
 					"playback": "PLAYBACK: "+script,
 					"finishplayback": "DONE: "+script
 					}[data["macro.transition"]]
-			line0=" ".join(physical)
-			line1=(
+			line0=box[0]+" ".join(physical)
+			line1=(box[1]+
 				(color_ui(planename+": ","cyan")
 				 if planename else "")+
 				(color_ui(" ".join(sorted(scriptmods)),"yellow")+" "
 				    if len(scriptmods)>0 else "")+
 				(script
 				 if script else ""))
-			line2=(
+			line2=(box[2]+
 				(color_ui(" ".join(sorted(modes))+" ", "blue")
 				 if len(modes)>0 else "")+
 				(color_ui(" ".join(sorted(lockedmods)),"green")+" "
 				 if len(lockedmods)>0 else "")+
 				(color_ui(" ".join(virtual),"white")+" "
 				 if len(virtual)>0 else ""))
-			line3=(
+			line3=(box[3]+
 				color_ui(tzstr.ljust(7), "blue") +
 				color_ui(macrostate.ljust(10), "red") +
 				color_ui(unicode_input_state, "magenta"))
-			show=(box[0]+" "+line0+"\n"+
-			      box[1]+" "+line1+"\n"+
-				  box[2]+" "+line2+"\n"+
-				  box[3]+" "+line3)
+			showarr=[line0,line1,line2,line3]
 			if("RedactUI" in modes):
-				show=color_ui("\n ***", "blue")
+				showarr=[Tt()]*4
+				showarr[1]=color_ui(" ***", "blue")
+			# Calculate historical maximum of rendered length of lines
+			maxlen=max(maxlen,max(map(len,showarr)))
+			# Extend every line with spaces to that length and covert to string
+			showarr=[str(x)+" "*(maxlen-len(x)) for x in showarr]
+			show="\n".join(showarr)
 			if(show!=oldshow):
-				print("\033[2J\033[;H" + show, file=sys.stderr, flush=True, end='')
+				# In order to avoid blinking, first move to top-left corner of
+				# terminal without clearing, then overwrite.
+				print("\033[;H" + show, file=sys.stderr, flush=True, end='')
 			oldshow=show
 			olddata=data
 		yield obj
