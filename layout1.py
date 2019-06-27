@@ -12,6 +12,7 @@
 # - Key renaming and aliasing (layout1_commonname)
 # - Chords manipulating state (boxdrawing)
 # - Output depending on time (printdate)
+# - Input characters by unicode codepoint (unicode_input)
 #
 # Run in cmd:
 #   listenkey -cel | python3 layout1.py | sendkey
@@ -25,6 +26,7 @@ from boxdrawings import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
 from sys import argv
+from unicodedata import name as unicodename
 
 planes={}
 def load(plane, iter):
@@ -58,28 +60,37 @@ w("from",
  "           S4      S3      S2             SPACE             D2      D3      D4                          " )
 
 w("mods",
- "Bats    Sub     WM2     .       Phon    Box     .       .       .       WM2     .       .       .       " +
+ ".       .       WM2     mods    .       .       .       .       .       WM2     .       .       .       " +
  "Super   Macro   WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Date    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
- "Shell   Shift   Meta    Num     Math    Cyr     Cyr     Math    Num     Meta    Shift   Shift   .       " +
+ "Shell   Shift   Meta    Num     Math    Bats    Bats    Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
 
+load("modes",[
+	("X", "+X11,-Win"),
+	("W", "+Win,-X11"),
+	("T", "^TeX"),
+	("C", "^Cyr,-Box"),
+	("B", "^Box,-Cyr"),
+	("R", "+RedactUI"),
+	("4", "-RedactUI")])
+
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
-ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """)
+ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
 ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔    ∀∃«»∈ℕℤℚℝℂ  """) # Inspired by the Knight keyboard
 ch("HyperSym",      """              ⫷⫸【】  ‹›«»         ⸨⸩—         „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
 ch("Math",          """             ¬⋀⋁∈ ⇒ ≈∞∅∝   ∀∫∂ ⊂⊃ ⇔    ≤ ∃  ⇐ℕℤℚℝℂ  """)
 ch("ShiftMath",     """          ≠   ⋂⋃∉ ∴ ≉       ∮  ⊏⊐      ≥ ∄  ∵∇      """)
 ch("Greek",         """               ςερτυθιοπ   ασδφγηξκλ´   ζχψωβνμ     """)
 ch("ShiftGreek",    """               ¨ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒΝΜ     """)
-ch("Cyr",           """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
-ch("ShiftCyr",      """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
+ch("Cyr-",          """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
+ch("Cyr-Shift",     """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
 ch("Bats",          """ ♭♮♯♩♪♫♬      ☠☢✗✆☎        ✧✦✓➔◢◣◇◆●        ◥◤      """)
-ch("ShiftBats",     """                                                    """)
-ch("Sub",           """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
+ch("HyperNum",      """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
 
-load("Sym", [("0","space")])
-load("Sub",[("SPACE","₀")])
+load("Sym", [("0","space"),
+             ("Z2","begin_unicode_input")])
+load("HyperNum",[("SPACE","₀")])
 
 w("Nav",
  ".       .       .       C-S-Tab C-Tab   .       .       .       10*Up   .       .       .       .       " +
@@ -149,18 +160,12 @@ load("Shell",[
 	("E", """S-pgup"""),
 	("D", """S-pgdn""")])
 
-w("Phon",
- ".       .       .       .        .        .       .         .        .       .       .           .            .           " +
- ".       .quebec .whisky .echo    .romeo   .tango  .yankee   .uniform .india  .oscar  .papa       .alpha-oscar .           " +
- ".       .alfa   .sierra .delta   .foxtrot .golf   .hotel    .juliett .kilo   .lima   .oscar-echo .alpha-echo  .           " +
- ".       .zulu   .x-ray  .charlie .victor  .bravo  .november .mike    .       .       .           .            .           " )
-
-w("SuperGreek", # lower-case greek letters for latex
+w("TeX-Greek", # lower-case greek letters for TeX
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .         .\\varsigma .\\epsilon .\\rho     .\\tau     .\\upsilon .\\theta   .\\iota    .\\omicron .\\pi      .          .  """ +
 	""".          .\\alpha   .\\sigma   .\\delta   .\\phi     .\\gamma   .\\eta     .\\xi      .\\kappa   .\\lamda   .          .          .  """ +
 	""".          .\\zeta    .\\chi     .\\psi     .\\omega   .\\beta    .\\nu      .\\mu      .          .          .          .          .  """ )
-w("SuperShiftGreek", # upper-case greek letters for latex
+w("TeX-ShiftGreek", # upper-case greek letters for Tex
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
 	""".          .          .          .\\Epsilon .\\Rho     .\\Tau     .\\Upsilon .\\Theta   .\\Iota    .\\Omicron .\\Pi      .          .  """ +
 	""".          .\\Alpha   .\\Sigma   .\\Delta   .\\Phi     .\\Gamma   .\\Eta     .\\Xi      .\\Kappa   .\\Lamda   .          .          .  """ +
@@ -182,6 +187,14 @@ planeprefixes=[
 	{"Hyper"},
 	set()]
 
+# List and priority of mode combinations together with allowed effective mods.
+# The empty set represents ignoring all modes.
+modespriority=[
+	({"Box"},set()),
+	({"Cyr"},set()),
+	({"TeX"},set()),
+	(set(),nativemods)]
+
 modnotation={
 	"s": "Super",
 	"H": "Hyper",
@@ -198,7 +211,7 @@ def planelookup(key, plane, default=None):
 		return pl[i]
 	return default
 
-def enrich_chord(modifierplane):
+def enrich_chord(modifierplane, modeplane):
 	def ret(gen):
 		for obj in gen:
 			type=obj["type"]
@@ -207,27 +220,35 @@ def enrich_chord(modifierplane):
 				inmods=set(inchord[:-1])
 				key=inchord[-1]
 				keyasmod=planelookup(key, modifierplane, key)
+				keyasmode=planelookup(key, modeplane, key)
 				downmods=set()
 				for mod in inmods:
 					mod=planelookup(mod, modifierplane, mod)
 					downmods.add(mod)
-				info={"key": key, "downmods": downmods, "keyasmod": keyasmod}
+				info={
+					"key": key,
+					"downmods": downmods,
+					"keyasmod": keyasmod,
+					"keyasmode": keyasmode}
 				yield {"type":"ui","data":info}
 				yield {**obj, **info}
 			else:
 				yield obj
 	return ret
 
-def modlock(modlockname, clearkey):
+def modlock(modlockset, modlockname, clearkey):
 	def ret(gen):
 		lockedmods=set()
 		for obj in gen:
 			type=obj["type"]
+			if(type=="loadstate" and "lockedmods" in obj["data"]):
+				lockedmods=obj["data"]["lockedmods"]
+				yield {"type":"ui","data":{"lockedmods":lockedmods}}
 			if(type=="chord"):
 				downmods=obj["downmods"]
 				key=obj["key"]
 				keyasmod=obj["keyasmod"]
-				if(modlockname in downmods):
+				if(modlockset==downmods):
 					if(key==clearkey):
 						lockedmods=set()
 					else:
@@ -237,8 +258,43 @@ def modlock(modlockname, clearkey):
 						"scriptmods": set(),
 						"planename": modlockname,
 						"script": "CLEAR" if key==clearkey else keyasmod}}
+					yield {"type":"savestate","data":{"lockedmods":lockedmods}}
 				else:
 					yield {**obj, "lockedmods":lockedmods}
+			else:
+				yield obj
+	return ret
+
+def modeswitch(modeswitchset, modeswitchname):
+	def ret(gen):
+		modes=set()
+		for obj in gen:
+			type=obj["type"]
+			if(type=="loadstate" and "modes" in obj["data"]):
+				modes=obj["data"]["modes"]
+			if(type in ["loadstate","init"]):
+				yield {"type":"ui","data":{"modes": modes}}
+			if(type=="chord"):
+				downmods=obj["downmods"]
+				keyasmode=obj["keyasmode"]
+				if(modeswitchset==downmods and keyasmode):
+					for cmd in keyasmode.split(","):
+						pm=cmd[0]
+						mode=cmd[1:]
+						if(pm=="^"):
+							pm="-" if mode in modes else "+"
+						if(pm=="+"):
+							modes=modes.union({mode})
+						if(pm=="-"):
+							modes=modes.difference({mode})
+					yield {"type":"ui","data":{
+						"modes": modes,
+						"scriptmods": set(),
+						"planename": modeswitchname,
+						"script": keyasmode}}
+					yield {"type":"savestate","data":{"modes":modes}}
+				else:
+					yield {**obj, "modes": modes}
 			else:
 				yield obj
 	return ret
@@ -246,8 +302,17 @@ def modlock(modlockname, clearkey):
 # Generate a stream of (effectivemods, planename) tuples. Note that this
 # generator is not part of the pipeline, but repeatedly created and consumed by
 # chords_to_scripts
-def modifier_sets(downmods, lockedmods):
-	# depends on global variables nativemods and planeprefixes
+def modifier_sets(downmods, lockedmods, modes):
+	# depends on global variables nativemods, planeprefixes and modespriority
+	#
+	# First, establish a list of mode prefixes
+	modeprefixes=[]
+	for (effectivemodes, allowedeffectivemods) in modespriority:
+		modeprefix=(
+			("".join(sorted(effectivemodes))+"-")
+			if len(effectivemodes)>0 else "")
+		if(effectivemodes<=modes and modeprefix not in modeprefixes):
+			modeprefixes.append((modeprefix, allowedeffectivemods))
 	# Loop through native modifier sets allowed as prefixes to plane name
 	for planeprefix in planeprefixes:
 		# For every planeprefix, there are two possible ways to find plane and
@@ -262,12 +327,13 @@ def modifier_sets(downmods, lockedmods):
 		#   - All downnativemods are used to select plane unless also in lockednativemods.
 		#   - All downnativemods not used to select plane, are in effect.
 		if(planeprefix == lockednativemods.union(downnativemods)):
-			planename = \
-				"".join(sorted(planeprefix)) + \
-					"".join(sorted(lockedplanemods.union(downplanemods)))
-			effectivemods = \
-				downnativemods.intersection(lockednativemods)
-			yield (effectivemods, planename)
+			planename = (
+				"".join(sorted(planeprefix)) +
+				"".join(sorted(lockedplanemods.union(downplanemods))))
+			effectivemods = downnativemods.intersection(lockednativemods)
+			for (modeprefix, allowedeffectivemods) in modeprefixes:
+				if(effectivemods<=allowedeffectivemods):
+					yield (effectivemods, modeprefix + planename)
 
 		# 2) explicit plane
 		#   - All downplanemods are used to select plane.
@@ -275,23 +341,26 @@ def modifier_sets(downmods, lockedmods):
 		#   - All downnativemods not used to select plane, are in effect.
 		#   - All lockedmods are rendered ineffective.
 		if(planeprefix <= downnativemods):
-			planename = \
-				"".join(sorted(planeprefix)) + \
-					"".join(sorted(downplanemods))
-			effectivemods = \
-				downnativemods.difference(planeprefix)
-			yield (effectivemods, planename)
+			planename = (
+				"".join(sorted(planeprefix)) +
+				"".join(sorted(downplanemods)))
+			effectivemods = downnativemods.difference(planeprefix)
+			for (modeprefix, allowedeffectivemods) in modeprefixes:
+				if(effectivemods<=allowedeffectivemods):
+					yield (effectivemods, modeprefix + planename)
 
 def chords_to_scripts(gen):
 	for obj in gen:
 		type=obj["type"]
 		if(type=="chord"):
 			lockedmods=obj["lockedmods"]
+			modes=obj["modes"]
 			downmods=obj["downmods"]
 			inkey=obj["key"]
 			outmods=set()
 			out=None
-			for (outmods_candidate, planename_candidate) in modifier_sets(downmods, lockedmods):
+			for (outmods_candidate, planename_candidate) in \
+			     modifier_sets(downmods, lockedmods, modes):
 				out_candidate=planelookup(inkey, planename_candidate, None)
 				if(out_candidate):
 					outmods=outmods_candidate
@@ -346,7 +415,7 @@ def scripts_to_chords(gen):
 		else:
 			yield obj
 
-w("Box",
+w("Box-",
  ".       b-das=N b-das=2 b-das=3 b-das=4 .       SPACE   b-___R  b-L__R  b-L___  .       .       .       " +
  ".       b-lef=d b-dow=d b-up=d  b-rig=d b-arc=Y b-_D__  b-_D_R  b-LD_R  b-LD__  back    del     .       " +
  ".       b-lef=l b-dow=l b-up=l  b-rig=l b-arc=N b-_DU_  b-_DUR  b-LDUR  b-LDU_  ret     ret,up,end .    " +
@@ -374,11 +443,18 @@ def boxdrawings(modifier):
 			"das":"N",
 			"arc":"N"}
 		for obj in gen:
+			if(obj["type"]=="loadstate" and "boxdrawing_state" in obj["data"]):
+				settings=obj["data"]["boxdrawing_state"]
+				yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
 			if(activation(obj, modifier)):
 				command=obj["chord"][1]
 				if("=" in command):
 					[var, val]=command.split("=")
 					settings[var]=val
+					yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
+					yield {
+						"type":"savestate",
+						"data":{"boxdrawing_state":settings}}
 				elif(len(command)==4 and set(command)<=set("LDUR_")):
 					prop="".join([
 						settings["lef"] if "L" in command else "-",
@@ -390,10 +466,49 @@ def boxdrawings(modifier):
 					boxobj=boxdrawings_bestmatch(prop)
 					if(boxobj):
 						yield from printstring(boxobj["char"])
-				yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
 			else:
 				yield obj
 	return ret
+
+def unicode_input(gen):
+	def resolve(str):
+		if(str=="" or len(str)>6): return ""
+		try: return chr(int(str,16))
+		except ValueError: return ""
+	def charname(str):
+		try: return unicodename(resolve(str))
+		except ValueError: return ""
+		except TypeError: return ""
+	for obj in gen:
+		if(obj["type"]=="chord" and obj["chord"]==["begin_unicode_input"]):
+			str=""
+			yield {"type":"ui","data":{"unicode_input":str}}
+			hexchars="0123456789abcdef"
+			for obj in gen:
+				if(obj["type"]=="chord" and len(obj["chord"])==1):
+					s=obj["chord"][0].lower()
+					if(s in hexchars):
+						str+=s
+					elif(len(s)==2 and s[1] in hexchars):
+						str+=s[1]
+					elif(s=="back"):
+						str=str[:-1]
+					elif(s=="esc"):
+						break
+					else:
+						yield from printstring(resolve(str))
+						yield {"type":"ui","data":{
+							"planename":"Unicode",
+							"script":charname(str)}}
+						if(s!="ret"):
+							yield obj
+						break
+				else: yield obj
+				res=resolve(str)
+				yield {"type":"ui","data":{
+					"unicode_input": (str + " " + charname(str)).strip()}}
+			yield {"type":"ui","data":{"unicode_input":None}}
+		else: yield obj
 
 load("Date",[
 	("K", "Printdate-TZ_increase"),
@@ -410,6 +525,9 @@ def printdate(modifier):
 	def ret(gen):
 		TZ=None
 		for obj in gen:
+			if(obj["type"]=="loadstate" and "timezone" in obj["data"]):
+				TZ=obj["data"]["timezone"]
+				yield {"type":"ui","data":{"printdate.timezone":TZ}}
 			if(activation(obj, modifier)):
 				command_or_format=obj["chord"][1]
 				if("%" in command_or_format):
@@ -430,6 +548,7 @@ def printdate(modifier):
 					elif(command=="TZ_local"):
 						TZ=None
 					yield {"type":"ui","data":{"printdate.timezone":TZ}}
+					yield {"type":"savestate","data":{"timezone":TZ}}
 			else:
 				yield obj
 	return ret
@@ -474,10 +593,23 @@ def boxdrawings_ui(settings):
 			ret[y]+=(boxobj["char"] if boxobj else " ")
 	return ret
 
+# Class for terminal text that keeps track of rendered length
+class Tt():
+	def __init__(self, txt="", txtlen=None):
+		self.txt=txt
+		self.len=len(txt) if txtlen==None else txtlen
+	def __add__(self, other):
+		return ((self+Tt(other)) if isinstance(other,str) else
+			Tt(self.txt+other.txt,self.len+other.len))
+	def __str__(self): return self.txt
+	def __len__(self): return self.len
+
+# Colored terminal text.
 def color_ui(text, color):
-	return ("\033[3"+str([
+	return Tt(("\033[3"+str([
 		"red","green","yellow","blue","magenta","cyan","white"
-		].index(color)+1)+"m"+text+"\033[0m")
+		].index(color)+1)+"m"+text+"\033[0m"),
+		len(text))
 
 def termui(gen):
 	oldshow=""
@@ -490,10 +622,13 @@ def termui(gen):
 		"printdate.timezone":None,
 		"events_to_chords.keysdown.commonname":[],
 		"lockedmods":set(),
+		"modes":set(),
 		"chords_to_events.keysdown.commonname":[],
 		"macro.state":"waiting",
-		"macro.transition":None}
+		"macro.transition":None,
+		"unicode_input": None}
 	olddata=defaultdata
+	maxlen=0
 	for obj in gen:
 		type=obj["type"]
 		update=False
@@ -507,11 +642,12 @@ def termui(gen):
 			update=True
 			data={**olddata, **on_keyup_all}
 		if(update):
-			box=(
-			 boxdrawings_ui(data['boxdrawings'])
-			 if 'boxdrawings' in data else ["    "]*4)
+			box=[Tt(x+" ") for x in (
+			 boxdrawings_ui(data["boxdrawings"])
+			 if ("boxdrawings" in data and "Box" in modes) else [""]*4)]
 			physical=data["events_to_chords.keysdown.commonname"]
 			lockedmods=data["lockedmods"]
+			modes=data["modes"]
 			planename=data["planename"]
 			scriptmods=data["scriptmods"]
 			script=data["script"]
@@ -520,6 +656,9 @@ def termui(gen):
 				else ("PLAYBACK" if data["macro.state"]=="playback" else ""))
 			tz=data["printdate.timezone"]
 			tzstr="local" if tz==None else ("UTC" + (("%+i" % tz) if tz!=0 else ""))
+			unicode_input_state=(
+				"" if data["unicode_input"]==None else
+				("0x"+data["unicode_input"]))
 			if(planename=="Macro"):
 				script={
 					"record": "RECORD",
@@ -528,26 +667,38 @@ def termui(gen):
 					"playback": "PLAYBACK: "+script,
 					"finishplayback": "DONE: "+script
 					}[data["macro.transition"]]
-			line0=" ".join(physical)
-			line1=(
+			line0=box[0]+" ".join(physical)
+			line1=(box[1]+
 				(color_ui(planename+": ","cyan")
 				 if planename else "")+
 				(color_ui(" ".join(sorted(scriptmods)),"yellow")+" "
 				    if len(scriptmods)>0 else "")+
 				(script
 				 if script else ""))
-			line2=(
+			line2=(box[2]+
+				(color_ui(" ".join(sorted(modes))+" ", "blue")
+				 if len(modes)>0 else "")+
 				(color_ui(" ".join(sorted(lockedmods)),"green")+" "
 				 if len(lockedmods)>0 else "")+
-				(color_ui(" ".join(virtual),"blue")+" "
+				(color_ui(" ".join(virtual),"white")+" "
 				 if len(virtual)>0 else ""))
-			line3=color_ui(tzstr.ljust(7), "blue") + color_ui(macrostate, "red")
-			show=(box[0]+" "+line0+"\n"+
-			      box[1]+" "+line1+"\n"+
-				  box[2]+" "+line2+"\n"+
-				  box[3]+" "+line3)
+			line3=(box[3]+
+				color_ui(tzstr.ljust(7), "blue") +
+				color_ui(macrostate.ljust(10), "red") +
+				color_ui(unicode_input_state, "magenta"))
+			showarr=[line0,line1,line2,line3]
+			if("RedactUI" in modes):
+				showarr=[Tt()]*4
+				showarr[1]=color_ui(" ***", "blue")
+			# Calculate historical maximum of rendered length of lines
+			maxlen=max(maxlen,max(map(len,showarr)))
+			# Extend every line with spaces to that length and covert to string
+			showarr=[str(x)+" "*(maxlen-len(x)) for x in showarr]
+			show="\n".join(showarr)
 			if(show!=oldshow):
-				print("\033[2J\033[;H" + show, file=sys.stderr, flush=True, end='')
+				# In order to avoid blinking, first move to top-left corner of
+				# terminal without clearing, then overwrite.
+				print("\033[;H" + show, file=sys.stderr, flush=True, end='')
 			oldshow=show
 			olddata=data
 		yield obj
@@ -582,28 +733,33 @@ def macrotest(obj):
 		return ",".join([*sorted(inmods_wo_macro),key])
 	return False
 
-macrosavefile="layout1-macros.txt"
+statesavefile="layout1-state.json"
 if(len(argv)>=2):
-	macrosavefile=argv[1]
+	statesavefile=argv[1]
 
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
 	altgr_workaround_input,          # libkeyboa
 	enrich_input,                    # libkeyboa
-	add_commonname,                  # libkeyboa
+	loadstate(statesavefile),        # libkeyboa
+	add_commonname,                  # common_name
 	allow_repeat("physkey"),         # libkeyboa
 	unstick_keys("commonname",       # libkeyboa
 		key_timeouts),
 	events_to_chords("commonname"),  # libkeyboa
-	enrich_chord("mods"),            # Customization from this file
-	modlock("Modlock", "SPACE"),     # Customization from this file
+	enrich_chord("mods", "modes"),   # Customization from this file
+	modlock({"Modlock"},             # Customization from this file
+		"Modlock",
+		"SPACE"),
+	modeswitch({"Modlock","Ctrl"},   # Customization from this file
+		"Modeswitch"),
 	macro_ui,                        # Customization from this file
-	macro(macrotest,                 # libkeyboa
-		macrosavefile),
+	macro(macrotest, "macros"),      # libkeyboa
 	chords_to_scripts,               # Customization from this file
 	scripts_to_chords,               # Customization from this file
 	boxdrawings("b"),                # Customization from this file
+	unicode_input,                   # Customization from this file
 	printdate("Printdate"),          # Customization from this file
 	wait("Wait"),                    # Customization from this file
 	chords_to_events("commonname"),  # libkeyboa
@@ -611,6 +767,7 @@ list_of_transformations = [
 	resolve_commonname,              # libkeyboa
 	altgr_workaround_output,         # libkeyboa
 	termui,                          # Customization from this file
+	savestate(statesavefile),        # libkeyboa
 	output]                          # libkeyboa
 
 if(__name__=="__main__"):
