@@ -60,10 +60,10 @@ w("from",
  "           S4      S3      S2             SPACE             D2      D3      D4                          " )
 
 w("mods",
- "Bats    Sub     WM2     mods    .       .       .       .       .       WM2     .       .       .       " +
+ ".       .       WM2     mods    .       .       .       .       .       WM2     .       .       .       " +
  "Super   Macro   WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Date    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
- "Shell   Shift   Meta    Num     Math    .       .       Math    Num     Meta    Shift   Shift   .       " +
+ "Shell   Shift   Meta    Num     Math    Bats    Bats    Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
 
 load("modes",[
@@ -86,11 +86,11 @@ ch("ShiftGreek",    """               ¨ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ   
 ch("Cyr-",          """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
 ch("Cyr-Shift",     """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
 ch("Bats",          """ ♭♮♯♩♪♫♬      ☠☢✗✆☎        ✧✦✓➔◢◣◇◆●        ◥◤      """)
-ch("Sub",           """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
+ch("HyperNum",      """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
 
 load("Sym", [("0","space"),
              ("Z2","begin_unicode_input")])
-load("Sub",[("SPACE","₀")])
+load("HyperNum",[("SPACE","₀")])
 
 w("Nav",
  ".       .       .       C-S-Tab C-Tab   .       .       .       10*Up   .       .       .       .       " +
