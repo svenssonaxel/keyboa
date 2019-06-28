@@ -19,6 +19,7 @@ mapping={
 	"VK_CAPITAL": "VK_LCONTROL",
 	"VK_LCONTROL": "VK_CAPITAL"}
 
+@retgen
 def remap(gen):
 	for obj in gen:
 		if(obj["type"] in ["keydown", "keyup", "keypress"]):
@@ -29,11 +30,11 @@ def remap(gen):
 		yield obj
 
 list_of_transformations = [
-	input,                           # libkeyboa
-	altgr_workaround_input,          # libkeyboa
-	enrich_input,                    # libkeyboa
-	remap,                           # This file
-	altgr_workaround_output,         # libkeyboa
-	output]                          # libkeyboa
+	input(),                                                # libkeyboa
+	altgr_workaround_input(),                               # libkeyboa
+	enrich_input(),                                         # libkeyboa
+	remap(),                                                # layout2
+	altgr_workaround_output(),                              # libkeyboa
+	output()]                                               # libkeyboa
 
 keyboa_run(list_of_transformations)

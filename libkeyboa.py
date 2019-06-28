@@ -14,12 +14,20 @@ def keyboa_run(tr):
 	for _ in reduced_transformation:
 		pass
 
+# Most functons in this module return transformations. retgen is a decorator for
+# making a functon of no arguments return the supplied transformation
+def retgen(transformation):
+	def returntransformation():
+		return transformation
+	return returntransformation
+
 # Read events from stdin. Auto-detect source format and adjust accordingly.
 # Supported formats are:
 # - The JSON output of listenkey.exe
 # - The format of x11vnc -pipeinput
 # After detecting the format, inform any downstream output processor so it can
 # match output format, then begin producing events from source.
+@retgen
 def input(_):
 	try:
 		firstline=sys.stdin.readline()
@@ -82,6 +90,7 @@ def input(_):
 	finally:
 		yield {"type":"exit"}
 
+@retgen
 def add_commonname(gen):
 	for obj in gen:
 		if(obj["type"] in ["keydown", "keyup", "keypress"]):
@@ -99,6 +108,7 @@ def add_commonname(gen):
 					 else kso["x11_keysym_symbol"]}
 		yield obj
 
+@retgen
 def resolve_commonname(gen):
 	for obj in gen:
 		if(obj["type"] in ["keydown", "keyup", "keypress"] and
@@ -124,6 +134,7 @@ def resolve_commonname(gen):
 # Supported formats are:
 # - The JSON format for sendkey.exe
 # - The format of x11vnc -pipeinput
+@retgen
 def output(gen):
 	platform=None
 	for obj in gen:
@@ -205,6 +216,7 @@ def output(gen):
 		yield obj
 
 # A transformation that changes nothing while printing everything to stderr
+@retgen
 def debug(gen):
 	for obj in gen:
 		print(obj, file=sys.stderr, flush=True)
@@ -212,6 +224,7 @@ def debug(gen):
 
 # A transformation that changes nothing while printing everything to stderr in
 # json format
+@retgen
 def debug_json(gen):
 	for obj in gen:
 		json.dump(obj, sys.stderr, allow_nan=False, indent=1)
@@ -222,6 +235,7 @@ def debug_json(gen):
 # If possible, find out what keys are already down at the start of the stream,
 # and release them by sending keyup events encapsulated so that no
 # transformation meddles with them until the output
+@retgen
 def releaseall_at_init(gen):
 	for obj in gen:
 		yield obj
@@ -253,6 +267,7 @@ def hashobj(obj):
 #   portable configurations.
 # - physkey_keyname_dict: A dictionary mapping physkey values to layout-specific
 #   key names.
+@retgen
 def enrich_input(gen):
 	initmsg = {}
 	physkey_keyname_dict = {}
@@ -588,7 +603,7 @@ def chords_to_events(field):
 # The transformations between these two workarounds can then act on key events
 # for RMENU (virtualkey 0xA5=165), which will mean AltGr if and only if it is
 # present.
-
+@retgen
 def altgr_workaround_input(gen):
 	lctrl=0xA2
 	rmenu=0xA5
@@ -611,6 +626,7 @@ def altgr_workaround_input(gen):
 		else:
 			yield obj
 
+@retgen
 def altgr_workaround_output(gen):
 	lctrl=0xA2
 	rmenu=0xA5

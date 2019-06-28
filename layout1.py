@@ -348,6 +348,7 @@ def modifier_sets(downmods, lockedmods, modes):
 				if(effectivemods<=allowedeffectivemods):
 					yield (effectivemods, modeprefix + planename)
 
+@retgen
 def chords_to_scripts(gen):
 	for obj in gen:
 		t=obj["type"]
@@ -381,6 +382,7 @@ def chords_to_scripts(gen):
 		else:
 			yield obj
 
+@retgen
 def scripts_to_chords(gen):
 	for obj in gen:
 		t=obj["type"]
@@ -469,6 +471,7 @@ def boxdrawings(modifier):
 				yield obj
 	return ret
 
+@retgen
 def unicode_input(gen):
 	def resolve(str):
 		if(str=="" or len(str)>6): return ""
@@ -563,6 +566,7 @@ def wait(modifier):
 				yield obj
 	return ret
 
+@retgen
 def macro_ui(gen):
 	macrorecording=False
 	for obj in gen:
@@ -610,6 +614,7 @@ def color_ui(text, color):
 		].index(color)+1)+"m"+text+"\033[0m"),
 		len(text))
 
+@retgen
 def termui(gen):
 	oldshow=""
 	on_keyup_all={
@@ -754,6 +759,7 @@ for cn in ["PgUp","PgDn", "AltGr"]:
 for cn in list(cnd.keys()):
 	cnd[cn.title()]=cnd[cn]
 
+@retgen
 def resolve_characters(gen):
 	for obj in gen:
 		if(obj["type"] in ["keydown", "keyup", "keypress"] and
@@ -769,37 +775,33 @@ def resolve_characters(gen):
 			yield obj
 
 list_of_transformations = [
-	input,                           # libkeyboa
-	releaseall_at_init,              # libkeyboa
-	altgr_workaround_input,          # libkeyboa
-	loadstate(statesavefile),        # libkeyboa
-	add_commonname,                  # libkeyboa
-	allow_repeat("physkey"),         # libkeyboa
-	unstick_keys("commonname",       # libkeyboa
-		key_timeouts),
-	events_to_chords("commonname"),  # libkeyboa
-	enrich_chord("mods", "modes"),   # Customization from this file
-	modlock({"Modlock"},             # Customization from this file
-		"Modlock",
-		"space"),
-	modeswitch({"Modlock","Ctrl"},   # Customization from this file
-		"Modeswitch"),
-	macro_ui,                        # Customization from this file
-	macro(macrotest, "macros"),      # libkeyboa
-	chords_to_scripts,               # Customization from this file
-	scripts_to_chords,               # Customization from this file
-	boxdrawings("b"),                # Customization from this file
-	unicode_input,                   # Customization from this file
-	printdate("Printdate"),          # Customization from this file
-	wait("Wait"),                    # Customization from this file
-	chords_to_events("commonname"),  # libkeyboa
-	ratelimit(30, ratelimit_filter), # libkeyboa
-	resolve_commonname,              # libkeyboa
-	resolve_characters,              # Customization from this file
-	altgr_workaround_output,         # libkeyboa
-	termui,                          # Customization from this file
-	savestate(statesavefile),        # libkeyboa
-	output]                          # libkeyboa
+	input(),                                                # libkeyboa
+	releaseall_at_init(),                                   # libkeyboa
+	altgr_workaround_input(),                               # libkeyboa
+	loadstate(statesavefile),                               # libkeyboa
+	add_commonname(),                                       # libkeyboa
+	allow_repeat("physkey"),                                # libkeyboa
+	unstick_keys("commonname", key_timeouts),               # libkeyboa
+	events_to_chords("commonname"),                         # libkeyboa
+	enrich_chord("mods", "modes"),                          # layout1
+	modlock({"Modlock"}, "Modlock", "space"),               # layout1
+	modeswitch({"Modlock","Ctrl"}, "Modeswitch"),           # layout1
+	macro_ui(),                                             # layout1
+	macro(macrotest, "macros"),                             # libkeyboa
+	chords_to_scripts(),                                    # layout1
+	scripts_to_chords(),                                    # layout1
+	boxdrawings("b"),                                       # layout1
+	unicode_input(),                                        # layout1
+	printdate("Printdate"),                                 # layout1
+	wait("Wait"),                                           # layout1
+	chords_to_events("commonname"),                         # libkeyboa
+	ratelimit(30, ratelimit_filter),                        # libkeyboa
+	resolve_commonname(),                                   # libkeyboa
+	resolve_characters(),                                   # layout1
+	altgr_workaround_output(),                              # libkeyboa
+	termui(),                                               # layout1
+	savestate(statesavefile),                               # libkeyboa
+	output()]                                               # libkeyboa
 
 if(__name__=="__main__"):
 	keyboa_run(list_of_transformations)
