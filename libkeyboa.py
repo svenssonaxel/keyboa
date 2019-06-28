@@ -21,7 +21,7 @@ def input(_):
 		firstline=sys.stdin.readline()
 		if(firstline.startswith('{')):
 			# listenkey.exe format
-			obj=json.loads(line)
+			obj=json.loads(firstline)
 			# listenkey.exe may or may not print an init message. At a minimum,
 			# the output generator needs to know what format to print.
 			if(not obj["type"]=="init"):
@@ -101,8 +101,8 @@ def resolve_commonname(gen):
 		   "commonname" in obj):
 			ret={**obj} # Shallow copy
 			cn=obj["commonname"]
-			if(cn in _commonnamesdict):
-				cno=_commonnamesdict[cn]
+			if(cn in commonnamesdict):
+				cno=commonnamesdict[cn]
 				if("vkey_obj" in cno):
 					ret={**ret,**cno["vkey_obj"]}
 				if("keysym_obj" in cno):
@@ -150,6 +150,10 @@ def output(gen):
 									 "win_scancode",
 									 "unicode_codepoint"]):
 							send=True
+				if(("win_virtualkey" in event
+				    or "win_scancode" in event)
+				   and "unicode_codepoint" in event):
+					del event["unicode_codepoint"]
 				if(send):
 					json.dump(event, sys.stdout, allow_nan=False, indent=1)
 					print(file=sys.stdout, flush=True)
@@ -279,7 +283,10 @@ def enrich_input(gen):
 			ret["keyid"]=physkey+"."+hexvk
 			if physkey in physkey_keyname_dict:
 				ret["keyname_local"]=physkey_keyname_dict[physkey]
-			ret={**ret,**vkeyinfo(ret["win_virtualkey"])}
+			vko=vkeyinfo(ret["win_virtualkey"])
+			ret={**ret,
+				"win_virtualkey_symbol": vko["win_virtualkey_symbol"],
+				"win_virtualkey_description": vko["win_virtualkey_description"]}
 			if("win_time" in ret):
 				if(prev_win_time!=None):
 					ret["delay"]=ret["win_time"]-prev_win_time
@@ -715,6 +722,8 @@ for (win_virtualkey, win_virtualkey_symbol, win_virtualkey_description) in [
 		_vkeysdict[win_virtualkey]=item
 	if(win_virtualkey_symbol):
 		_vkeysdict[win_virtualkey_symbol]=item
+for vk in list(range(0x30,0x3a))+list(range(0x41,0x5b)):
+	_vkeysdict[chr(vk)]=_vkeysdict[vk]
 
 def vkeyinfo(vkey):
 	try:
@@ -770,17 +779,14 @@ def keysyminfo(x):
 	return {}
 
 # Use the table of common names in commonname.csv to add information to
-# - A new dictionary _commonnamesdict
+# - A new dictionary commonnamesdict
 # - _keysymsdict
 # - _vkeysdict
 
-_commonnamesdict={}
-for (commonname, keysym_symbol, vkey_symbol) in [
-		(x, None if y=="" else y, None if z=="" else z)
-		for [x, y, z]
-		in fromcsv("commonname.csv")]:
-	item=(_commonnamesdict[commonname]
-		  if commonname in _commonnamesdict
+commonnamesdict={}
+def add_commonname_mapping(commonname, keysym_symbol, vkey_symbol):
+	item=(commonnamesdict[commonname]
+		  if commonname in commonnamesdict
 		  else {"commonname": commonname})
 	keysym_obj=keysyminfo(keysym_symbol)
 	if(keysym_obj):
@@ -792,4 +798,10 @@ for (commonname, keysym_symbol, vkey_symbol) in [
 		vkey_obj["commonname_obj"]=item
 		if("vkey_obj" not in item):
 			item["vkey_obj"]=vkey_obj
-	_commonnamesdict[commonname]=item
+	commonnamesdict[commonname]=item
+
+for (commonname, keysym_symbol, vkey_symbol) in [
+		(x, None if y=="" else y, None if z=="" else z)
+		for [x, y, z]
+		in fromcsv("commonname.csv")]:
+	add_commonname_mapping(commonname, keysym_symbol, vkey_symbol)

@@ -1,0 +1,29 @@
+# Custom commonname mappings for layout1
+#
+#commonname, keysym,    vkey
+ 12,         ,          VK_OEM_5
+ Q2,         ,          VK_TAB
+ A2,         ,          VK_CAPITAL
+ Z2,         ,          VK_OEM_102
+ Z3,         ,          VK_LSHIFT
+ 02,         ,          VK_OEM_PLUS
+ 03,         ,          VK_OEM_4
+ P2,         ,          VK_OEM_6
+ P3,         ,          VK_OEM_1
+ L2,         ,          VK_OEM_3
+ L3,         ,          VK_OEM_7
+ L4,         ,          VK_OEM_2
+ M2,         ,          VK_OEM_COMMA
+ M3,         ,          VK_OEM_PERIOD
+ M4,         ,          VK_OEM_MINUS
+ M5,         ,          VK_RSHIFT
+ D2,         ,          VK_RMENU
+ D3,         ,          VK_APPS
+ D4,         ,          VK_RCONTROL
+ S2,         ,          VK_LMENU
+ S3,         ,          VK_LWIN
+ S4,         ,          VK_LCONTROL
+ ret,        Return,    VK_RETURN
+ back,       BackSpace, VK_BACK
+ lef,        Left,      VK_LEFT
+ rig,        Right,     VK_RIGHT

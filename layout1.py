@@ -9,7 +9,7 @@
 # - Layout planes/layers, selectable using any number of modifiers (load, w, ch)
 # - Chords transformed to other operations (chords_to_scripts)
 # - Notation for key combinations, series, and repetition (scripts_to_chords)
-# - Key renaming and aliasing (layout1_commonname)
+# - Key renaming and aliasing (using commonnamesdict)
 # - Chords manipulating state (boxdrawing)
 # - Output depending on time (printdate)
 # - Input characters by unicode codepoint (unicode_input)
@@ -21,7 +21,6 @@
 #   ./listenkey -cel | ./layout1.py | ./sendkey
 
 from libkeyboa import *
-from layout1_commonname import *
 from boxdrawings import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
@@ -57,7 +56,7 @@ w("from",
  "Q2      Q       W       E       R       T       Y       U       I       O       P       P2      P3      " +
  "A2      A       S       D       F       G       H       J       K       L       L2      L3      L4      " +
  "Z2      Z       X       C       V       B       N       M       M2      M3      M4      M5      .       " +
- "           S4      S3      S2             SPACE             D2      D3      D4                          " )
+ "           S4      S3      S2             space             D2      D3      D4                          " )
 
 w("mods",
  ".       .       WM2     mods    .       .       .       .       .       WM2     .       .       .       " +
@@ -90,14 +89,14 @@ ch("HyperNum",      """        ₍₎₌₊        ₇₈₉          ₄₅₆�
 
 load("Sym", [("0","space"),
              ("Z2","begin_unicode_input")])
-load("HyperNum",[("SPACE","₀")])
+load("HyperNum",[("space","₀")])
 
 w("Nav",
  ".       .       .       C-S-Tab C-Tab   .       .       .       10*Up   .       .       .       .       " +
  ".       Esc     Alt-F4  C-PgUp  C-PgDn  A-Home  .       Home    Up      End     Back    Del     .       " +
  ".       A-Left  A-Right S-Tab   Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Up,End .    " +
  ".       .       .       .       .       .       .       Ins     10*Down S-home,Back S-end,del . .       " +
- "           .       .       .              SPACE          SPACE,left .       .                           " )
+ "           .       .       .              space          space,left .       .                           " )
 
 w("Nav2",
  ".       .       .       .       .       .       .       .       10*PgUp .       .       .       .       " +
@@ -130,11 +129,11 @@ w("WM",
  ".       .       .       .       .       .       .       .       s-up    .       .       .       .       " +
  ".       .       .       .       .       .       .       s-lef   s-dow   s-rig   .       .       .       " +
  ".       s-1     s-2     s-3     s-4     .       .       .       A-F4    .       .       .       .       " +
- "           .       .       .              SPACE             .       .       .                           " )
+ "           .       .       .              space             .       .       .                           " )
 
 load("WM",[
-	("Q", "A-sp,Wait-250,X"),
-	("M4","A-sp,Wait-250,N")])
+	("Q", "A-space,Wait-250,X"),
+	("M4","A-space,Wait-250,N")])
 
 w("Num",
  ".       .       F12     F11     F10     .       .e      .a      .b      .c      .d      .f      .       " +
@@ -416,11 +415,11 @@ def scripts_to_chords(gen):
 			yield obj
 
 w("Box-",
- ".       b-das=N b-das=2 b-das=3 b-das=4 .       SPACE   b-___R  b-L__R  b-L___  .       .       .       " +
+ ".       b-das=N b-das=2 b-das=3 b-das=4 .       space   b-___R  b-L__R  b-L___  .       .       .       " +
  ".       b-lef=d b-dow=d b-up=d  b-rig=d b-arc=Y b-_D__  b-_D_R  b-LD_R  b-LD__  back    del     .       " +
  ".       b-lef=l b-dow=l b-up=l  b-rig=l b-arc=N b-_DU_  b-_DUR  b-LDUR  b-LDU_  ret     ret,up,end .    " +
  ".       b-lef=h b-dow=h b-up=h  b-rig=h .       b-__U_  b-__UR  b-L_UR  b-L_U_  .       .       .       " +
- "           .       .       .              SPACE             .       .       .                           " )
+ "           .       .       .              space             .       .       .                           " )
 
 def printstring(str):
 	for char in str:
@@ -707,7 +706,7 @@ def termui(gen):
 def ratelimit_filter(obj):
 	if(obj["type"] in ["keydown", "keypress"]
 	   and "commonname" in obj
-	   and obj["commonname"] in ["up", "down", "pgup", "pgdn"]):
+	   and obj["commonname"] in ["Up", "Down", "PgUp", "PgDn"]):
 			return True
 	return False
 
@@ -729,7 +728,7 @@ def macrotest(obj):
 		inmods)
 	downmods=obj["downmods"]
 	key=inchord[-1]
-	if(downmods=={"Macro"} and key=="SPACE"): return True
+	if(downmods=={"Macro"} and key=="space"): return True
 	if("Macro" in downmods):
 		return ",".join([*sorted(inmods_wo_macro),key])
 	return False
@@ -738,13 +737,43 @@ statesavefile="layout1-state.json"
 if(len(argv)>=2):
 	statesavefile=argv[1]
 
+# Add custom commonname mappings
+cnd=commonnamesdict
+for (commonname, keysym_symbol, vkey_symbol) in [
+		(cn, None if ks=="" else ks, None if vk=="" else vk)
+		for [cn, ks, vk]
+		in fromcsv("layout1_commonname.csv")]:
+	add_commonname_mapping(commonname, keysym_symbol, vkey_symbol)
+for vk in list(range(0x30,0x3a))+list(range(0x41,0x5b)):
+	uletter=chr(vk)
+	lletter=uletter.lower()
+	cnd[uletter]=cnd[lletter]
+	cnd[uletter]["commonname"]=uletter
+for cn in ["PgUp","PgDn", "AltGr"]:
+	cnd[cn]=cnd[cn.lower()]
+for cn in list(cnd.keys()):
+	cnd[cn.title()]=cnd[cn]
+
+def resolve_characters(gen):
+	for obj in gen:
+		if(obj["type"] in ["keydown", "keyup", "keypress"] and
+		   "commonname" in obj and
+		   "win_virtualkey" not in obj and
+		   "x11_keysym" not in obj and
+		   "unicode_codepoint" not in obj and
+		   len(obj["commonname"])<=2 and
+		   (obj["commonname"][0]=="." or
+		    len(obj["commonname"])==1)):
+			yield {**obj, "unicode_codepoint": ord(obj["commonname"][-1])}
+		else:
+			yield obj
+
 list_of_transformations = [
 	input,                           # libkeyboa
 	releaseall_at_init,              # libkeyboa
 	altgr_workaround_input,          # libkeyboa
-	enrich_input,                    # libkeyboa
 	loadstate(statesavefile),        # libkeyboa
-	add_commonname,                  # common_name
+	add_commonname,                  # libkeyboa
 	allow_repeat("physkey"),         # libkeyboa
 	unstick_keys("commonname",       # libkeyboa
 		key_timeouts),
@@ -752,7 +781,7 @@ list_of_transformations = [
 	enrich_chord("mods", "modes"),   # Customization from this file
 	modlock({"Modlock"},             # Customization from this file
 		"Modlock",
-		"SPACE"),
+		"space"),
 	modeswitch({"Modlock","Ctrl"},   # Customization from this file
 		"Modeswitch"),
 	macro_ui,                        # Customization from this file
@@ -766,6 +795,7 @@ list_of_transformations = [
 	chords_to_events("commonname"),  # libkeyboa
 	ratelimit(30, ratelimit_filter), # libkeyboa
 	resolve_commonname,              # libkeyboa
+	resolve_characters,              # Customization from this file
 	altgr_workaround_output,         # libkeyboa
 	termui,                          # Customization from this file
 	savestate(statesavefile),        # libkeyboa
