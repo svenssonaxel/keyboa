@@ -21,7 +21,7 @@
 #   ./listenkey -cel | ./layout1.py | ./sendkey
 
 from libkeyboa import *
-from boxdrawings import *
+from libkeyboa.boxdrawings import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
 from sys import argv
@@ -747,7 +747,7 @@ cnd=commonnamesdict
 for (commonname, keysym_symbol, vkey_symbol) in [
 		(cn, None if ks=="" else ks, None if vk=="" else vk)
 		for [cn, ks, vk]
-		in fromcsv("layout1_commonname.csv")]:
+		in fromcsv("layout1_commonname.csv", __file__)]:
 	add_commonname_mapping(commonname, keysym_symbol, vkey_symbol)
 for vk in list(range(0x30,0x3a))+list(range(0x41,0x5b)):
 	uletter=chr(vk)

@@ -4,7 +4,7 @@
 #include "libsendkey.h"
 #include <stdio.h>
 #include <sys/stat.h>
-#include "jsonsl.c"
+#include "jsonsl/jsonsl.c"
 #include "json-str.c"
 
 #define BUFFER_SIZE 102400

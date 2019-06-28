@@ -4,7 +4,7 @@
 # This file is part of keyboa version <VERSION>
 # License: See LICENSE
 
-import sys, json, functools, time, csv
+import sys, json, functools, time, csv, os
 
 # Run data in series through the supplied list of transformations
 def keyboa_run(tr):
@@ -714,10 +714,17 @@ def ratelimit(n, filter = lambda _: True):
 			yield obj
 	return ret
 
-def fromcsv(filename):
+def absrelfile(file, relfile):
+	dir=os.path.dirname(relfile)
+	absdir=os.path.abspath(dir)
+	absfile=os.path.join(absdir, file)
+	return absfile
+
+def fromcsv(filename, relativetofile=__file__):
+	file=absrelfile(filename, relativetofile)
 	return csv.reader(
 		filter(lambda x:not x.startswith("#"), # Remove comments
-			   open(filename)),
+			   open(file)),
 		lineterminator='\n',
 		quotechar='"',
 		quoting=0,
