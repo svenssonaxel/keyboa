@@ -8,7 +8,11 @@ import sys, json, functools, time, csv
 
 # Run data in series through the supplied list of transformations
 def keyboa_run(tr):
-	return functools.reduce((lambda x, y: y(x)), tr, None)
+	def reducer(reduced, next_generator):
+		return next_generator(reduced)
+	reduced_transformation = functools.reduce(reducer, tr, [])
+	for _ in reduced_transformation:
+		pass
 
 # Read events from stdin. Auto-detect source format and adjust accordingly.
 # Supported formats are:
@@ -198,6 +202,7 @@ def output(gen):
 					raise e
 		else:
 			raise Exception("Unknown platform")
+		yield obj
 
 # A transformation that changes nothing while printing everything to stderr
 def debug(gen):
