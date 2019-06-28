@@ -458,6 +458,7 @@ def savestate(filename):
 # cancel         ( recording -> waiting   )
 # playback       ( waiting   -> playback  )
 # finishplayback ( waiting   -> playback  )
+# emptyplayback  ( waiting   -> playback  )
 def macro(macrotest, statekey=None):
 	def ret(gen):
 		macros={}
@@ -479,6 +480,8 @@ def macro(macrotest, statekey=None):
 						if(mt2):
 							if(mt2!=True):
 								macros[mt2]=newmacro
+								if(len(newmacro)==0):
+									del macros[mt2]
 								if(statekey):
 									yield {"type":"savestate",
 										"data":{statekey:macros}}
@@ -501,6 +504,10 @@ def macro(macrotest, statekey=None):
 					yield {"type":"ui","data":{
 						"macro.state": "waiting",
 						"macro.transition": "finishplayback"}}
+				else:
+					yield {"type":"ui","data":{
+						"macro.state": "waiting",
+						"macro.transition": "emptyplayback"}}
 			else:
 				yield obj
 	return ret

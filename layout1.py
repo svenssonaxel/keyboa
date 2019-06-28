@@ -665,7 +665,8 @@ def termui(gen):
 					"cancel": "CANCEL",
 					"save": "SAVE: "+script,
 					"playback": "PLAYBACK: "+script,
-					"finishplayback": "DONE: "+script
+					"finishplayback": "DONE: "+script,
+					"emptyplayback": "EMPTY MACRO SLOT: "+script,
 					}[data["macro.transition"]]
 			line0=box[0]+" ".join(physical)
 			line1=(box[1]+
