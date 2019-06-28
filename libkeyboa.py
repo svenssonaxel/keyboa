@@ -123,8 +123,8 @@ def resolve_commonname(gen):
 def output(gen):
 	platform=None
 	for obj in gen:
-		type=obj["type"]
-		if(type not in [
+		t=obj["type"]
+		if(t not in [
 				"init",
 				"keydown",
 				"keyup",
@@ -132,10 +132,10 @@ def output(gen):
 				"pointerstate"]):
 			continue
 		if(platform==None):
-			if(type=="init"):
+			if(t=="init"):
 				platform=obj["platform"]
 			else:
-				raise Exception("Missing init message. Instead, the type is: "+type)
+				raise Exception("Missing init message. Instead, the type is: "+t)
 		elif(platform=="windows"):
 			if(obj["type"]=="output"):
 				obj=obj["data"]
@@ -160,10 +160,10 @@ def output(gen):
 		elif(platform=="vnc"):
 			if(obj["type"]=="output"):
 				obj=obj["data"]
-			type=obj["type"]
-			if(type in ["keydown", "keyup", "keypress"]):
+			t=obj["type"]
+			if(t in ["keydown", "keyup", "keypress"]):
 				for down in [1, 0]:
-					if(type=="keypress" or type==["keydown", "keyup"][down]):
+					if(t=="keypress" or t==["keydown", "keyup"][down]):
 						try:
 							print(" ".join([
 								"Keysym",
@@ -173,9 +173,9 @@ def output(gen):
 								str(obj["x11_keysym"])]),
 								  flush=True)
 						except Exception as e:
-							print("Error trying to output "+type+" event: "+str(obj),file=sys.stderr)
+							print("Error trying to output "+t+" event: "+str(obj),file=sys.stderr)
 							raise e
-			elif(type=="pointerstate"):
+			elif(t=="pointerstate"):
 				try:
 					buttonsdown=obj["vnc_buttonsdown"]
 					buttonid=1
@@ -194,7 +194,7 @@ def output(gen):
 						str(mask)]),
 						  flush=True)
 				except Exception as e:
-					print("Error trying to output "+type+" event")
+					print("Error trying to output "+t+" event")
 					raise e
 		else:
 			raise Exception("Unknown platform")
@@ -307,13 +307,13 @@ def allow_repeat(field):
 	def ret(gen):
 		keysdown=set()
 		for obj in gen:
-			type=obj["type"]
+			t=obj["type"]
 			key=obj[field] if field in obj else None
-			if(type in ["keydown", "keypress"] and key in keysdown):
+			if(t in ["keydown", "keypress"] and key in keysdown):
 				yield {**obj, "type":"keyup"}
-			if(type=="keydown"):
+			if(t=="keydown"):
 				keysdown.add(key)
-			if(type in ["keyup", "keypress"] and key in keysdown):
+			if(t in ["keyup", "keypress"] and key in keysdown):
 				keysdown.remove(key)
 			yield obj
 	return ret
@@ -323,22 +323,22 @@ def unstick_keys(field, timeouts):
 	def ret(gen):
 		key_history_state=[]
 		for obj in gen:
-			type=obj["type"]
+			t=obj["type"]
 			this_time=time.monotonic()
 			alreadyup=False
 			for (deadline, key, event) in key_history_state:
 				if(this_time>deadline):
-					if(type=="keyup" and obj[field]==key):
+					if(t=="keyup" and obj[field]==key):
 						alreadyup=True
 					yield {**event, "type":"keyup", "noop":True}
 			key_history_state=[*filter(lambda x: x[0]<=deadline, key_history_state)]
 			if(alreadyup):
 				continue
-			if(type=="keydown"):
+			if(t=="keydown"):
 				key=obj[field]
 				if(key in timeouts):
 					key_history_state=sorted([*filter(lambda x: x[1]!=key, key_history_state), (this_time+timeouts[key], key, obj)])
-			if(type=="keyup"):
+			if(t=="keyup"):
 				key=obj[field]
 				key_history_state=[*filter(lambda x: x[1]!=key, key_history_state)]
 				if(obj[field] in timeouts):
@@ -376,15 +376,15 @@ def events_to_chords(field):
 		yield updateui()
 		mods=0
 		for obj in gen:
-			type=obj["type"]
-			if(type=="keydown"):
+			t=obj["type"]
+			if(t=="keydown"):
 				key=obj[field]
 				if(key in keysdown):
 					pass
 				else:
 					keysdown.append(key)
 				yield updateui()
-			elif(type=="keyup"):
+			elif(t=="keyup"):
 				key=obj[field]
 				if(key in keysdown):
 					i=keysdown.index(key)
@@ -401,7 +401,7 @@ def events_to_chords(field):
 						yield {"type":"keyup_all"}
 				else:
 					pass
-			elif(type=="exit"):
+			elif(t=="exit"):
 				yield {"type":"keyup_all"}
 				yield obj
 			else:
@@ -436,10 +436,10 @@ def savestate(filename):
 		state={}
 		for obj in gen:
 			yield obj
-			type=obj["type"]
-			if(type=="loadstate"):
+			t=obj["type"]
+			if(t=="loadstate"):
 				state=obj["data"]
-			if(type=="savestate"):
+			if(t=="savestate"):
 				state={**state,**(obj["data"])}
 				with open(filename, "w") as file:
 					sjsonstr=json.dumps(
@@ -539,14 +539,14 @@ def chords_to_events(field):
 				"chords_to_events.keysdown."+field:[*keysdown]}}
 		yield updateui()
 		for obj in gen:
-			type=obj["type"]
-			if(type=="keyup_all"):
+			t=obj["type"]
+			if(t=="keyup_all"):
 				for key in reversed(keysdown):
 					yield {"type":"keyup", field: key}
 				keysdown=[]
 				yield updateui()
 				yield obj
-			elif(type=="chord"):
+			elif(t=="chord"):
 				chord=obj["chord"]
 				chordmods=chord[:-1]
 				chordkey=chord[-1]
@@ -624,9 +624,9 @@ def altgr_workaround_output(gen):
 			sc=(obj["win_scancode"]
 			    if "win_scancode" in obj else None)
 			vk=obj["win_virtualkey"]
-			type=obj["type"]
+			t=obj["type"]
 			altgr_lctrl_event={
-				"type":type,
+				"type":t,
 				"win_scancode": altgr_lctrl_sc,
 				"win_extended": altgr_lctrl_ext,
 				"win_virtualkey": lctrl}
@@ -636,10 +636,10 @@ def altgr_workaround_output(gen):
 				yield obj
 			elif(vk==lctrl):
 				pass
-			elif(vk==rmenu and type in ["keydown", "keyup"]):
+			elif(vk==rmenu and t in ["keydown", "keyup"]):
 				yield altgr_lctrl_event
 				yield obj
-			else: # means (vk==rmenu and type=="keypress")
+			else: # means (vk==rmenu and t=="keypress")
 				yield {**altgr_lctrl_event, "type": "keydown"}
 				yield {**obj, "type": "keydown"}
 				yield {**altgr_lctrl_event, "type": "keyup"}

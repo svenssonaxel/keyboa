@@ -213,8 +213,8 @@ def planelookup(key, plane, default=None):
 def enrich_chord(modifierplane, modeplane):
 	def ret(gen):
 		for obj in gen:
-			type=obj["type"]
-			if(type=="chord"):
+			t=obj["type"]
+			if(t=="chord"):
 				inchord=obj["chord"]
 				inmods=set(inchord[:-1])
 				key=inchord[-1]
@@ -239,11 +239,11 @@ def modlock(modlockset, modlockname, clearkey):
 	def ret(gen):
 		lockedmods=set()
 		for obj in gen:
-			type=obj["type"]
-			if(type=="loadstate" and "lockedmods" in obj["data"]):
+			t=obj["type"]
+			if(t=="loadstate" and "lockedmods" in obj["data"]):
 				lockedmods=obj["data"]["lockedmods"]
 				yield {"type":"ui","data":{"lockedmods":lockedmods}}
-			if(type=="chord"):
+			if(t=="chord"):
 				downmods=obj["downmods"]
 				key=obj["key"]
 				keyasmod=obj["keyasmod"]
@@ -268,12 +268,12 @@ def modeswitch(modeswitchset, modeswitchname):
 	def ret(gen):
 		modes=set()
 		for obj in gen:
-			type=obj["type"]
-			if(type=="loadstate" and "modes" in obj["data"]):
+			t=obj["type"]
+			if(t=="loadstate" and "modes" in obj["data"]):
 				modes=obj["data"]["modes"]
-			if(type in ["loadstate","init"]):
+			if(t in ["loadstate","init"]):
 				yield {"type":"ui","data":{"modes": modes}}
-			if(type=="chord"):
+			if(t=="chord"):
 				downmods=obj["downmods"]
 				keyasmode=obj["keyasmode"]
 				if(modeswitchset==downmods and keyasmode):
@@ -350,8 +350,8 @@ def modifier_sets(downmods, lockedmods, modes):
 
 def chords_to_scripts(gen):
 	for obj in gen:
-		type=obj["type"]
-		if(type=="chord"):
+		t=obj["type"]
+		if(t=="chord"):
 			lockedmods=obj["lockedmods"]
 			modes=obj["modes"]
 			downmods=obj["downmods"]
@@ -383,8 +383,8 @@ def chords_to_scripts(gen):
 
 def scripts_to_chords(gen):
 	for obj in gen:
-		type=obj["type"]
-		if(type=="script"):
+		t=obj["type"]
+		if(t=="script"):
 			script=obj["script"]
 			scriptmods=obj["scriptmods"]
 			for item in script.split(","):
@@ -567,8 +567,8 @@ def macro_ui(gen):
 	macrorecording=False
 	for obj in gen:
 		yield obj
-		type=obj["type"]
-		mt=macrotest(obj) if type=="chord" else False
+		t=obj["type"]
+		mt=macrotest(obj) if t=="chord" else False
 		if(mt):
 			yield {"type":"ui", "data":{
 				"scriptmods": set(),
@@ -629,15 +629,15 @@ def termui(gen):
 	olddata=defaultdata
 	maxlen=0
 	for obj in gen:
-		type=obj["type"]
+		t=obj["type"]
 		update=False
-		if(type=="ui"):
+		if(t=="ui"):
 			update=True
 			data={**defaultdata,
 				**{key:value for (key, value)
 					in {**olddata, **obj["data"]}.items()
 					if value!=None}}
-		if(type=="keyup_all"):
+		if(t=="keyup_all"):
 			update=True
 			data={**olddata, **on_keyup_all}
 		if(update):
