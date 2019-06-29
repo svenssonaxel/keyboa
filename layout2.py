@@ -25,16 +25,16 @@ def remap(gen):
 		if(obj["type"] in ["keydown", "keyup", "keypress"]):
 			vks=obj["win_virtualkey_symbol"]
 			if(vks in mapping):
-				yield {"type": obj["type"], **vkeyinfo(mapping[vks])}
+				yield {"type": obj["type"], **data.vkeyinfo(mapping[vks])}
 				continue
 		yield obj
 
 list_of_transformations = [
-	keyboa_input(),                                         # libkeyboa
-	altgr_workaround_input(),                               # libkeyboa
-	enrich_input(),                                         # libkeyboa
+	tr.keyboa_input(),                                      # libkeyboa
+	tr.altgr_workaround_input(),                            # libkeyboa
+	tr.enrich_input(),                                      # libkeyboa
 	remap(),                                                # layout2
-	altgr_workaround_output(),                              # libkeyboa
-	keyboa_output()]                                        # libkeyboa
+	tr.altgr_workaround_output(),                           # libkeyboa
+	tr.keyboa_output()]                                     # libkeyboa
 
 keyboa_run(list_of_transformations)

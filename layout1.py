@@ -21,7 +21,6 @@
 #   ./listenkey -cel | ./layout1.py | ./sendkey
 
 from libkeyboa import *
-from libkeyboa.boxdrawings import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
 from sys import argv, stderr
@@ -746,15 +745,17 @@ if(len(argv)>=2):
 for (commonname, keysym_symbol, vkey_symbol) in [
 		(cn, None if ks=="" else ks, None if vk=="" else vk)
 		for [cn, ks, vk]
-		in fromcsv("layout1_commonname.csv", __file__)]:
-	add_commonname_mapping(commonname, keysym_symbol, vkey_symbol)
+		in data.fromcsv("layout1_commonname.csv", __file__)]:
+	data.add_commonname_mapping(commonname, keysym_symbol, vkey_symbol)
 for cn in ("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,"+
            "F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,"+
-           "Alt,AltGr,Back,Comma,Ctrl,Del,Down,End,Esc,Home,Hyper,Ins,Lef,"+
-           "Left,Meta,Period,PgDn,PgUp,Ret,Rig,Right,Shift,Super,Tab,Up"
+           "Up,Down,Lef,Left,Rig,Right,"+
+           "Super,Hyper,Meta,Alt,Ctrl,Shift,AltGr,"+
+           "Ins,Del,Home,End,PgUp,PgDn,"+
+           "Esc,Back,Tab,Ret,Comma,Period"
           ).split(","):
-	add_commonname_alias(cn, cn.lower(), True)
-	add_commonname_alias(cn.title(), cn.lower())
+	data.add_commonname_alias(cn, cn.lower(), True)
+	data.add_commonname_alias(cn.title(), cn.lower())
 
 @retgen
 def resolve_characters(gen):
@@ -772,33 +773,33 @@ def resolve_characters(gen):
 			yield obj
 
 list_of_transformations = [
-	keyboa_input(),                                         # libkeyboa
-	releaseall_at_init(),                                   # libkeyboa
-	altgr_workaround_input(),                               # libkeyboa
-	loadstate(statesavefile),                               # libkeyboa
-	add_commonname(),                                       # libkeyboa
-	allow_repeat("physkey"),                                # libkeyboa
-	unstick_keys("commonname", key_timeouts),               # libkeyboa
-	events_to_chords("commonname"),                         # libkeyboa
+	tr.keyboa_input(),                                      # libkeyboa
+	tr.releaseall_at_init(),                                # libkeyboa
+	tr.altgr_workaround_input(),                            # libkeyboa
+	tr.loadstate(statesavefile),                            # libkeyboa
+	tr.add_commonname(),                                    # libkeyboa
+	tr.allow_repeat("physkey"),                             # libkeyboa
+	tr.unstick_keys("commonname", key_timeouts),            # libkeyboa
+	tr.events_to_chords("commonname"),                      # libkeyboa
 	enrich_chord("mods", "modes"),                          # layout1
 	modlock({"Modlock"}, "Modlock", "space"),               # layout1
 	modeswitch({"Modlock","Ctrl"}, "Modeswitch"),           # layout1
 	macro_ui(),                                             # layout1
-	macro(macrotest, "macros"),                             # libkeyboa
+	tr.macro(macrotest, "macros"),                          # libkeyboa
 	chords_to_scripts(),                                    # layout1
 	scripts_to_chords(),                                    # layout1
 	boxdrawings("b"),                                       # layout1
 	unicode_input(),                                        # layout1
 	printdate("Printdate"),                                 # layout1
 	wait("Wait"),                                           # layout1
-	chords_to_events("commonname"),                         # libkeyboa
-	ratelimit(30, ratelimit_filter),                        # libkeyboa
-	resolve_commonname(),                                   # libkeyboa
+	tr.chords_to_events("commonname"),                      # libkeyboa
+	tr.ratelimit(30, ratelimit_filter),                     # libkeyboa
+	tr.resolve_commonname(),                                # libkeyboa
 	resolve_characters(),                                   # layout1
-	altgr_workaround_output(),                              # libkeyboa
+	tr.altgr_workaround_output(),                           # libkeyboa
 	termui(),                                               # layout1
-	savestate(statesavefile),                               # libkeyboa
-	keyboa_output()]                                        # libkeyboa
+	tr.savestate(statesavefile),                            # libkeyboa
+	tr.keyboa_output()]                                     # libkeyboa
 
 if(__name__=="__main__"):
 	keyboa_run(list_of_transformations)
