@@ -30,11 +30,11 @@ def remap(gen):
 		yield obj
 
 list_of_transformations = [
-	input(),                                                # libkeyboa
+	keyboa_input(),                                         # libkeyboa
 	altgr_workaround_input(),                               # libkeyboa
 	enrich_input(),                                         # libkeyboa
 	remap(),                                                # layout2
 	altgr_workaround_output(),                              # libkeyboa
-	output()]                                               # libkeyboa
+	keyboa_output()]                                        # libkeyboa
 
 keyboa_run(list_of_transformations)

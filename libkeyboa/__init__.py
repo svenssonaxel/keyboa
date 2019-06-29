@@ -28,7 +28,7 @@ def retgen(transformation):
 # After detecting the format, inform any downstream output processor so it can
 # match output format, then begin producing events from source.
 @retgen
-def input(_):
+def keyboa_input(_):
 	try:
 		firstline=sys.stdin.readline()
 		if(firstline.startswith('{')):
@@ -135,7 +135,7 @@ def resolve_commonname(gen):
 # - The JSON format for sendkey.exe
 # - The format of x11vnc -pipeinput
 @retgen
-def output(gen):
+def keyboa_output(gen):
 	platform=None
 	for obj in gen:
 		t=obj["type"]
@@ -827,9 +827,43 @@ def add_commonname_mapping(commonname, keysym_symbol, vkey_symbol):
 		if("vkey_obj" not in item):
 			item["vkey_obj"]=vkey_obj
 	commonnamesdict[commonname]=item
+def add_commonname_alias(newname, oldname, newname_is_default=False):
+	commonnamesdict[newname]=commonnamesdict[oldname]
+	if(newname_is_default):
+		commonnamesdict[newname]["commonname"]=newname
 
 for (commonname, keysym_symbol, vkey_symbol) in [
 		(x, None if y=="" else y, None if z=="" else z)
 		for [x, y, z]
 		in fromcsv("commonname.csv")]:
 	add_commonname_mapping(commonname, keysym_symbol, vkey_symbol)
+
+__all__ = [
+	"keyboa_run",
+	"retgen",
+	"keyboa_input",
+	"add_commonname",
+	"resolve_commonname",
+	"keyboa_output",
+	"debug",
+	"debug_json",
+	"releaseall_at_init",
+	"enrich_input",
+	"allow_repeat",
+	"unstick_keys",
+	"events_to_chords",
+	"loadstate",
+	"savestate",
+	"macro",
+	"chords_to_events",
+	"altgr_workaround_input",
+	"altgr_workaround_output",
+	"selecttypes",
+	"selecttypesexcept",
+	"selectfields",
+	"ratelimit",
+	"fromcsv",
+	"vkeyinfo",
+	"keysyminfo",
+	"add_commonname_mapping",
+	"add_commonname_alias"]

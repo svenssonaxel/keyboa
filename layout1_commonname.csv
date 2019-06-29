@@ -27,3 +27,4 @@
  back,       BackSpace, VK_BACK
  lef,        Left,      VK_LEFT
  rig,        Right,     VK_RIGHT
+ ins,        Insert,    VK_INSERT

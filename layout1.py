@@ -24,7 +24,7 @@ from libkeyboa import *
 from libkeyboa.boxdrawings import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
-from sys import argv
+from sys import argv, stderr
 from unicodedata import name as unicodename
 
 planes={}
@@ -703,7 +703,7 @@ def termui(gen):
 			if(show!=oldshow):
 				# In order to avoid blinking, first move to top-left corner of
 				# terminal without clearing, then overwrite.
-				print("\033[;H" + show, file=sys.stderr, flush=True, end='')
+				print("\033[;H" + show, file=stderr, flush=True, end='')
 			oldshow=show
 			olddata=data
 		yield obj
@@ -743,21 +743,18 @@ if(len(argv)>=2):
 	statesavefile=argv[1]
 
 # Add custom commonname mappings
-cnd=commonnamesdict
 for (commonname, keysym_symbol, vkey_symbol) in [
 		(cn, None if ks=="" else ks, None if vk=="" else vk)
 		for [cn, ks, vk]
 		in fromcsv("layout1_commonname.csv", __file__)]:
 	add_commonname_mapping(commonname, keysym_symbol, vkey_symbol)
-for vk in list(range(0x30,0x3a))+list(range(0x41,0x5b)):
-	uletter=chr(vk)
-	lletter=uletter.lower()
-	cnd[uletter]=cnd[lletter]
-	cnd[uletter]["commonname"]=uletter
-for cn in ["PgUp","PgDn", "AltGr"]:
-	cnd[cn]=cnd[cn.lower()]
-for cn in list(cnd.keys()):
-	cnd[cn.title()]=cnd[cn]
+for cn in ("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,"+
+           "F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,"+
+           "Alt,AltGr,Back,Comma,Ctrl,Del,Down,End,Esc,Home,Hyper,Ins,Lef,"+
+           "Left,Meta,Period,PgDn,PgUp,Ret,Rig,Right,Shift,Super,Tab,Up"
+          ).split(","):
+	add_commonname_alias(cn, cn.lower(), True)
+	add_commonname_alias(cn.title(), cn.lower())
 
 @retgen
 def resolve_characters(gen):
@@ -775,7 +772,7 @@ def resolve_characters(gen):
 			yield obj
 
 list_of_transformations = [
-	input(),                                                # libkeyboa
+	keyboa_input(),                                         # libkeyboa
 	releaseall_at_init(),                                   # libkeyboa
 	altgr_workaround_input(),                               # libkeyboa
 	loadstate(statesavefile),                               # libkeyboa
@@ -801,7 +798,7 @@ list_of_transformations = [
 	altgr_workaround_output(),                              # libkeyboa
 	termui(),                                               # layout1
 	savestate(statesavefile),                               # libkeyboa
-	output()]                                               # libkeyboa
+	keyboa_output()]                                        # libkeyboa
 
 if(__name__=="__main__"):
 	keyboa_run(list_of_transformations)

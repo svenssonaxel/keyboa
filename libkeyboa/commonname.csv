@@ -341,3 +341,20 @@
 #
 #commonname,        keysym,           vkey
  altgr,             ISO_Level3_Shift, VK_RMENU
+#
+#
+#
+# Other mappings
+#
+#commonname,        keysym,           vkey
+ comma,             comma,            VK_OEM_COMMA
+ period,            period,           VK_OEM_PERIOD
+ meta,              Meta_L,           VK_MENU
+ metaleft,          Meta_L,           VK_LMENU
+ metaright,         Meta_R,           VK_RMENU
+ super,             Super_L,          VK_LWIN
+ superleft,         Super_L,          VK_LWIN
+ superright,        Super_R,          VK_RWIN
+ hyper,             Hyper_L,
+ hyperleft,         Hyper_L,
+ hyperright,        Hyper_R,
