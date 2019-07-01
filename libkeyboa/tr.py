@@ -420,7 +420,7 @@ def events_to_chords(field):
 				yield obj
 	return ret
 
-# Load state from file
+# Load state from file if possible
 def loadstate(filename):
 	state=None
 	def SJSON_decode_object(o):
@@ -437,8 +437,12 @@ def loadstate(filename):
 		for obj in gen: yield obj
 	return ret
 
-# Save state to file
+# Save state to file if filename is a string, otherwise do nothing
 def savestate(filename):
+	if(not filename):
+		def ret(gen):
+			yield from gen
+		return ret
 	class SJSONEncoder(json.JSONEncoder):
 		def default(self, o):
 			if isinstance(o, set):

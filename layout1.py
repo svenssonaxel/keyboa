@@ -737,7 +737,7 @@ def macrotest(obj):
 		return ",".join([*sorted(inmods_wo_macro),key])
 	return False
 
-statesavefile="layout1-state.json"
+statesavefile=None
 if(len(argv)>=2):
 	statesavefile=argv[1]
 
