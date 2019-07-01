@@ -4,6 +4,7 @@
 VERSION = $(shell ../makeversion)
 
 default: *.py win_vkeys.csv keysyms.csv commonname.csv
+	$(if $(findstring UNKNOWN,$(VERSION)),$(error Couldn't determine VERSION. Provide it manually or install git))
 	mkdir -p release
 	cp $^ release/
 	sed -ri 's/<VERSION>/'"$(VERSION)"'/;' release/*.py release/*.csv

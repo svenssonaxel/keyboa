@@ -30,6 +30,7 @@ sendkey.exe: sendkey.c libsendkey.h sendkey-json-parser.c json-str.c common.h ve
 	$(CC) -o sendkey.exe sendkey.c
 
 version.h:
+	$(if $(findstring UNKNOWN,$(VERSION)),$(error Couldn't determine VERSION. Provide it manually or install git))
 	echo '$(VERSION_H)' > version.h
 
 .PHONY: default clean

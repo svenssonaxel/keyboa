@@ -6,6 +6,11 @@
 # projectversion=`git describe --tags --long`
 # cleanversion=${projectversion%%-*}
 
+if which git >/dev/null 2>&1; then :; else
+	echo UNKNOWN
+	exit 1
+fi
+
 revisioncount=`git log --oneline | wc -l`
 ts=`date +%Y%m%d.%H%M%S`
 id=`git rev-parse --short HEAD`
