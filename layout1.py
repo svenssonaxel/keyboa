@@ -630,27 +630,29 @@ def termui(gen):
 		"macro.state":"waiting",
 		"macro.transition":None,
 		"unicode_input": None}
-	olddata=defaultdata
+	data=defaultdata
 	maxlen=0
+	term_clear="\033[2J"
+	term_gototopleft="\033[;H"
+	# reset terminal
+	print(term_clear + term_gototopleft, file=stderr, flush=True, end='')
+	update=True
 	for obj in gen:
 		t=obj["type"]
-		update=False
 		if(t=="ui"):
 			update=True
-			data={**defaultdata,
-				**{key:value for (key, value)
-					in {**olddata, **obj["data"]}.items()
-					if value!=None}}
+			data={**data, **obj["data"]}
 		if(t=="keyup_all"):
 			update=True
-			data={**olddata, **on_keyup_all}
-		if(update):
+			data={**data, **on_keyup_all}
+		if(update and (t=="tick" or not oldshow)):
+			update=False
+			modes=data["modes"]
 			box=[Tt(x+" ") for x in (
 			 boxdrawings_ui(data["boxdrawings"])
 			 if ("boxdrawings" in data and "Box" in modes) else [""]*4)]
 			physical=data["events_to_chords.keysdown.commonname"]
 			lockedmods=data["lockedmods"]
-			modes=data["modes"]
 			planename=data["planename"]
 			scriptmods=data["scriptmods"]
 			script=data["script"]
@@ -694,17 +696,24 @@ def termui(gen):
 			if("RedactUI" in modes):
 				showarr=[Tt()]*4
 				showarr[1]=color_ui(" ***", "blue")
+			# If previous lines were very long
+			if(maxlen>80):
+				# then begin by clearing
+				show=term_clear
+				# and reset the historical maximum line length
+				maxlen=0
+			else:
+				show=""
 			# Calculate historical maximum of rendered length of lines
 			maxlen=max(maxlen,max(map(len,showarr)))
 			# Extend every line with spaces to that length and covert to string
 			showarr=[str(x)+" "*(maxlen-len(x)) for x in showarr]
-			show="\n".join(showarr)
+			show+="\n".join(showarr)
 			if(show!=oldshow):
 				# In order to avoid blinking, first move to top-left corner of
 				# terminal without clearing, then overwrite.
-				print("\033[;H" + show, file=stderr, flush=True, end='')
+				print(term_gototopleft + show, file=stderr, flush=True, end='')
 			oldshow=show
-			olddata=data
 		yield obj
 
 def ratelimit_filter(obj):
