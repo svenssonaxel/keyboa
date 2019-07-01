@@ -463,7 +463,7 @@ def boxdrawings(modifier):
 						settings["rig"] if "R" in command else "-",
 						settings["das"],
 						settings["arc"]])
-					boxobj=boxdrawings_bestmatch(prop)
+					boxobj=data.boxdrawings_bestmatch(prop)
 					if(boxobj):
 						yield from printstring(boxobj["char"])
 			else:
@@ -591,7 +591,7 @@ def boxdrawings_ui(settings):
 				settings["rig"] if x in [1,2] else "-",
 				settings["das"],
 				settings["arc"]])
-			boxobj=boxdrawings_bestmatch(prop)
+			boxobj=data.boxdrawings_bestmatch(prop)
 			ret[y]+=(boxobj["char"] if boxobj else " ")
 	return ret
 
