@@ -698,6 +698,13 @@ def selectfields(fields):
 # between any two events is at least 1/n seconds. This does not insert any
 # delay between events that already are sufficiently spread out. If filter is
 # given, only apply to events that match that predicate.
+#
+# WARNING for use on Windows: When holding down a key, the Windows autorepeat
+# functionality can produce up to at least 34 keydown events per second. Do not
+# slow down your program so much that the consumption of input events is
+# retarded below the rate the input events are generated. Doing so could cause
+# Windows to stop sending events to listenkey.exe, which in turn would likely
+# freeze your program.
 def ratelimit(n, filter = lambda _: True):
 	def ret(gen):
 		minimum_delay=1/n

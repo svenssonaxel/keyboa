@@ -802,7 +802,7 @@ list_of_transformations = [
 	printdate("Printdate"),                                 # layout1
 	wait("Wait"),                                           # layout1
 	tr.chords_to_events("commonname"),                      # libkeyboa
-	tr.ratelimit(30, ratelimit_filter),                     # libkeyboa
+	tr.ratelimit(40, ratelimit_filter),                     # libkeyboa
 	tr.resolve_commonname(),                                # libkeyboa
 	resolve_characters(),                                   # layout1
 	tr.altgr_workaround_output(),                           # libkeyboa
