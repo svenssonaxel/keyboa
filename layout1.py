@@ -11,6 +11,7 @@
 # - Notation for key combinations, series, and repetition (scripts_to_chords)
 # - Key renaming and aliasing (using commonnamesdict)
 # - Chords manipulating state (boxdrawing)
+# - Repetition of chords based on a numeric argument (numarg_multiplier)
 # - Output depending on time (printdate)
 # - Input characters by unicode codepoint (unicode_input)
 #
@@ -296,6 +297,55 @@ def modeswitch(modeswitchset, modeswitchname):
 			else:
 				yield obj
 	return ret
+
+# Classify an event for the repeat functionality.
+# Returns
+# - A string containing a digit if the event designates a digit argument
+# - "back" if the event designates erasing a digit
+# - True if the event is subject to repetition
+# - False otherwise
+def numarg_multiplier_filter(obj):
+	if(obj["type"]!="chord"): return False
+	if(obj["downmods"]!={"Meta", "Num"}): return True
+	maybedigit=planelookup(obj["key"], "Num")
+	if(maybedigit in {"back","0","1","2","3","4","5","6","7","8","9"}):
+		return maybedigit
+	return True
+
+# Repeat functionality
+@retgen
+def numarg_multiplier(gen):
+	numarg=""
+	needs_ui_reset=False
+	for obj in gen:
+		r=numarg_multiplier_filter(obj)
+		if(r==False): yield obj
+		elif(r==True):
+			if(numarg):
+				repeat=int(numarg)
+				yield {"type":"ui","data":{
+					"multiplier":"",
+					"multiplier_executing":numarg}}
+				for repeat_index in range(repeat):
+					yield obj
+					if(repeat_index==0):
+						yield {"type":"tick","after":"multiplier_start"}
+				numarg=""
+				needs_ui_reset=True
+			else:
+				if(needs_ui_reset):
+					yield {"type":"ui","data":{
+						"multiplier_executing":""}}
+				yield obj
+		elif(r=="back"):
+			numarg=numarg[:-1]
+			yield {"type":"ui","data":{
+				"multiplier":numarg}}
+		else:
+			numarg+=r
+			numarg=numarg[-3:]
+			yield {"type":"ui","data":{
+				"multiplier":numarg}}
 
 # Generate a stream of (effectivemods, planename) tuples. Note that this
 # generator is not part of the pipeline, but repeatedly created and consumed by
@@ -619,13 +669,15 @@ def termui(gen):
 	on_keyup_all={
 		"planename":None,
 		"scriptmods":set(),
-		"script":None}
+		"script":None,
+		"multiplier_executing":""}
 	defaultdata={
 		**on_keyup_all,
 		"printdate.timezone":None,
 		"events_to_chords.keysdown.commonname":[],
 		"lockedmods":set(),
 		"modes":set(),
+		"multiplier":"",
 		"chords_to_events.keysdown.commonname":[],
 		"macro.state":"waiting",
 		"macro.transition":None,
@@ -656,6 +708,10 @@ def termui(gen):
 			planename=data["planename"]
 			scriptmods=data["scriptmods"]
 			script=data["script"]
+			multiplier=(data["multiplier"]+"x"
+				if data["multiplier"] else "")
+			multiplier_executing=(str(int(data["multiplier_executing"]))+"x"
+				if data["multiplier_executing"] else "")
 			virtual=data["chords_to_events.keysdown.commonname"]
 			macrostate=("RECORDING" if data["macro.state"]=="recording"
 				else ("PLAYBACK" if data["macro.state"]=="playback" else ""))
@@ -679,6 +735,8 @@ def termui(gen):
 				 if planename else "")+
 				(color_ui(" ".join(sorted(scriptmods)),"yellow")+" "
 				    if len(scriptmods)>0 else "")+
+				(color_ui(multiplier_executing, "yellow")+" "
+					if multiplier_executing else "")+
 				(script
 				 if script else ""))
 			line2=(box[2]+
@@ -686,6 +744,7 @@ def termui(gen):
 				 if len(modes)>0 else "")+
 				(color_ui(" ".join(sorted(lockedmods)),"green")+" "
 				 if len(lockedmods)>0 else "")+
+				(color_ui(multiplier.rjust(4), "yellow")+" ")+
 				(color_ui(" ".join(virtual),"white")+" "
 				 if len(virtual)>0 else ""))
 			line3=(box[3]+
@@ -794,6 +853,7 @@ list_of_transformations = [
 	modlock({"Modlock"}, "Modlock", "space"),               # layout1
 	modeswitch({"Modlock","Ctrl"}, "Modeswitch"),           # layout1
 	macro_ui(),                                             # layout1
+	numarg_multiplier(),                                    # layout1
 	tr.macro(macrotest, "macros"),                          # libkeyboa
 	chords_to_scripts(),                                    # layout1
 	scripts_to_chords(),                                    # layout1
