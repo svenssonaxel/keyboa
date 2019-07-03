@@ -37,7 +37,9 @@ def keyboa_input(_):
 				obj=json.loads(line)
 				yield obj
 				yield {"type":"tick", "after":"input_event"}
-		elif(firstline.startswith('#')):
+		elif(firstline.startswith('#') or
+		     firstline.startswith('Pointer ') or
+		     firstline.startswith('Keysym ')):
 			# x11vnc format
 			yield {
 				"type": "init",
@@ -51,12 +53,12 @@ def keyboa_input(_):
 					[_, client_id, xpos, ypos, mask, hint] = line
 					buttonid=1
 					buttonsdown=set()
-					while(mask>0):
+					while(mask):
 						if(mask&1):
 							buttonsdown.add(buttonid)
 							buttonid+=1
 							mask-=1
-						mask/=2
+						mask>>=1
 					yield {
 						"type": "pointerstate",
 						"vnc_client_id": int(client_id),
