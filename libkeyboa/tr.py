@@ -172,40 +172,32 @@ def keyboa_output(gen):
 				obj=obj["data"]
 			t=obj["type"]
 			if(t in ["keydown", "keyup", "keypress"]):
-				for down in [1, 0]:
-					if(t=="keypress" or t==["keydown", "keyup"][down]):
-						try:
-							print(" ".join([
-								"Keysym",
-								str(obj["vnc_client_id"])
-									if "vnc_client_id" in obj else "0",
-								str(down),
-								str(obj["x11_keysym"])]),
-								  flush=True)
-						except Exception as e:
-							print("Error trying to output "+t+" event: "+str(obj),file=sys.stderr)
-							raise e
+				# Find missing keysym for a codepoint if possible
+				if("x11_keysym" not in obj and
+				   "x11_keysym_symbol" not in obj and
+				   "unicode_codepoint" in obj):
+					cp=obj["unicode_codepoint"]
+					cpkey=data.format_unicode(cp)
+					ksobj=data.keysyminfo(cpkey)
+					obj={**obj, **ksobj}
+				# Output using keysym or keysym_symbol if present
+				if("x11_keysym" in obj or
+				   "x11_keysym_symbol" in obj):
+					print(
+						t.replace("press","") + " " +
+						(hex(obj["x11_keysym"])
+						 if "x11_keysym" in obj
+						 else obj["x11_keysym_symbol"]),
+						flush=True)
+				# Otherwise output using codepoint
+				elif("unicode_codepoint" in obj and t=="keypress"):
+					cp=obj["unicode_codepoint"]
+					print("type '"+chr(cp)+"'", flush=True)
+				else:
+					pass # todo rm
+					#print("Error trying to output "+t+" event: "+str(obj),file=sys.stderr)
 			elif(t=="pointerstate"):
-				try:
-					buttonsdown=obj["vnc_buttonsdown"]
-					buttonid=1
-					mask=0
-					while(len(buttonsdown)>0):
-						if(buttonid in buttonsdown):
-							mask&=2**buttonid
-							buttonsdown.remove(buttonid)
-						buttonid+=1
-					print(" ".join([
-						"Pointer",
-						str(obj["vnc_client_id"])
-							if "vnc_client_id" in obj else "0",
-						str(obj["vnc_xpos"]),
-						str(obj["vnc_ypos"]),
-						str(mask)]),
-						  flush=True)
-				except Exception as e:
-					print("Error trying to output "+t+" event")
-					raise e
+				pass # todo
 		else:
 			raise Exception("Unknown platform")
 		yield obj
