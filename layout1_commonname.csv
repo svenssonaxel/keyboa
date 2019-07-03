@@ -1,30 +1,91 @@
 # Custom commonname mappings for layout1
 #
-#commonname, keysym,    vkey
- 12,         ,          VK_OEM_5
- Q2,         ,          VK_TAB
- A2,         ,          VK_CAPITAL
- Z2,         ,          VK_OEM_102
- Z3,         ,          VK_LSHIFT
- 02,         ,          VK_OEM_PLUS
- 03,         ,          VK_OEM_4
- P2,         ,          VK_OEM_6
- P3,         ,          VK_OEM_1
- L2,         ,          VK_OEM_3
- L3,         ,          VK_OEM_7
- L4,         ,          VK_OEM_2
- M2,         ,          VK_OEM_COMMA
- M3,         ,          VK_OEM_PERIOD
- M4,         ,          VK_OEM_MINUS
- M5,         ,          VK_RSHIFT
- D2,         ,          VK_RMENU
- D3,         ,          VK_APPS
- D4,         ,          VK_RCONTROL
- S2,         ,          VK_LMENU
- S3,         ,          VK_LWIN
- S4,         ,          VK_LCONTROL
- ret,        Return,    VK_RETURN
- back,       BackSpace, VK_BACK
- lef,        Left,      VK_LEFT
- rig,        Right,     VK_RIGHT
- ins,        Insert,    VK_INSERT
+# These mappings serve to map input from a swedish keyboard layout to a generic
+# key name like so:
+#
+#    12 1  2  3  4  5  6  7  8  9  0  02 03 back
+#    Q2 Q  W  E  R  T  Y  U  I  O  P  P2 P3 ret
+#    A2 A  S  D  F  G  H  J  K  L  L2 L3 L4
+# Z3 Z2 Z  X  C  V  B  N  M  M2 M3 M4 M5
+#          S4 S3 S2 space D2 D3 D4
+#
+#
+#commonname, keysym,           vkey
+ 12,         section,          VK_OEM_5
+ 12,         onehalf,
+ 12,         paragraph,
+ 1,          exclam,
+ 1,          exclamdown,
+ 2,          quotedbl,
+ 2,          at,
+ 3,          numbersign,
+ 3,          sterling,
+ 4,          currency,
+ 4,          dollar,
+ 5,          percent,
+#EuroSign is duplicate on 5 and E
+ 6,          ampersand,
+ 6,          yen,
+ 7,          slash,
+ 7,          braceleft,
+ 8,          parenleft,
+ 8,          bracketleft,
+ 9,          parenright,
+ 9,          bracketright,
+ 0,          equal,
+ 0,          braceright,
+ 02,         plus,             VK_OEM_PLUS
+ 02,         question,
+ 02,         backslash,
+ 03,         dead_acute,       VK_OEM_4
+ 03,         dead_grave,
+ 03,         plusminus,
+ back,       BackSpace,        VK_BACK
+ ins,        Insert,           VK_INSERT
+ Q2,         Tab,              VK_TAB
+ P2,         aring,            VK_OEM_6
+ P2,         Aring,
+#AltGr+P2 produces dead_diaeresis as well
+ P3,         dead_diaeresis,   VK_OEM_1
+ P3,         dead_circumflex,
+ P3,         dead_tilde,
+ ret,        Return,           VK_RETURN
+ A2,         Caps_Lock,        VK_CAPITAL
+ L2,         odiaeresis,       VK_OEM_3
+ L2,         Odiaeresis,
+ L2,         oslash,
+ L2,         Oslash,
+ L3,         adiaeresis,       VK_OEM_7
+ L3,         Adiaeresis,
+ L3,         ae,
+ L3,         AE,
+ L4,         apostrophe,       VK_OEM_2
+ L4,         asterisk,
+ L4,         acute,
+ L4,         multiply,
+ Z3,         Shift_L,          VK_LSHIFT
+ Z2,         less,             VK_OEM_102
+ Z2,         greater,
+ M2,         comma,            VK_OEM_COMMA
+ M2,         semicolon,
+ M2,         dead_cedilla,
+ M2,         dead_ogonek,
+ M3,         period,           VK_OEM_PERIOD
+ M3,         colon,
+ M3,         periodcentered,
+#dead_abovedot is duplicated on M3 and M4
+#M3,         dead_abovedot,
+ M4,         minus,            VK_OEM_MINUS
+ M4,         underscore,
+ M4,         dead_belowdot,
+#M4,         dead_abovedot,
+ M5,         Shift_R,          VK_RSHIFT
+ S4,         Control_l,        VK_LCONTROL
+ S3,         Super_L,          VK_LWIN
+ S2,         Alt_L,            VK_LMENU
+ S2,         Meta_L,
+ D2,         ISO_Level3_Shift, VK_RMENU
+ D3,         Super_R,          VK_APPS
+ D4,         Control_R,        VK_RCONTROL
+ lef,        Left,             VK_LEFT
+ rig,        Right,            VK_RIGHT

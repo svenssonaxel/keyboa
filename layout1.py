@@ -134,6 +134,9 @@ load("WM",[
 	("Q", "A-space,Wait-250,X"),
 	("M4","A-space,Wait-250,N")])
 
+for key in planes["from"]:
+	if(key): load("X11-WM",[(key, "C-M-section,Wait-100,"+key)])
+
 w("Num",
  ".       .       F12     F11     F10     .       .e      .a      .b      .c      .d      .f      .       " +
  ".       F12     F9      F8      F7      [       ]       7       8       9       back    /       .       " +
@@ -186,8 +189,11 @@ planeprefixes=[
 	set()]
 
 # List and priority of mode combinations together with allowed effective mods.
-# The empty set represents ignoring all modes.
+# The empty set represents ignoring all modes and allowing no effective mods,
+# respectively.
 modespriority=[
+	({"Win"},set()),
+	({"X11"},{"Ctrl"}),
 	({"Box"},set()),
 	({"Cyr"},set()),
 	({"TeX"},set()),
