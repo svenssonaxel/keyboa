@@ -62,6 +62,9 @@ def _keysymobj_compareby(obj):
 		obj["x11_keysym_description"].startswith("Alias for "),
 		obj["x11_keysym_description"].startswith("Same as "),
 		len(obj["x11_keysym_symbol"])]
+def format_unicode(cp):
+	if(not cp): return None
+	return hex(cp).replace("0x", "U+")
 for (keysym, keysym_symbol, keysym_description, unicode_codepoint) in [
 		(int(n, 16), s, d, None if u=="" else int(u, 16))
 		for [n, s, d, u]
@@ -70,14 +73,17 @@ for (keysym, keysym_symbol, keysym_description, unicode_codepoint) in [
 		  "x11_keysym_symbol": keysym_symbol,
 		  "x11_keysym_description": keysym_description,
 		  "unicode_codepoint": unicode_codepoint}
+	cpkey=format_unicode(unicode_codepoint)
 	save=_keysymsdict[keysym] if keysym in _keysymsdict else item
+	save=_keysymsdict[cpkey] if cpkey in _keysymsdict else save
 	if(_keysymobj_compareby(item) <
 	   _keysymobj_compareby(save)):
 		save["x11_keysym_symbol"]=item["x11_keysym_symbol"]
 		save["x11_keysym_description"]=item["x11_keysym_description"]
 		save["unicode_codepoint"]=item["unicode_codepoint"]
-	_keysymsdict[keysym]=save
-	_keysymsdict[keysym_symbol]=save
+	if(keysym): _keysymsdict[keysym]=save
+	if(keysym_symbol): _keysymsdict[keysym_symbol]=save
+	if(cpkey): _keysymsdict[cpkey]=save
 
 def keysyminfo(x):
 	if(isinstance(x,int)):
