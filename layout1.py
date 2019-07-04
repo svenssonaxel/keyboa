@@ -91,16 +91,16 @@ load("Sym", [("0","space"),
 load("HyperNum",[("space","₀")])
 
 w("Nav",
- ".       .       .       C-S-Tab C-Tab   .       .       .       10*Up   .       .       .       .       " +
+ ".       .       .      C-S-LTab C-Tab   .       .       .       10*Up   .       .       .       .       " +
  ".       Esc     Alt-F4  C-PgUp  C-PgDn  A-Home  .       Home    Up      End     Back    Del     .       " +
- ".       A-Left  A-Right S-Tab   Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Up,End .    " +
+ ".       A-Left  A-Right S-LTab  Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Up,End .    " +
  ".       .       .       .       .       .       .       Ins     10*Down S-home,Back S-end,del . .       " +
  "           .       .       .              space          space,left .       .                           " )
 
 w("Nav2",
  ".       .       .       .       .       .       .       .       10*PgUp .       .       .       .       " +
  ".       .       .       C-A-lef C-A-rig .       .       C-Home  PgUp    C-End   C-Back  C-Del   .       " +
- ".       .       .       S-A-Tab A-Tab   .       .       C-Left  PgDn    C-Right S-Ret   .       .       " +
+ ".       .       .      S-A-LTab A-Tab   .       .       C-Left  PgDn    C-Right S-Ret   .       .       " +
  ".       .       .       .       .       .       .       .       10*PgDn .       S-end,S-rig,S-del .     " )
 
 load("Nav3",[
@@ -767,7 +767,7 @@ for cn in ("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,"+
            "Up,Down,Lef,Left,Rig,Right,"+
            "Super,Hyper,Meta,Alt,Ctrl,Shift,AltGr,"+
            "Ins,Del,Home,End,PgUp,PgDn,"+
-           "Esc,Back,Tab,Ret,Comma,Period"
+           "Esc,Back,Tab,LTab,Ret,Comma,Period"
           ).split(","):
 	data.add_commonname_alias(cn, cn.lower(), True)
 	data.add_commonname_alias(cn.title(), cn.lower())

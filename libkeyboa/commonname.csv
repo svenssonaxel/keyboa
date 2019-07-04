@@ -358,3 +358,4 @@
  hyper,             Hyper_L,
  hyperleft,         Hyper_L,
  hyperright,        Hyper_R,
+ ltab,              ISO_Left_Tab,     VK_TAB
