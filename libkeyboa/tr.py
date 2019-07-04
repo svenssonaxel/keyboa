@@ -430,7 +430,6 @@ def loadstate(filename):
 	def ret(gen):
 		if(state):
 			yield {"type":"loadstate","data":state}
-			yield {"type":"tick", "after":"loadstate"}
 		for obj in gen: yield obj
 	return ret
 

@@ -651,7 +651,7 @@ def termui(gen):
 		if(t=="keyup_all"):
 			update=True
 			data={**data, **on_keyup_all}
-		if(update and (t=="tick" or not oldshow)):
+		if(update):
 			update=False
 			modes=data["modes"]
 			box=[Tt(x+" ") for x in (
