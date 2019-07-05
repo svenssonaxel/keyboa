@@ -788,7 +788,7 @@ def resolve_characters(gen):
 			yield obj
 
 list_of_transformations = [
-	tr.keyboa_input(),                                      # libkeyboa
+	tr.input_events(),                                      # libkeyboa
 	tr.releaseall_at_init(),                                # libkeyboa
 	tr.altgr_workaround_input(),                            # libkeyboa
 	tr.loadstate(statesavefile),                            # libkeyboa
@@ -814,7 +814,7 @@ list_of_transformations = [
 	tr.altgr_workaround_output(),                           # libkeyboa
 	termui(),                                               # layout1
 	tr.savestate(statesavefile),                            # libkeyboa
-	tr.keyboa_output()]                                     # libkeyboa
+	tr.output_events()]                                     # libkeyboa
 
 if(__name__=="__main__"):
 	keyboa_run(list_of_transformations)

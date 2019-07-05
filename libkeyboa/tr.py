@@ -4,7 +4,7 @@
 # This file is part of keyboa version <VERSION>
 # License: See LICENSE
 
-import sys, json, time, libkeyboa.data as data
+import sys, json, time, itertools, libkeyboa.data as data
 
 # Most functons in this module return transformations. retgen is a decorator for
 # making a functon of no arguments return the supplied transformation
@@ -13,77 +13,80 @@ def retgen(transformation):
 		return transformation
 	return returntransformation
 
-# Read events from stdin. Auto-detect source format and adjust accordingly.
-# Supported formats are:
-# - The JSON output of listenkey.exe
-# - The format of x11vnc -pipeinput
-# After detecting the format, inform any downstream output processor so it can
-# match output format, then begin producing events from source.
-@retgen
-def keyboa_input(_):
-	try:
-		firstline=sys.stdin.readline()
-		if(firstline.startswith('{')):
-			# listenkey.exe format
-			obj=json.loads(firstline)
-			# listenkey.exe may or may not print an init message. At a minimum,
-			# the output generator needs to know what format to print.
-			if(not obj["type"]=="init"):
+# Input events. The inputformat argument can be
+# - keyboa: The format written by listenkey.exe on Windows
+# - x11vnc: The format written by `x11vnc -pipeinput` under X11
+# - autodetect: keyboa or x11vnc depending on the first line
+# In any case, the chosen inputformat will be communicated in an "inputformat"
+# event.
+def input_events(inputformat="autodetect", inputfile=sys.stdin):
+	def input_events_keyboa_format(gen):
+		yield {"type":"inputformat","inputformat":"keyboa"}
+		for line in gen:
+			yield json.loads(gen)
+	def input_events_x11vnc_format(gen):
+		yield {"type":"inputformat","inputformat":"x11vnc"}
+		for line in gen:
+			if(line.startswith('#')): # comment
+				pass
+			elif(line.startswith('Pointer ')):
+				line=line.split(" ")
+				line[1:5]=map(int, line[1:5])
+				[_, client_id, xpos, ypos, mask, hint] = line
+				buttonid=1
+				buttonsdown=set()
+				while(mask):
+					if(mask&1):
+						buttonsdown.add(buttonid)
+						buttonid+=1
+						mask-=1
+					mask>>=1
 				yield {
-					"type": "init",
-					"platform": "windows"}
-			yield obj
-			for line in sys.stdin:
-				obj=json.loads(line)
-				yield obj
-				yield {"type":"tick", "after":"input_event"}
+					"type": "pointerstate",
+					"vnc_client_id": int(client_id),
+					"vnc_xpos": int(xpos),
+					"vnc_ypos": int(ypos),
+					"vnc_buttonsdown": buttonsdown,
+					"vnc_hint": hint}
+			elif(line.startswith('Keysym ')):
+				line=line.split(" ")
+				line[1:4]=map(int, line[1:4])
+				[_, client_id, down, keysym, keysym_symbol, hint] = line
+				yield {
+					"type": "keydown" if down else "keyup",
+					"vnc_client_id": int(client_id),
+					"x11_keysym": int(keysym),
+					"x11_keysym_symbol": keysym_symbol,
+					"vnc_hint": hint}
+			else:
+				raise Exception("Unknown x11vnc event")
+	def input_events_autodetect_format(gen):
+		firstline=next(gen)
+		restored_gen=itertools.chain([firstline], gen)
+		if(firstline.startswith('{')):
+			yield from input_events_keyboa_format(restored_gen)
 		elif(firstline.startswith('#') or
 		     firstline.startswith('Pointer ') or
 		     firstline.startswith('Keysym ')):
-			# x11vnc format
-			yield {
-				"type": "init",
-				"platform": "vnc"}
-			for line in sys.stdin:
-				if(line.startswith('#')): # comment
-					pass
-				elif(line.startswith('Pointer ')):
-					line=line.split(" ")
-					line[1:5]=map(int, line[1:5])
-					[_, client_id, xpos, ypos, mask, hint] = line
-					buttonid=1
-					buttonsdown=set()
-					while(mask):
-						if(mask&1):
-							buttonsdown.add(buttonid)
-							buttonid+=1
-							mask-=1
-						mask>>=1
-					yield {
-						"type": "pointerstate",
-						"vnc_client_id": int(client_id),
-						"vnc_xpos": int(xpos),
-						"vnc_ypos": int(ypos),
-						"vnc_buttonsdown": buttonsdown,
-						"vnc_hint": hint}
-				elif(line.startswith('Keysym ')):
-					line=line.split(" ")
-					line[1:4]=map(int, line[1:4])
-					[_, client_id, down, keysym, keysym_symbol, hint] = line
-					yield {
-						"type": "keydown" if down else "keyup",
-						"vnc_client_id": int(client_id),
-						"x11_keysym": int(keysym),
-						"x11_keysym_symbol": keysym_symbol,
-						"vnc_hint": hint}
-				else:
-					raise Exception("Unknown x11vnc event")
+			yield from input_events_x11vnc_format(restored_gen)
 		else:
-			raise Exception("Unknown format")
-	except KeyboardInterrupt:
-		pass
-	finally:
-		yield {"type":"exit"}
+			raise Exception("Couldn't detect input format")
+	def ret(_):
+		gen=inputfile
+		try:
+			if(inputformat=="autodetect"):
+				yield from input_events_autodetect_format(gen)
+			elif(inputformat=="keyboa"):
+				yield from input_events_keyboa_format(gen)
+			elif(inputformat=="x11vnc"):
+				yield from input_events_x11vnc_format(gen)
+			else:
+				raise Exception("Illegal input format specified: "+str(inputformat))
+		except KeyboardInterrupt:
+			pass
+		finally:
+			yield {"type":"exit"}
+	return ret
 
 @retgen
 def add_commonname(gen):
@@ -124,29 +127,15 @@ def resolve_commonname(gen):
 		else:
 			yield obj
 
-# Output events to stdout. Detect format announced by input() and adjust
-# accordingly.
-# Supported formats are:
-# - The JSON format for sendkey.exe
-# - The format of x11vnc -pipeinput
-@retgen
-def keyboa_output(gen):
-	platform=None
-	for obj in gen:
-		t=obj["type"]
-		if(t not in [
-				"init",
-				"keydown",
-				"keyup",
-				"keypress",
-				"pointerstate"]):
-			continue
-		if(platform==None):
-			if(t=="init"):
-				platform=obj["platform"]
-			else:
-				raise Exception("Missing init message. Instead, the type is: "+t)
-		elif(platform=="windows"):
+# Output events. The outputformat argument can be
+# - keyboa: The format read by sendkey.exe on Windows
+# - xdotool: The format read by `xdotool -` under X11
+# - autodetect:
+#    - keyboa if input format is keyboa
+#    - xdotool if input format is x11vnc
+def output_events(outputformat="autodetect", outputfile=sys.stdout):
+	def output_events_keyboa_format(gen):
+		for obj in gen:
 			if(obj["type"]=="output"):
 				obj=obj["data"]
 			if(obj["type"] in ["keydown", "keyup", "keypress"]):
@@ -165,9 +154,11 @@ def keyboa_output(gen):
 				   and "unicode_codepoint" in event):
 					del event["unicode_codepoint"]
 				if(send):
-					json.dump(event, sys.stdout, allow_nan=False, indent=1)
-					print(file=sys.stdout, flush=True)
-		elif(platform=="vnc"):
+					json.dump(event, outputfile, allow_nan=False, separators=(',',':'))
+					print(file=outputfile, flush=True)
+			yield obj
+	def output_events_xdotool_format(gen):
+		for obj in gen:
 			if(obj["type"]=="output"):
 				obj=obj["data"]
 			t=obj["type"]
@@ -198,9 +189,36 @@ def keyboa_output(gen):
 					#print("Error trying to output "+t+" event: "+str(obj),file=sys.stderr)
 			elif(t=="pointerstate"):
 				pass # todo
+			yield obj
+	def output_events_autodetect_format(gen):
+		# Find out what input format was used
+		inputformat=None
+		for obj in gen:
+			if(obj["type"]=="output"):
+				obj=obj["data"]
+			t=obj["type"]
+			if(t in ["keydown", "keyup", "keypress", "pointerstate"]):
+				raise Exception("Event with type "+t+" before init message")
+			if(t=="inputformat"):
+				inputformat=obj["inputformat"]
+				yield obj
+				break
+			yield obj
+		# Output using the detected format
+		if(inputformat=="keyboa"):
+			yield from output_events_keyboa_format(gen)
+		elif(inputformat=="x11vnc"):
+			yield from output_events_xdotool_format(gen)
 		else:
-			raise Exception("Unknown platform")
-		yield obj
+			raise Exception("Couldn't determine output format")
+	if(outputformat=="autodetect"):
+		return output_events_autodetect_format
+	elif(outputformat=="keyboa"):
+		return output_events_keyboa_format
+	elif(outputformat=="xdotool"):
+		return output_events_xdotool_format
+	else:
+		raise Exception("Illegal output format specified: "+str(outputformat))
 
 # A transformation that changes nothing while printing everything to stderr
 @retgen
