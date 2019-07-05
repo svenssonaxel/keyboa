@@ -775,12 +775,15 @@ def termui(gen):
 			oldshow=show
 		yield obj
 
-def ratelimit_filter(obj):
+def ratelimit_filter_updown(obj):
 	if(obj["type"] in ["keydown", "keypress"]
 	   and "commonname" in obj
 	   and obj["commonname"] in ["Up", "Down", "PgUp", "PgDn"]):
 			return True
 	return False
+
+def ratelimit_filter_keyevent(obj):
+	return obj["type"] in ["keypress", "keydown", "keyup"]
 
 key_timeouts={
 	"S3": 10,
@@ -862,7 +865,8 @@ list_of_transformations = [
 	printdate("Printdate"),                                 # layout1
 	wait("Wait"),                                           # layout1
 	tr.chords_to_events("commonname"),                      # libkeyboa
-	tr.ratelimit(40, ratelimit_filter),                     # libkeyboa
+	tr.ratelimit(40, ratelimit_filter_updown),              # libkeyboa
+	tr.ratelimit(1000, ratelimit_filter_keyevent),          # libkeyboa
 	tr.resolve_commonname(),                                # libkeyboa
 	resolve_characters(),                                   # layout1
 	tr.altgr_workaround_output(),                           # libkeyboa
