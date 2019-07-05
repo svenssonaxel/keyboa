@@ -36,7 +36,6 @@ def keyboa_input(_):
 			for line in sys.stdin:
 				obj=json.loads(line)
 				yield obj
-				yield {"type":"tick", "after":"input_event"}
 		elif(firstline.startswith('#')):
 			# x11vnc format
 			yield {
@@ -436,7 +435,6 @@ def loadstate(filename):
 	def ret(gen):
 		if(state):
 			yield {"type":"loadstate","data":state}
-			yield {"type":"tick", "after":"loadstate"}
 		for obj in gen: yield obj
 	return ret
 

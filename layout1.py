@@ -328,10 +328,8 @@ def numarg_multiplier(gen):
 				yield {"type":"ui","data":{
 					"multiplier":"",
 					"multiplier_executing":numarg}}
-				for repeat_index in range(repeat):
+				for _ in range(repeat):
 					yield obj
-					if(repeat_index==0):
-						yield {"type":"tick","after":"multiplier_start"}
 				numarg=""
 				needs_ui_reset=True
 			else:
@@ -699,7 +697,7 @@ def termui(gen):
 		if(t=="keyup_all"):
 			update=True
 			data={**data, **on_keyup_all}
-		if(update and (t=="tick" or not oldshow)):
+		if(update):
 			update=False
 			modes=data["modes"]
 			box=[Tt(x+" ") for x in (
