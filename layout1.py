@@ -312,6 +312,8 @@ def numarg_multiplier_filter(obj):
 		return maybedigit
 	return True
 
+max_numarg_digits=4
+
 # Repeat functionality
 @retgen
 def numarg_multiplier(gen):
@@ -343,7 +345,7 @@ def numarg_multiplier(gen):
 				"multiplier":numarg}}
 		else:
 			numarg+=r
-			numarg=numarg[-3:]
+			numarg=numarg[-max_numarg_digits:]
 			yield {"type":"ui","data":{
 				"multiplier":numarg}}
 
@@ -744,7 +746,7 @@ def termui(gen):
 				 if len(modes)>0 else "")+
 				(color_ui(" ".join(sorted(lockedmods)),"green")+" "
 				 if len(lockedmods)>0 else "")+
-				(color_ui(multiplier.rjust(4), "yellow")+" ")+
+				(color_ui(multiplier.rjust(max_numarg_digits+1), "yellow")+" ")+
 				(color_ui(" ".join(virtual),"white")+" "
 				 if len(virtual)>0 else ""))
 			line3=(box[3]+
