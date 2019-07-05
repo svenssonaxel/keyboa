@@ -468,12 +468,19 @@ def savestate(filename):
 	return ret
 
 # Macro record/playback functionality. Macros are sequences of chords.
-# macrotest is a function of a chord returning:
-# - The name for the macro if the chord means save/playback
-# - True if the chord means begin/cancel recording
-# - False otherwise
-# In normal mode, macrotest can playback or begin recording.
-# While recording a macro, macrotest can cancel or save recording.
+# macrotest(event, recording) is a function of an event and a bool indicating
+# whether the current state is recording. During recording, it is supposed to
+# return:
+# - If the event means save: ["save", macroname] where macroname is a string
+# - If the event means cancel recording: ["cancel", None]
+# - If the event is to be recorded: ["recordable", event] where event is the
+#   event to be recorded
+# - Otherwise: [False, None]
+# During waiting, it is supposed to return
+# - If the event means playback: ["playback", macroname] where macroname is a
+#   string
+# - If the event means begin recording: ["record", None]
+# - Otherwise: [False, None]
 # If statekey is given, it is used to persist macros between sessions.
 # ui events are generated to communicate state and state transitions.
 # TRANSITION     ( FROMSTATE -> TOSTATE   )
@@ -481,8 +488,8 @@ def savestate(filename):
 # save           ( recording -> waiting   )
 # cancel         ( recording -> waiting   )
 # playback       ( waiting   -> playback  )
-# finishplayback ( waiting   -> playback  )
-# emptyplayback  ( waiting   -> playback  )
+# finishplayback ( playback  -> waiting   )
+# emptyplayback  ( waiting   -> waiting   )
 def macro(macrotest, statekey=None):
 	def ret(gen):
 		macros={}
@@ -492,47 +499,58 @@ def macro(macrotest, statekey=None):
 			if(obj["type"]=="loadstate" and statekey and
 			   statekey in obj["data"]):
 				macros=obj["data"][statekey]
-			mt=macrotest(obj) if obj["type"]=="chord" else False
-			if(mt):
-				if(mt==True):
-					newmacro=[]
-					yield {"type":"ui","data":{
-						"macro.state": "recording",
-						"macro.transition": "record"}}
-					for obj in gen:
-						mt2=macrotest(obj) if obj["type"]=="chord" else False
-						if(mt2):
-							if(mt2!=True):
-								macros[mt2]=newmacro
-								if(len(newmacro)==0):
-									del macros[mt2]
-								if(statekey):
-									yield {"type":"savestate",
-										"data":{statekey:macros}}
-								yield {"type":"ui","data":{
-									"macro.state": "waiting",
-									"macro.transition": "save"}}
-							else:
-								yield {"type":"ui","data":{
-									"macro.state": "waiting",
-									"macro.transition": "cancel"}}
-							break
-						elif(obj["type"]=="chord"): # record only chords
-							newmacro.append(obj)
+			[mt_op, mt_arg]=macrotest(obj, False)
+			if(mt_op=="record"):
+				# Record macro
+				newmacro=[]
+				yield {"type":"ui","data":{
+					"macro.state": "recording",
+					"macro.transition": "record"}}
+				for obj in gen:
+					[mt2_op, mt2_arg]=macrotest(obj, True)
+					if(mt2_op=="save"):
+						# Save macro
+						macros[mt2_arg]=newmacro
+						if(len(newmacro)==0):
+							del macros[mt2_arg]
+						if(statekey):
+							yield {"type":"savestate",
+								"data":{statekey:macros}}
+						yield {"type":"ui","data":{
+							"macro.state": "waiting",
+							"macro.transition": "save",
+							"macro.key": mt2_arg}}
+						break
+					elif(mt2_op=="cancel"):
+						# Cancel recording
+						yield {"type":"ui","data":{
+							"macro.state": "waiting",
+							"macro.transition": "cancel"}}
+						break
+					else:
+						if(mt2_op=="recordable"):
+							# Add processed event to recording
+							newmacro.append(mt2_arg)
+						# Pass-through unprocessed event
 						yield obj
-				elif(mt in macros):
-					yield {"type":"ui","data":{
-						"macro.state": "playback",
-						"macro.transition": "playback"}}
-					yield from macros[mt]
-					yield {"type":"ui","data":{
-						"macro.state": "waiting",
-						"macro.transition": "finishplayback"}}
-				else:
-					yield {"type":"ui","data":{
-						"macro.state": "waiting",
-						"macro.transition": "emptyplayback"}}
+			elif(mt_op=="playback" and mt_arg in macros):
+				# Playback existing macro
+				yield {"type":"ui","data":{
+					"macro.state": "playback",
+					"macro.transition": "playback",
+					"macro.key": mt_arg}}
+				yield from macros[mt_arg]
+				yield {"type":"ui","data":{
+					"macro.state": "waiting",
+					"macro.transition": "finishplayback"}}
+			elif(mt_op=="playback"):
+				# Playback non-existing macro
+				yield {"type":"ui","data":{
+					"macro.state": "waiting",
+					"macro.transition": "emptyplayback",
+					"macro.key": mt_arg}}
 			else:
+				# Pass-through when not in record or playback
 				yield obj
 	return ret
 

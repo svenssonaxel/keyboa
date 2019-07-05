@@ -306,6 +306,7 @@ def modeswitch(modeswitchset, modeswitchname):
 # - False otherwise
 def numarg_multiplier_filter(obj):
 	if(obj["type"]!="chord"): return False
+	if("multiplier_ignore" in obj and obj["multiplier_ignore"]): return False
 	if(obj["downmods"]!={"Meta", "Num"}): return True
 	maybedigit=planelookup(obj["key"], "Num")
 	if(maybedigit in {"back","0","1","2","3","4","5","6","7","8","9"}):
@@ -615,21 +616,6 @@ def wait(modifier):
 				yield obj
 	return ret
 
-@retgen
-def macro_ui(gen):
-	macrorecording=False
-	for obj in gen:
-		yield obj
-		t=obj["type"]
-		mt=macrotest(obj) if t=="chord" else False
-		if(mt):
-			yield {"type":"ui", "data":{
-				"scriptmods": set(),
-				"planename": "Macro",
-				"script": (
-					"RECORD/CANCEL"
-					if mt==True else mt)}}
-
 def boxdrawings_ui(settings):
 	ret=["","","",""]
 	for y in range(4):
@@ -663,6 +649,10 @@ def color_ui(text, color):
 		].index(color)+1)+"m"+text+"\033[0m"),
 		len(text))
 
+# This is the TUI (text user interface). It works in most terminals on both
+# windows and linux. It is rather ugly code because it depends on almost
+# everything else, but in doing so it saves a lot of other things from being
+# interdependent.
 @retgen
 def termui(gen):
 	oldshow=""
@@ -680,8 +670,10 @@ def termui(gen):
 		"multiplier":"",
 		"chords_to_events.keysdown.commonname":[],
 		"macro.state":"waiting",
-		"macro.transition":None,
+		"macro.transition":"finishplayback",
+		"macro.key":"",
 		"unicode_input": None}
+	script_newer_than_macro_transition=True
 	data=defaultdata
 	maxlen=0
 	term_clear="\033[2J"
@@ -694,9 +686,14 @@ def termui(gen):
 		if(t=="ui"):
 			update=True
 			data={**data, **obj["data"]}
+			if("macro.transition" in obj["data"]):
+				script_newer_than_macro_transition=False
+			if("script" in obj["data"]):
+				script_newer_than_macro_transition=True
 		if(t=="keyup_all"):
 			update=True
 			data={**data, **on_keyup_all}
+			script_newer_than_macro_transition=True
 		if(update):
 			update=False
 			modes=data["modes"]
@@ -708,35 +705,50 @@ def termui(gen):
 			planename=data["planename"]
 			scriptmods=data["scriptmods"]
 			script=data["script"]
-			multiplier=(data["multiplier"]+"x"
+			multiplier=(data["multiplier"]+"×"
 				if data["multiplier"] else "")
-			multiplier_executing=(str(int(data["multiplier_executing"]))+"x"
+			multiplier_executing=(str(int(data["multiplier_executing"]))+"×"
 				if data["multiplier_executing"] else "")
 			virtual=data["chords_to_events.keysdown.commonname"]
-			macrostate=("RECORDING" if data["macro.state"]=="recording"
-				else ("PLAYBACK" if data["macro.state"]=="playback" else ""))
 			tz=data["printdate.timezone"]
 			tzstr="local" if tz==None else ("UTC" + (("%+i" % tz) if tz!=0 else ""))
 			unicode_input_state=(
 				"" if data["unicode_input"]==None else
 				("0x"+data["unicode_input"]))
-			if(planename=="Macro"):
-				script={
-					"record": "RECORD",
-					"cancel": "CANCEL",
-					"save": "SAVE: "+script,
-					"playback": "PLAYBACK: "+script,
-					"finishplayback": "DONE: "+script,
-					"emptyplayback": "EMPTY MACRO SLOT: "+script,
-					}[data["macro.transition"]]
+			mk=data["macro.key"]
+			mt=data["macro.transition"]
+			macro_script_prefix={
+				"record": "RECORDING",
+				"cancel": "CANCEL",
+				"save": "SAVE: "+mk,
+				"playback": "PLAY: "+mk,
+				"finishplayback": "DONE: "+mk,
+				"emptyplayback": "NONE: "+mk,
+				}[mt]
+			macro_color=("green" if mt in ["save", "finishplayback"] else "red")
+			if(mt not in ["playback", "record"] and
+			   script_newer_than_macro_transition):
+				macro_script_prefix=""
+			if(mt!="finishplayback" and
+			   not script_newer_than_macro_transition):
+				planename=""
+				script=""
+			mult_exec_ui=(
+				color_ui(multiplier_executing, "yellow")+" "
+				if multiplier_executing else "")
+			mult_exec_before_macro=(
+				mt in ["playback", "finishplayback", "emptyplayback"] and
+				macro_script_prefix)
 			line0=box[0]+" ".join(physical)
 			line1=(box[1]+
+				(mult_exec_ui if mult_exec_before_macro else "")+
+				(color_ui(macro_script_prefix, macro_color)+" "
+				 if macro_script_prefix else "")+
 				(color_ui(planename+": ","cyan")
 				 if planename else "")+
 				(color_ui(" ".join(sorted(scriptmods)),"yellow")+" "
-				    if len(scriptmods)>0 else "")+
-				(color_ui(multiplier_executing, "yellow")+" "
-					if multiplier_executing else "")+
+				 if len(scriptmods)>0 else "")+
+				(mult_exec_ui if not mult_exec_before_macro else "")+
 				(script
 				 if script else ""))
 			line2=(box[2]+
@@ -749,7 +761,6 @@ def termui(gen):
 				 if len(virtual)>0 else ""))
 			line3=(box[3]+
 				color_ui(tzstr.ljust(7), "blue") +
-				color_ui(macrostate.ljust(10), "red") +
 				color_ui(unicode_input_state, "magenta"))
 			showarr=[line0,line1,line2,line3]
 			if("RedactUI" in modes):
@@ -791,22 +802,57 @@ key_timeouts={
 	"S2": 15,
 	"Q2": 5}
 
-# macrotest is a function of a chord returning:
-# - The name for the macro if the chord means save/playback
-# - True if the chord means begin/cancel recording
-# - False otherwise
-def macrotest(obj):
-	inchord=obj["chord"]
-	inmods=set(inchord[:-1])
-	inmods_wo_macro=filter(
-		lambda key: planelookup(key, "mods", key)!="Macro",
-		inmods)
-	downmods=obj["downmods"]
-	key=inchord[-1]
-	if(downmods=={"Macro"} and key=="space"): return True
-	if("Macro" in downmods):
-		return ",".join([*sorted(inmods_wo_macro),key])
-	return False
+# macrotest(event, recording) is a function of an event and a bool indicating
+# whether the current state is recording. During recording, it returns:
+# - If the event means save: ["save", macroname] where macroname is a string
+# - If the event means cancel recording: ["cancel", None]
+# - If the event is to be recorded: ["recordable", event] where event is the
+#   event to be recorded
+# - Otherwise: [False, None]
+# During waiting, it is supposed to return
+# - If the event means playback: ["playback", macroname] where macroname is a
+#   string
+# - If the event means begin recording: ["record", None]
+# - Otherwise: [False, None]
+def macrotest(obj, _):
+	if("macrotest" in obj):
+		return obj["macrotest"]
+	return [False, None]
+
+@retgen
+def macro_and_multiplier_controller(gen):
+	in_recording=False
+	for obj in gen:
+		if(obj["type"]!="chord"):
+			yield obj
+			continue
+		inchord=obj["chord"]
+		inmods=set(inchord[:-1])
+		inmods_wo_macro=filter(
+			lambda key: planelookup(key, "mods", key)!="Macro",
+			inmods)
+		downmods=obj["downmods"]
+		key=inchord[-1]
+		if(downmods=={"Macro"} and key=="space"):
+			yield {**obj,
+				"macrotest": ["cancel" if in_recording else "record", None],
+				"multiplier_ignore": True}
+			in_recording=not in_recording
+			continue
+		if("Macro" in downmods):
+			macroname=",".join([*sorted(inmods_wo_macro),key])
+			yield {**obj,
+				"macrotest": [
+					"save" if in_recording else "playback",
+					macroname],
+				"multiplier_ignore": in_recording}
+			in_recording=False
+			continue
+		if(in_recording):
+			yield {**obj,
+				"macrotest": ["recordable", obj]}
+			continue
+		yield obj
 
 statesavefile=None
 if(len(argv)>=2):
@@ -855,7 +901,7 @@ list_of_transformations = [
 	enrich_chord("mods", "modes"),                          # layout1
 	modlock({"Modlock"}, "Modlock", "space"),               # layout1
 	modeswitch({"Modlock","Ctrl"}, "Modeswitch"),           # layout1
-	macro_ui(),                                             # layout1
+	macro_and_multiplier_controller(),                      # layout1
 	numarg_multiplier(),                                    # layout1
 	tr.macro(macrotest, "macros"),                          # libkeyboa
 	chords_to_scripts(),                                    # layout1
