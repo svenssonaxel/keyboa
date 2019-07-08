@@ -509,6 +509,7 @@ def boxdrawings(modifier):
 			"rig":"l",
 			"das":"N",
 			"arc":"N"}
+		yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
 		for obj in gen:
 			if(obj["type"]=="loadstate" and "boxdrawing_state" in obj["data"]):
 				settings=obj["data"]["boxdrawing_state"]
