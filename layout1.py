@@ -216,6 +216,16 @@ def planelookup(key, plane, default=None):
 		return pl[i]
 	return default
 
+@retgen
+def exit_on_escape(gen):
+	for obj in gen:
+		yield obj
+		if(obj["type"]=="keyup" and
+		   (("x11_keysym" in obj and obj["x11_keysym"]==0xff1b) or
+			("win_virtualkey" in obj and obj["win_virtualkey"]==0x1b))):
+			yield {"type":"exit"}
+			break
+
 def enrich_chord(modifierplane, modeplane):
 	def ret(gen):
 		for obj in gen:
@@ -910,6 +920,7 @@ def resolve_characters(gen):
 list_of_transformations = [
 	tr.input_events(file=infile),                           # libkeyboa
 	tr.releaseall_at_init(),                                # libkeyboa
+ 	exit_on_escape(),                                       # layout1
 	tr.altgr_workaround_input(),                            # libkeyboa
 	tr.loadstate(statefilename),                            # libkeyboa
 	tr.add_commonname(),                                    # libkeyboa
