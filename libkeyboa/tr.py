@@ -19,7 +19,7 @@ def retgen(transformation):
 # - autodetect: keyboa or x11vnc depending on the first line
 # In any case, the chosen inputformat will be communicated in an "inputformat"
 # event.
-def input_events(inputformat="autodetect", inputfile=sys.stdin):
+def input_events(inputformat="autodetect", file=sys.stdin):
 	def input_events_keyboa_format(gen):
 		yield {"type":"inputformat","inputformat":"keyboa"}
 		for line in gen:
@@ -72,7 +72,7 @@ def input_events(inputformat="autodetect", inputfile=sys.stdin):
 		else:
 			raise Exception("Couldn't detect input format")
 	def ret(_):
-		gen=inputfile
+		gen=file
 		try:
 			if(inputformat=="autodetect"):
 				yield from input_events_autodetect_format(gen)
@@ -133,7 +133,7 @@ def resolve_commonname(gen):
 # - autodetect:
 #    - keyboa if input format is keyboa
 #    - xdotool if input format is x11vnc
-def output_events(outputformat="autodetect", outputfile=sys.stdout):
+def output_events(outputformat="autodetect", file=sys.stdout):
 	def output_events_keyboa_format(gen):
 		for obj in gen:
 			if(obj["type"]=="output"):
@@ -154,8 +154,8 @@ def output_events(outputformat="autodetect", outputfile=sys.stdout):
 				   and "unicode_codepoint" in event):
 					del event["unicode_codepoint"]
 				if(send):
-					json.dump(event, outputfile, allow_nan=False, separators=(',',':'))
-					print(file=outputfile, flush=True)
+					json.dump(event, file, allow_nan=False, separators=(',',':'))
+					print(file=file, flush=True)
 			yield obj
 	def output_events_xdotool_format(gen):
 		for obj in gen:
@@ -179,14 +179,15 @@ def output_events(outputformat="autodetect", outputfile=sys.stdout):
 						(hex(obj["x11_keysym"])
 						 if "x11_keysym" in obj
 						 else obj["x11_keysym_symbol"]),
+						file=file,
 						flush=True)
 				# Otherwise output using codepoint
 				elif("unicode_codepoint" in obj and t=="keypress"):
 					cp=obj["unicode_codepoint"]
-					print("type '"+chr(cp)+"'", flush=True)
+					print("type '"+chr(cp)+"'", file=file, flush=True)
 				else:
 					pass # todo rm
-					#print("Error trying to output "+t+" event: "+str(obj),file=sys.stderr)
+					#print("Error trying to output "+t+" event: "+str(obj),file=file)
 			elif(t=="pointerstate"):
 				pass # todo
 			yield obj
@@ -221,20 +222,20 @@ def output_events(outputformat="autodetect", outputfile=sys.stdout):
 		raise Exception("Illegal output format specified: "+str(outputformat))
 
 # A transformation that changes nothing while printing everything to stderr
-@retgen
-def debug(gen):
-	for obj in gen:
-		print(obj, file=sys.stderr, flush=True)
-		yield obj
+def debug(file=sys.stderr):
+	def ret(gen):
+		for obj in gen:
+			print(obj, file=file, flush=True)
+			yield obj
 
 # A transformation that changes nothing while printing everything to stderr in
 # json format
-@retgen
-def debug_json(gen):
-	for obj in gen:
-		json.dump(obj, sys.stderr, allow_nan=False, indent=1)
-		print(file=sys.stderr, flush=True)
-		yield obj
+def debug_json(file=sys.stderr):
+	def ret(gen):
+		for obj in gen:
+			json.dump(obj, file, allow_nan=False, indent=1)
+			print(file=file, flush=True)
+			yield obj
 
 # Only has effect on windows.
 # If possible, find out what keys are already down at the start of the stream,

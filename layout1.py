@@ -24,8 +24,8 @@
 from libkeyboa import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
-from sys import argv, stderr
 from unicodedata import name as unicodename
+import argparse, sys
 
 planes={}
 def load(plane, iter):
@@ -685,7 +685,7 @@ def termui(gen):
 	term_clear="\033[2J"
 	term_gototopleft="\033[;H"
 	# reset terminal
-	print(term_clear + term_gototopleft, file=stderr, flush=True, end='')
+	print(term_clear + term_gototopleft, file=uifile, flush=True, end='')
 	update=True
 	for obj in gen:
 		t=obj["type"]
@@ -788,7 +788,7 @@ def termui(gen):
 			if(show!=oldshow):
 				# In order to avoid blinking, first move to top-left corner of
 				# terminal without clearing, then overwrite.
-				print(term_gototopleft + show, file=stderr, flush=True, end='')
+				print(term_gototopleft + show, file=uifile, flush=True, end='')
 			oldshow=show
 		yield obj
 
@@ -860,9 +860,21 @@ def macro_and_multiplier_controller(gen):
 			continue
 		yield obj
 
-statesavefile=None
-if(len(argv)>=2):
-	statesavefile=argv[1]
+ap = argparse.ArgumentParser()
+ap.add_argument("-s", "--state", required=False, help="The file used to persist state. Default: No persistence.")
+ap.add_argument("-i", "--in",    required=False, help="The file used to input key events. Default: stdin.")
+ap.add_argument("-o", "--out",   required=False, help="The file used to output key events. Default: stdout.")
+ap.add_argument("-e", "--err",   required=False, help="The file used to output errors. Default: stderr.")
+ap.add_argument("-u", "--ui",    required=False, help="The terminal used for UI. Default: stderr.")
+args = vars(ap.parse_args())
+statefilename=args['state']
+infile=sys.stdin
+outfile=sys.stdout
+uifile=sys.stderr
+if(args["in"]): infile=open(args["in"], "r")
+if(args["out"]): outfile=open(args["out"], "w")
+if(args["err"]): sys.stderr=open(args['err'], "w")
+if(args["ui"]): uifile=open(args["ui"], "w")
 
 # Add custom commonname mappings
 for (commonname, keysym_symbol, vkey_symbol) in [
@@ -896,10 +908,10 @@ def resolve_characters(gen):
 			yield obj
 
 list_of_transformations = [
-	tr.input_events(),                                      # libkeyboa
+	tr.input_events(file=infile),                           # libkeyboa
 	tr.releaseall_at_init(),                                # libkeyboa
 	tr.altgr_workaround_input(),                            # libkeyboa
-	tr.loadstate(statesavefile),                            # libkeyboa
+	tr.loadstate(statefilename),                            # libkeyboa
 	tr.add_commonname(),                                    # libkeyboa
 	tr.allow_repeat("physkey"),                             # libkeyboa
 	tr.unstick_keys("commonname", key_timeouts),            # libkeyboa
@@ -923,8 +935,8 @@ list_of_transformations = [
 	resolve_characters(),                                   # layout1
 	tr.altgr_workaround_output(),                           # libkeyboa
 	termui(),                                               # layout1
-	tr.savestate(statesavefile),                            # libkeyboa
-	tr.output_events()]                                     # libkeyboa
+	tr.savestate(statefilename),                            # libkeyboa
+	tr.output_events(file=outfile)]                         # libkeyboa
 
 if(__name__=="__main__"):
 	keyboa_run(list_of_transformations)
