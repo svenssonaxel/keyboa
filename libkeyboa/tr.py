@@ -38,15 +38,15 @@ def input_events(inputformat="autodetect", file=sys.stdin):
 				while(mask):
 					if(mask&1):
 						buttonsdown.add(buttonid)
-						buttonid+=1
 						mask-=1
+					buttonid+=1
 					mask>>=1
 				yield {
 					"type": "pointerstate",
 					"vnc_client_id": int(client_id),
-					"vnc_xpos": int(xpos),
-					"vnc_ypos": int(ypos),
-					"vnc_buttonsdown": buttonsdown,
+					"x11_xpos": int(xpos),
+					"x11_ypos": int(ypos),
+					"x11_buttonsdown": buttonsdown,
 					"vnc_hint": hint}
 			elif(line.startswith('Keysym ')):
 				line=line.split(" ")
@@ -158,6 +158,8 @@ def output_events(outputformat="autodetect", file=sys.stdout):
 					print(file=file, flush=True)
 			yield obj
 	def output_events_xdotool_format(gen):
+		pos=[None, None]
+		but=set()
 		for obj in gen:
 			if(obj["type"]=="output"):
 				obj=obj["data"]
@@ -185,11 +187,19 @@ def output_events(outputformat="autodetect", file=sys.stdout):
 				elif("unicode_codepoint" in obj and t=="keypress"):
 					cp=obj["unicode_codepoint"]
 					print("type '"+chr(cp)+"'", file=file, flush=True)
-				else:
-					pass # todo rm
-					#print("Error trying to output "+t+" event: "+str(obj),file=file)
 			elif(t=="pointerstate"):
-				pass # todo
+				new_pos=[obj["x11_xpos"], obj["x11_ypos"]]
+				if(pos!=new_pos):
+					pos=new_pos
+					print("mousemove "+str(pos[0])+" "+str(pos[1]),
+						  file=file, flush=True)
+				new_but=obj["x11_buttonsdown"]
+				if(but!=new_but):
+					for b in but.difference(new_but):
+						print("mouseup "+str(b), file=file, flush=True)
+					for b in new_but.difference(but):
+						print("mousedown "+str(b), file=file, flush=True)
+					but=new_but
 			yield obj
 	def output_events_autodetect_format(gen):
 		# Find out what input format was used
