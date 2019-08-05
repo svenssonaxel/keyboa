@@ -23,7 +23,7 @@ def input_events(inputformat="autodetect", file=sys.stdin):
 	def input_events_keyboa_format(gen):
 		yield {"type":"inputformat","inputformat":"keyboa"}
 		for line in gen:
-			yield json.loads(gen)
+			yield json.loads(line)
 	def input_events_x11vnc_format(gen):
 		yield {"type":"inputformat","inputformat":"x11vnc"}
 		for line in gen:
