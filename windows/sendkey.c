@@ -8,7 +8,7 @@
 #include "sendkey-json-parser.c"
 #include "version.h"
 
-bool opt_d, opt_o, opt_p, opt_t;
+bool opt_d, opt_o, opt_p;
 
 void printjson(struct keyevent *ke, FILE *stream) {
 	bool td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
@@ -65,18 +65,18 @@ void sendkey_dispatch_handler(struct keyevent *ke) {
 	char* ke_error = validate_keyevent(ke);
 	if(ke_error) {
 		global_sendkey_error_handler(false, "Ignoring keyevent", ke_error);
+		return;
 	}
-	else {
-		if(!opt_d) {
-			send_keyevent(ke);
-		}
-		if(opt_p) {
-			printprettyjson(ke, stdout);
-		}
-		else if(opt_o) {
-			printjson(ke, stdout);
-		}
+	if(opt_p) {
+		printprettyjson(ke, stdout);
 	}
+	else if(opt_o) {
+		printjson(ke, stdout);
+	}
+	if(opt_d) {
+		return;
+	}
+	send_keyevent(ke);
 }
 
 void error_handler(bool critical, char* errclass, char* errmsg) {
@@ -106,7 +106,6 @@ void printhelp() {
 		" -d Dry run: Do not inject events.\n"
 		" -o Also print events on stdout.\n"
 		" -p Pretty-print on stdout (implies -o).\n"
-		" -t Where win_time is not provided, use current time yet always increase it.\n"
 		" -h Print this help text and exit.\n\n"
 		"sendkey is part of keyboa version %s\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
@@ -125,12 +124,11 @@ int main(int argc, char* argv[]) {
 			case 'd': opt_d = true;  break;
 			case 'o': opt_o = true;  break;
 			case 'p': opt_p = true;  break;
-			case 't': opt_t = true;  break;
 			case 'h': printhelp();
 			default: abort();
 		}
 	}
 	signal(SIGINT, quitsignal);
 	signal(SIGTERM, quitsignal);
-	sendkey_json_parser(opt_t);
+	sendkey_json_parser();
 }

@@ -22,9 +22,6 @@ struct parse_context {
 	size_t hkeystart;
 	size_t hkeyend;
 	bool stopped;
-	bool filltime;
-	bool gottime;
-	DWORD maxtime;
 };
 
 int error_callback(jsonsl_t jsn,
@@ -56,43 +53,23 @@ void callback(jsonsl_t jsn,
 	if(level == 1 && type == JSONSL_T_OBJECT && action == JSONSL_ACTION_PUSH) {
 		//reset key event data
 		ke->eventtype = KEYEVENT_T_UNDEFINED;
-		ke->scancode=0;
-		ke->virtualkey=0;
-		ke->extended=false;
-		ke->unicode_codepoint=0;
+		ke->eventtype_present = false;
+		ke->scancode = 0;
+		ke->scancode_present = false;
+		ke->extended = false;
+		ke->extended_present = false;
+		ke->virtualkey = 0;
+		ke->virtualkey_present = false;
+		ke->unicode_codepoint = 0;
+		ke->unicode_codepoint_present = false;
+		ke->time = 0;
+		ke->time_present = false;
 	}
 
 	//at end of top-level object
 	if(level == 1 && type == JSONSL_T_OBJECT && action == JSONSL_ACTION_POP) {
-		if(pc->filltime) {
-			DWORD sendtime;
-			if(pc->gottime) {
-				sendtime=ke->time;
-			}
-			else {
-				sendtime=GetTickCount();
-				sendtime=max(sendtime, pc->maxtime+1);
-			}
-			//handle keyevent
-			ke->time = sendtime;
-			if(ke->eventtype==KEYEVENT_T_KEYPRESS) {
-				ke->eventtype=KEYEVENT_T_KEYDOWN;
-				global_sendkey_keyevent_handler(ke);
-				ke->eventtype=KEYEVENT_T_KEYUP;
-				sendtime++;
-				ke->time = sendtime;
-				global_sendkey_keyevent_handler(ke);
-				ke->eventtype=KEYEVENT_T_KEYPRESS;
-			}
-			else {
-				global_sendkey_keyevent_handler(ke);
-			}
-			pc->maxtime = max(sendtime, pc->maxtime);
-		}
-		else {
-			//handle keyevent
-			global_sendkey_keyevent_handler(ke);
-		}
+		//handle keyevent
+		global_sendkey_keyevent_handler(ke);
 		pc->stopped = true;
 		jsonsl_stop(jsn);
 	}
@@ -132,13 +109,12 @@ void callback(jsonsl_t jsn,
 					keyname)) {
 			jsonsl_type_t t = state->type;
 			jsonsl_special_t f = state->special_flags;
-			bool isstring = (t == JSONSL_T_STRING)?1:0;
 			bool ispint = (t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_UNSIGNED) && !(f & JSONSL_SPECIALf_NUMNOINT);
 			uint32_t intval = state->nelem;
-			bool isbool = (t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_BOOLEAN)?1:0;
-			bool boolval = (f & JSONSL_SPECIALf_TRUE)?1:0;
+			bool isbool = ((t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_BOOLEAN));
+			bool boolval = (f & JSONSL_SPECIALf_TRUE)?true:false;
 			if(strcmp(keyname, "type")==0) {
-				if(isstring) {
+				if(t == JSONSL_T_STRING) {
 					char* stringvalue = malloc(sizeof(char) * (state->pos_cur - state->pos_begin));
 					if(0 <= json_string_value_to_ascii(
 								pc->buffer + state->pos_begin - pc->min_available,
@@ -146,12 +122,15 @@ void callback(jsonsl_t jsn,
 								stringvalue)) {
 						if(strcmp(stringvalue, "keyup")==0) {
 							ke->eventtype = KEYEVENT_T_KEYUP;
+							ke->eventtype_present = true;
 						}
 						else if(strcmp(stringvalue, "keydown")==0) {
 							ke->eventtype = KEYEVENT_T_KEYDOWN;
+							ke->eventtype_present = true;
 						}
 						else if(strcmp(stringvalue, "keypress")==0) {
 							ke->eventtype = KEYEVENT_T_KEYPRESS;
+							ke->eventtype_present = true;
 						}
 						else {
 							fprintf(stderr, "Unknown keyevent type\n");
@@ -169,31 +148,7 @@ void callback(jsonsl_t jsn,
 			else if(strcmp(keyname, "win_scancode")==0) {
 				if(ispint) {
 					ke->scancode = intval;
-				}
-				else {
-					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
-				}
-			}
-			else if(strcmp(keyname, "win_virtualkey")==0) {
-				if(ispint) {
-					ke->virtualkey = intval;
-				}
-				else {
-					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
-				}
-			}
-			else if(strcmp(keyname, "unicode_codepoint")==0) {
-				if(ispint) {
-					ke->unicode_codepoint = intval;
-				}
-				else {
-					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
-				}
-			}
-			else if(strcmp(keyname, "win_time")==0) {
-				if(ispint) {
-					ke->time = intval;
-					pc->gottime = true;
+					ke->scancode_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
@@ -202,9 +157,37 @@ void callback(jsonsl_t jsn,
 			else if(strcmp(keyname, "win_extended")==0) {
 				if(isbool) {
 					ke->extended = boolval;
+					ke->extended_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a boolean\n", keyname);
+				}
+			}
+			else if(strcmp(keyname, "win_virtualkey")==0) {
+				if(ispint) {
+					ke->virtualkey = intval;
+					ke->virtualkey_present = true;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
+				}
+			}
+			else if(strcmp(keyname, "unicode_codepoint")==0) {
+				if(ispint) {
+					ke->unicode_codepoint = intval;
+					ke->unicode_codepoint_present = true;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
+				}
+			}
+			else if(strcmp(keyname, "win_time")==0) {
+				if(ispint) {
+					ke->time = intval;
+					ke->time_present = true;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
 				}
 			}
 		}
@@ -212,14 +195,13 @@ void callback(jsonsl_t jsn,
 	}
 }
 
-void sendkey_json_parser(bool filltime) {
+void sendkey_json_parser() {
 	struct parse_context pc={};
 	jsonsl_char_t buffer[BUFFER_SIZE];
 	int charsize = sizeof(jsonsl_char_t);
 	pc.buffer_len = BUFFER_SIZE * (charsize);
 	pc.buffer = (void*) buffer;
 	pc.buffer_writeat = 0;
-	pc.filltime = filltime;
 	jsonsl_t jsn;
 	jsn = jsonsl_new(0x100);
 	jsonsl_enable_all_callbacks(jsn);
@@ -254,7 +236,6 @@ void sendkey_json_parser(bool filltime) {
 				pc.stopped = false;
 				pc.min_available -= (jsn->pos);
 				pc.min_needed=0;
-				pc.gottime = false;
 				jsonsl_reset(jsn);
 			}
 		}
