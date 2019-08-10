@@ -28,11 +28,9 @@ int error_callback(jsonsl_t jsn,
 				   jsonsl_error_t err,
 				   struct jsonsl_state_st *state,
 				   char *at) {
-	//todo maybe position isn't meaningful
 	fprintf(stderr,
-			"JSON parse error at position %lu: %s\n"
+			"JSON parse error: %s\n"
 			"Remaining text: %s\n",
-			jsn->pos,
 			jsonsl_strerror(err),
 			at);
 	fflush(stderr);
@@ -195,9 +193,11 @@ void callback(jsonsl_t jsn,
 	}
 }
 
+_Static_assert (sizeof(jsonsl_char_t)==1, "char size 1 is assumed");
+_Static_assert (sizeof(char)==1, "char size 1 is assumed");
 void sendkey_json_parser() {
 	struct parse_context pc={};
-	jsonsl_char_t buffer[BUFFER_SIZE];
+	jsonsl_char_t buffer[BUFFER_SIZE+1]; //One extra for null temination
 	int charsize = sizeof(jsonsl_char_t);
 	pc.buffer_len = BUFFER_SIZE * (charsize);
 	pc.buffer = (void*) buffer;
@@ -218,6 +218,7 @@ void sendkey_json_parser() {
 		}
 		void* buffer_process = pc.buffer + pc.buffer_writeat;
 		ssize_t nread = read(0, buffer_process, maxread);
+		((char*)buffer_process)[nread] = 0; //add terminating null
 		pc.buffer_writeat += nread;
 		ssize_t toprocess = nread;
 		while(toprocess>=charsize) {

@@ -40,7 +40,7 @@ char* validate_keyevent(struct keyevent *ke) {
 	}
 	//check scancode
 	if(ke->scancode_present) {
-		if(!(1<=ke->scancode && ke->scancode<=255)) { //todo check doc
+		if(!(1<=ke->scancode && ke->scancode<=127)) {
 			return "Invalid scancode";
 		}
 	}
@@ -50,7 +50,7 @@ char* validate_keyevent(struct keyevent *ke) {
 	}
 	//check virtualkey
 	if(ke->virtualkey_present) {
-		if(!(0<=ke->virtualkey && ke->virtualkey<=254)) { //todo check doc
+		if(!(1<=ke->virtualkey && ke->virtualkey<=254)) {
 			return "Invalid virtualkey";
 		}
 	}
@@ -146,8 +146,12 @@ void send_keyevent(struct keyevent *ke) {
 			if(calctime) sendtime++;
 		}
 	}
-	SendInput(idx, input, sizeof(INPUT));
-	//todo handle return value
+	//Send events and handle failure
+	if(idx!=SendInput(idx, input, sizeof(INPUT))) {
+		fprintf(stderr,
+			"Failed sending events\n");
+		fflush(stderr);
+	}
 	maxtime=max(sendtime, maxtime);
 }
 
