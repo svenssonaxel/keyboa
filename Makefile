@@ -1,7 +1,7 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 # License: See LICENSE
 
-VERSION = $(shell ./makeversion)
+VERSION := $(shell ./makeversion)
 
 default: release
 
@@ -11,14 +11,14 @@ clean:
 	rm -rf __pycache__/ release/
 
 libkeyboa:
-	cd libkeyboa; make
+	cd libkeyboa; make VERSION=$(VERSION)
 
 windows:
-	cd windows; make
+	cd windows; make VERSION=$(VERSION)
 
 release: libkeyboa windows *LICENSE README.md
 	mkdir -p release/libkeyboa
-	cp -p windows/*.exe *LICENSE README.md layout* release/
+	cp -pr windows/*.exe *LICENSE README.md layout* release/
 	cp -pr libkeyboa/release/* release/libkeyboa
 	echo === Finished building keyboa version $(VERSION)
 
