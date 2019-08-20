@@ -7,7 +7,7 @@
 #include "liblistenkey.h"
 #include "version.h"
 
-bool opt_c, opt_C, opt_i, opt_e, opt_d, opt_f, opt_l, opt_L;
+bool opt_c, opt_C, opt_i, opt_e, opt_d, opt_l, opt_L;
 int evcount;
 
 bool processevent(KBDLLHOOKSTRUCT* hooked) {
@@ -21,38 +21,24 @@ bool processevent(KBDLLHOOKSTRUCT* hooked) {
 	if(!opt_i && (flags & LLKHF_INJECTED)) {
 		return consume;
 	}
-	if(!opt_f) {
-		printf(
-			"{\"type\":%s"
-			",\"win_scancode\":%5u"
-			",\"win_virtualkey\":%3u"
-			",\"win_extended\":%s"
-			",\"win_injected\":%s"
-			",\"win_lower_il_injected\":%s"
-			",\"win_altdown\":%s"
-			",\"win_time\":%10u}"
-			,(flags & LLKHF_UP) ? "\"keyup\"  " : "\"keydown\""
-			,scancode
-			,virtualkey
-			,(flags & LLKHF_EXTENDED) ? "true " : "false"
-			,(flags & LLKHF_INJECTED) ? "true " : "false"
-			,(flags & LLKHF_LOWER_IL_INJECTED) ? "true " : "false"
-			,(flags & LLKHF_ALTDOWN) ? "true " : "false"
-			,time
-		);
-	}
-	if(opt_f) {
-		printf("%s %04x %02x %s%s%s%s %08x"
-			,(flags & LLKHF_UP) ? "u" : "d"
-			,scancode
-			,virtualkey
-			,(flags & LLKHF_EXTENDED) ? "e" : "-"
-			,(flags & LLKHF_INJECTED) ? "i" : "-"
-			,(flags & LLKHF_LOWER_IL_INJECTED) ? "l" : "-"
-			,(flags & LLKHF_ALTDOWN) ? "a" : "-"
-			,time
-		);
-	}
+	printf(
+		"{\"type\":%s"
+		",\"win_scancode\":%5u"
+		",\"win_virtualkey\":%3u"
+		",\"win_extended\":%s"
+		",\"win_injected\":%s"
+		",\"win_lower_il_injected\":%s"
+		",\"win_altdown\":%s"
+		",\"win_time\":%10u}"
+		,(flags & LLKHF_UP) ? "\"keyup\"  " : "\"keydown\""
+		,scancode
+		,virtualkey
+		,(flags & LLKHF_EXTENDED) ? "true " : "false"
+		,(flags & LLKHF_INJECTED) ? "true " : "false"
+		,(flags & LLKHF_LOWER_IL_INJECTED) ? "true " : "false"
+		,(flags & LLKHF_ALTDOWN) ? "true " : "false"
+		,time
+	);
 	if(printf("\n") == -1) {
 		quitlistenkey();
 	}
@@ -190,7 +176,6 @@ void printinit(FILE* stream) {
 void printhelp() {
 	fprintf(stderr,
 		"\nPrint Windows keyboard events on stdout.\n\n"
-		"Unless -f is provided, output will be JSON.\n\n"
 		"Options:\n\n"
 		" -c Consume non-injected events (prevent windows sending them to applications).\n\n"
 		" -C Consume injected events (prevent windows sending them to applications).\n\n"
@@ -200,21 +185,6 @@ void printhelp() {
 		" -l At startup, print a message containing information about the current\n"
 		"    keyboard layout and state.\n\n"
 		" -L Exit after printing startup message (implies -l).\n\n"
-		" -f Output in fixed width format:\n"
-		"    Column Content\n"
-		"        1  'u' if key-up, 'd' if key-down\n"
-		"        2  Space\n"
-		"      3-6  Scan code, 4 hex digits\n"
-		"        7  Space\n"
-		"      8-9  Virtual key code, 2 hex digits\n"
-		"       10  Space\n"
-		"       11  'e' if extended, otherwise '-'\n"
-		"       12  'i' if injected (from any process), otherwise '-'\n"
-		"       13  'l' if injected (from process at lower integrity level),\n"
-		"               otherwise '-'\n"
-		"       14  'a' if alt down, otherwise '-'\n"
-		"       15  Space\n"
-		"    16-23  Time (ms since system start), 8 hex digits\n\n"
 		" -h Print this help text and exit.\n\n"
 		"listenkey is part of keyboa version %s\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
@@ -234,16 +204,11 @@ int main(int argc, char** argv) {
 			case 'i': opt_i = true;  break;
 			case 'e': opt_e = true;  break;
 			case 'd': opt_d = true;  break;
-			case 'f': opt_f = true;  break;
 			case 'l': opt_l = true;  break;
 			case 'L': opt_L = true; opt_l = true;  break;
 			case 'h': printhelp();
 			default: abort();
 		}
-	}
-	if(opt_l && opt_f) {
-		fprintf(stderr, "Options -l and -L are incompatible with -f.\n");
-		exit(1);
 	}
 	signal(SIGINT, quitlistenkey);
 	signal(SIGTERM, quitlistenkey);
