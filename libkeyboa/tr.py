@@ -209,7 +209,7 @@ def output_events(outputformat="autodetect", file=sys.stdout):
 				obj=obj["data"]
 			t=obj["type"]
 			if(t in ["keydown", "keyup", "keypress", "pointerstate"]):
-				raise Exception("Event with type "+t+" before init message")
+				raise Exception("Event with type "+t+" before inputformat message")
 			if(t=="inputformat"):
 				inputformat=obj["inputformat"]
 				yield obj
@@ -237,6 +237,7 @@ def debug(file=sys.stderr):
 		for obj in gen:
 			print(obj, file=file, flush=True)
 			yield obj
+	return ret
 
 # A transformation that changes nothing while printing everything to stderr in
 # json format
@@ -246,6 +247,7 @@ def debug_json(file=sys.stderr):
 			json.dump(obj, file, allow_nan=False, indent=1)
 			print(file=file, flush=True)
 			yield obj
+	return ret
 
 # Only has effect on windows.
 # If possible, find out what keys are already down at the start of the stream,
