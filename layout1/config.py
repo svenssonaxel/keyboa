@@ -37,7 +37,7 @@ w("from",
 
 w("mods",
  ".       .       WM2     mods    .       .       .       .       .       WM2     .       .       .       " +
- "Super   Macro   WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Date    Super   .       " +
+ "Super   Macro   WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Univ    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
  "Shell   Shift   Meta    Num     Math    Bats    Bats    Math    Num     Meta    Shift   Shift   .       " +
  "           Ctrl  Super     Alt            Mirror            AltGr   .       Ctrl                        " )
@@ -202,16 +202,37 @@ w("Box-",
  ".       b-lef=h b-dow=h b-up=h  b-rig=h .       b-__U_  b-__UR  b-L_UR  b-L_U_  .       .       .       " +
  "           .       .       .              space             .       .       .                           " )
 
-load("Date",[
-	("K", "Printdate-TZ_increase"),
-	("J", "Printdate-TZ_decrease"),
-	("Z", "Printdate-TZ_UTC"),
-	("L", "Printdate-TZ_local"),
+load("Univ",[
+	("A", "Printdate-%y%m%d"),
+	("S", "Printdate-%y%m%d%H%M%S"),
 	("D", "Printdate-%Y_%m_%d"),
-	("C", "Printdate-%y%m%d"),
-	("T", "Printdate-%H:%M"),
-	("G", "Printdate-%H%M"),
-	("S", "Printdate-%y%m%d%H%M%S")])
+	("F", "Printdate-%H%M"),
+	("G", "Printdate-%H:%M"),
+	("J", "Printdate-TZ_decrease"),
+	("K", "Printdate-TZ_increase"),
+	("L", "Printdate-TZ_local")])
+load("X11-Univ",[
+	("Y", "NONE"),            # Toggle light/dark color theme
+	("U", "NONE"),            # Reset zoom
+	("I", "XF86ZoomIn"),      # Zoom in
+	("O", "XF86ZoomOut"),     # Zoom out
+	("H", "XF86ScrollUp"),    # Scroll up
+	("Z", "Undo"),            # Undo
+	("X", "XF86Cut"),         # Cut
+	("C", "XF86Copy"),        # Copy
+	("V", "XF86Paste"),       # Paste
+	("N", "XF86ScrollDown")]) # Scroll down
+load("Win-Univ",[
+	("Y", "NONE"),            # Toggle light/dark color theme
+	("U", "C-0"),             # Reset zoom
+	("I", "C-plus"),          # Zoom in
+	("O", "C-minus"),         # Zoom out
+	("H", "NONE"),            # Scroll up
+	("Z", "C-Z"),             # Undo
+	("X", "S-del"),           # Cut
+	("C", "C-ins"),           # Copy
+	("V", "S-ins"),           # Paste
+	("N", "NONE")])           # Scroll down
 
 key_timeouts={
 	"S3": 10,
