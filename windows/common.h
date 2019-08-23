@@ -12,6 +12,14 @@
 #define LLKHF_LOWER_IL_INJECTED 0x02
 #endif
 
+#ifndef WM_MOUSEHWHEEL
+#define WM_MOUSEHWHEEL 0x020E
+#endif
+
+#ifndef LLMHF_LOWER_IL_INJECTED
+#define LLMHF_LOWER_IL_INJECTED 0x00000002
+#endif
+
 typedef unsigned __int32 ucodepoint;
 
 bool validate_unicode_codepoint(ucodepoint cp) {

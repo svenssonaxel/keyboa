@@ -7,19 +7,59 @@
 #include "liblistenkey.h"
 #include "version.h"
 
-bool opt_c, opt_C, opt_i, opt_e, opt_d, opt_l, opt_L;
+bool opt_k, opt_m, opt_b, opt_c, opt_C, opt_i, opt_e, opt_d, opt_l, opt_L;
 int evcount;
 
-bool processevent(KBDLLHOOKSTRUCT* hooked) {
+void error_handler(bool critical, char* errclass, char* errmsg) {
+	fflush(stdout);
+	fprintf(
+		stderr,
+		"%s: %s\n",
+		errclass ? errclass : "",
+		errmsg ? errmsg : "");
+	if(critical) {
+		fprintf(stderr, "Exiting due to critical error.\n");
+		exit(1);
+	}
+	fflush(stderr);
+}
+
+bool processKeyEvent(WPARAM wParam, KBDLLHOOKSTRUCT* hooked) {
 	DWORD     virtualkey = hooked->vkCode;
 	DWORD     scancode = hooked->scanCode;
 	DWORD     flags = hooked->flags;
 	DWORD     time = hooked->time;
-	bool consume =
-		(opt_c && !(flags & LLKHF_INJECTED)) ||
-		(opt_C && (flags & LLKHF_INJECTED));
-	if(!opt_i && (flags & LLKHF_INJECTED)) {
+	if(opt_e) {
+		if(scancode == 1 && flags == 128) {
+			quitlistenkey();
+			return false;
+		}
+	}
+	if(!opt_k) {
+		return false;
+	}
+	bool isinjected = !!(flags & LLKHF_INJECTED);
+	bool consume = isinjected ? opt_C : opt_c;
+	if(!opt_i && isinjected) {
 		return consume;
+	}
+	char* lleventname="";
+	switch(wParam) {
+		case WM_KEYDOWN:
+			lleventname="WM_KEYDOWN";
+			break;
+		case WM_KEYUP:
+			lleventname="WM_KEYUP";
+			break;
+		case WM_SYSKEYDOWN:
+			lleventname="WM_SYSKEYDOWN";
+			break;
+		case WM_SYSKEYUP:
+			lleventname="WM_SYSKEYUP";
+			break;
+		default:
+			error_handler(false, "Ignoring keyevent message", "Unknown message type");
+			return false;
 	}
 	printf(
 		"{\"type\":%s"
@@ -29,15 +69,17 @@ bool processevent(KBDLLHOOKSTRUCT* hooked) {
 		",\"win_injected\":%s"
 		",\"win_lower_il_injected\":%s"
 		",\"win_altdown\":%s"
-		",\"win_time\":%10u}"
+		",\"win_time\":%10u"
+		",\"win_eventname\":\"%s\"}"
 		,(flags & LLKHF_UP) ? "\"keyup\"  " : "\"keydown\""
 		,scancode
 		,virtualkey
 		,(flags & LLKHF_EXTENDED) ? "true " : "false"
-		,(flags & LLKHF_INJECTED) ? "true " : "false"
+		,isinjected ? "true " : "false"
 		,(flags & LLKHF_LOWER_IL_INJECTED) ? "true " : "false"
 		,(flags & LLKHF_ALTDOWN) ? "true " : "false"
 		,time
+		,lleventname
 	);
 	if(printf("\n") == -1) {
 		quitlistenkey();
@@ -48,8 +90,158 @@ bool processevent(KBDLLHOOKSTRUCT* hooked) {
 			quitlistenkey();
 		}
 	}
-	if(opt_e) {
-		if(scancode == 1 && flags == 128) {
+	return consume;
+}
+
+bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
+	POINT     pt = hooked->pt;
+	DWORD     mouseData = hooked->mouseData;
+	DWORD     flags = hooked->flags;
+	DWORD     time = hooked->time;
+	if(!(wParam==WM_MOUSEMOVE ? opt_m : opt_b)) {
+		return false;
+	}
+	bool isinjected = !!(flags & LLMHF_INJECTED);
+	bool consume = isinjected ? opt_C : opt_c;
+	if(!opt_i && isinjected) {
+		return consume;
+	}
+	bool iswheel = false;
+	bool isxbutton = false;
+	switch(wParam) {
+		case WM_MOUSEMOVE:
+			printf("{\"type\":\"pointermove\",\"win_eventname\":\"WM_MOUSEMOVE\"");
+			break;
+		case WM_MOUSEWHEEL:
+			printf("{\"type\":\"wheel\",\"win_eventname\":\"WM_MOUSEWHEEL\",\"win_direction\":\"y\"");
+			iswheel = true;
+			break;
+		case WM_MOUSEHWHEEL:
+			printf("{\"type\":\"wheel\",\"win_eventname\":\"WM_MOUSEHWHEEL\",\"win_direction\":\"x\"");
+			iswheel = true;
+			break;
+		case WM_LBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_LBUTTONDOWN\",\"win_button\":\"L\"");
+			break;
+		case WM_LBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_LBUTTONUP\",\"win_button\":\"L\"");
+			break;
+		case WM_LBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_LBUTTONDBLCLK\",\"win_button\":\"L\"");
+			break;
+		case WM_RBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_RBUTTONDOWN\",\"win_button\":\"R\"");
+			break;
+		case WM_RBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_RBUTTONUP\",\"win_button\":\"R\"");
+			break;
+		case WM_MENURBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_MENURBUTTONUP\",\"win_button\":\"R\",\"win_context\":\"menu\"");
+			break;
+		case WM_RBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_RBUTTONDBLCLK\",\"win_button\":\"R\"");
+			break;
+		case WM_MBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_MBUTTONDOWN\",\"win_button\":\"M\"");
+			break;
+		case WM_MBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_MBUTTONUP\",\"win_button\":\"M\"");
+			break;
+		case WM_MBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_MBUTTONDBLCLK\",\"win_button\":\"M\"");
+			break;
+		case WM_XBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_XBUTTONDOWN\"");
+			isxbutton = true;
+			break;
+		case WM_XBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_XBUTTONUP\"");
+			isxbutton = true;
+			break;
+		case WM_XBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_XBUTTONDBLCLK\"");
+			isxbutton = true;
+			break;
+		case WM_NCLBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCLBUTTONDOWN\",\"win_button\":\"L\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCLBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCLBUTTONUP\",\"win_button\":\"L\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCLBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCLBUTTONDBLCLK\",\"win_button\":\"L\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCRBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCRBUTTONDOWN\",\"win_button\":\"R\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCRBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCRBUTTONUP\",\"win_button\":\"R\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCRBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCRBUTTONDBLCLK\",\"win_button\":\"R\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCMBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCMBUTTONDOWN\",\"win_button\":\"M\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCMBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCMBUTTONUP\",\"win_button\":\"M\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCMBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCMBUTTONDBLCLK\",\"win_button\":\"M\",\"win_context\":\"NC\"");
+			break;
+		case WM_NCXBUTTONDOWN:
+			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCXBUTTONDOWN\",\"win_context\":\"NC\"");
+			isxbutton = true;
+			break;
+		case WM_NCXBUTTONUP:
+			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCXBUTTONUP\",\"win_context\":\"NC\"");
+			isxbutton = true;
+			break;
+		case WM_NCXBUTTONDBLCLK:
+			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCXBUTTONDBLCLK\",\"win_context\":\"NC\"");
+			isxbutton = true;
+			break;
+		default:
+			error_handler(false, "Ignoring mouseevent message", "Unknown message type");
+			printf("debug: wParam is: %d", wParam);
+			return false;
+	}
+	if(iswheel) {
+		signed short wheelDelta = HIWORD(mouseData);
+		printf(",\"win_wheeldelta\":%5d", wheelDelta);
+	}
+	if(isxbutton) {
+		switch(HIWORD(mouseData)) {
+			case 1:
+				printf(",\"win_button\":\"X1\"");
+				break;
+			case 2:
+				printf(",\"win_button\":\"X2\"");
+				break;
+			default:
+				error_handler(false, "Using null", "Unknown X button");
+				printf(",\"win_button\":null");
+				break;
+		}
+	}
+	printf(
+		",\"win_pointerx\":%5d"
+		",\"win_pointery\":%5d"
+		",\"win_injected\":%s"
+		",\"win_lower_il_injected\":%s"
+		",\"win_time\":%10u}"
+		,pt.x
+		,pt.y
+		,isinjected ? "true " : "false"
+		,(flags & LLMHF_LOWER_IL_INJECTED) ? "true " : "false"
+		,time
+	);
+	if(printf("\n") == -1) {
+		quitlistenkey();
+	}
+	fflush(stdout);
+	if(opt_d) {
+		if(++evcount>20) {
 			quitlistenkey();
 		}
 	}
@@ -177,9 +369,12 @@ void printhelp() {
 	fprintf(stderr,
 		"\nPrint Windows keyboard events on stdout.\n\n"
 		"Options:\n\n"
-		" -c Consume non-injected events (prevent windows sending them to applications).\n\n"
-		" -C Consume injected events (prevent windows sending them to applications).\n\n"
-		" -i Also print injected events.\n\n"
+		" -k Print keyboard events (on by default unless -m or -b is provided).\n\n"
+		" -m Print mouse move events.\n\n"
+		" -b Print mouse button and wheel events.\n\n"
+		" -c Consume non-injected events.\n\n"
+		" -C Consume injected events.\n\n"
+		" -i Print injected events.\n\n"
 		" -e Exit when escape key is pressed.\n\n"
 		" -d Exit after 20 events are processed (useful for debugging).\n\n"
 		" -l At startup, print a message containing information about the current\n"
@@ -197,8 +392,11 @@ void printhelp() {
 int main(int argc, char** argv) {
 	char* progname = argv[0];
 	int c;
-	while ((c = getopt (argc, argv, "cCiedjflLh")) != -1) {
+	while ((c = getopt (argc, argv, "kmbcCiedjflLh")) != -1) {
 		switch (c) {
+			case 'k': opt_k = true;  break;
+			case 'm': opt_m = true;  break;
+			case 'b': opt_b = true;  break;
 			case 'c': opt_c = true;  break;
 			case 'C': opt_C = true;  break;
 			case 'i': opt_i = true;  break;
@@ -210,6 +408,8 @@ int main(int argc, char** argv) {
 			default: abort();
 		}
 	}
+	// -k is on by default unless -m or -b is provided.
+	if(!(opt_m || opt_b)) { opt_k = true; }
 	signal(SIGINT, quitlistenkey);
 	signal(SIGTERM, quitlistenkey);
 	if(opt_l) {
@@ -218,5 +418,10 @@ int main(int argc, char** argv) {
 			exit(0);
 		}
 	}
-	runlistenkey(processevent, progname);
+	runlistenkey(
+		// Listen to key events if we need to print them or exit on Esc.
+		(opt_k || opt_e) ? processKeyEvent : NULL,
+		// Listen to mouse events if we need to print move or button events.
+		(opt_m || opt_b) ? processMouseEvent : NULL,
+		progname);
 }
