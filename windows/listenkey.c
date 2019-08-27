@@ -51,12 +51,12 @@ bool processKeyEvent(WPARAM wParam, KBDLLHOOKSTRUCT* hooked) {
 		case WM_KEYUP:
 			lleventname="WM_KEYUP";
 			break;
-		case WM_SYSKEYDOWN:
-			lleventname="WM_SYSKEYDOWN";
-			break;
-		case WM_SYSKEYUP:
-			lleventname="WM_SYSKEYUP";
-			break;
+//		case WM_SYSKEYDOWN:
+//			lleventname="WM_SYSKEYDOWN";
+//			break;
+//		case WM_SYSKEYUP:
+//			lleventname="WM_SYSKEYUP";
+//			break;
 		default:
 			error_handler(false, "Ignoring keyevent message", "Unknown message type");
 			return false;
@@ -126,30 +126,30 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 		case WM_LBUTTONUP:
 			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_LBUTTONUP\",\"win_button\":\"L\"");
 			break;
-		case WM_LBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_LBUTTONDBLCLK\",\"win_button\":\"L\"");
-			break;
+//		case WM_LBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_LBUTTONDBLCLK\",\"win_button\":\"L\"");
+//			break;
 		case WM_RBUTTONDOWN:
 			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_RBUTTONDOWN\",\"win_button\":\"R\"");
 			break;
 		case WM_RBUTTONUP:
 			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_RBUTTONUP\",\"win_button\":\"R\"");
 			break;
-		case WM_MENURBUTTONUP:
-			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_MENURBUTTONUP\",\"win_button\":\"R\",\"win_context\":\"menu\"");
-			break;
-		case WM_RBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_RBUTTONDBLCLK\",\"win_button\":\"R\"");
-			break;
+//		case WM_MENURBUTTONUP:
+//			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_MENURBUTTONUP\",\"win_button\":\"R\",\"win_context\":\"menu\"");
+//			break;
+//		case WM_RBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_RBUTTONDBLCLK\",\"win_button\":\"R\"");
+//			break;
 		case WM_MBUTTONDOWN:
 			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_MBUTTONDOWN\",\"win_button\":\"M\"");
 			break;
 		case WM_MBUTTONUP:
 			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_MBUTTONUP\",\"win_button\":\"M\"");
 			break;
-		case WM_MBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_MBUTTONDBLCLK\",\"win_button\":\"M\"");
-			break;
+//		case WM_MBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_MBUTTONDBLCLK\",\"win_button\":\"M\"");
+//			break;
 		case WM_XBUTTONDOWN:
 			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_XBUTTONDOWN\"");
 			isxbutton = true;
@@ -158,49 +158,49 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_XBUTTONUP\"");
 			isxbutton = true;
 			break;
-		case WM_XBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_XBUTTONDBLCLK\"");
-			isxbutton = true;
-			break;
-		case WM_NCLBUTTONDOWN:
-			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCLBUTTONDOWN\",\"win_button\":\"L\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCLBUTTONUP:
-			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCLBUTTONUP\",\"win_button\":\"L\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCLBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCLBUTTONDBLCLK\",\"win_button\":\"L\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCRBUTTONDOWN:
-			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCRBUTTONDOWN\",\"win_button\":\"R\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCRBUTTONUP:
-			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCRBUTTONUP\",\"win_button\":\"R\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCRBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCRBUTTONDBLCLK\",\"win_button\":\"R\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCMBUTTONDOWN:
-			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCMBUTTONDOWN\",\"win_button\":\"M\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCMBUTTONUP:
-			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCMBUTTONUP\",\"win_button\":\"M\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCMBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCMBUTTONDBLCLK\",\"win_button\":\"M\",\"win_context\":\"NC\"");
-			break;
-		case WM_NCXBUTTONDOWN:
-			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCXBUTTONDOWN\",\"win_context\":\"NC\"");
-			isxbutton = true;
-			break;
-		case WM_NCXBUTTONUP:
-			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCXBUTTONUP\",\"win_context\":\"NC\"");
-			isxbutton = true;
-			break;
-		case WM_NCXBUTTONDBLCLK:
-			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCXBUTTONDBLCLK\",\"win_context\":\"NC\"");
-			isxbutton = true;
-			break;
+//		case WM_XBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_XBUTTONDBLCLK\"");
+//			isxbutton = true;
+//			break;
+//		case WM_NCLBUTTONDOWN:
+//			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCLBUTTONDOWN\",\"win_button\":\"L\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCLBUTTONUP:
+//			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCLBUTTONUP\",\"win_button\":\"L\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCLBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCLBUTTONDBLCLK\",\"win_button\":\"L\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCRBUTTONDOWN:
+//			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCRBUTTONDOWN\",\"win_button\":\"R\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCRBUTTONUP:
+//			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCRBUTTONUP\",\"win_button\":\"R\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCRBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCRBUTTONDBLCLK\",\"win_button\":\"R\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCMBUTTONDOWN:
+//			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCMBUTTONDOWN\",\"win_button\":\"M\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCMBUTTONUP:
+//			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCMBUTTONUP\",\"win_button\":\"M\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCMBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCMBUTTONDBLCLK\",\"win_button\":\"M\",\"win_context\":\"NC\"");
+//			break;
+//		case WM_NCXBUTTONDOWN:
+//			printf("{\"type\":\"buttondown\",\"win_eventname\":\"WM_NCXBUTTONDOWN\",\"win_context\":\"NC\"");
+//			isxbutton = true;
+//			break;
+//		case WM_NCXBUTTONUP:
+//			printf("{\"type\":\"buttonup\",\"win_eventname\":\"WM_NCXBUTTONUP\",\"win_context\":\"NC\"");
+//			isxbutton = true;
+//			break;
+//		case WM_NCXBUTTONDBLCLK:
+//			printf("{\"type\":\"buttondoubleclick\",\"win_eventname\":\"WM_NCXBUTTONDBLCLK\",\"win_context\":\"NC\"");
+//			isxbutton = true;
+//			break;
 		default:
 			error_handler(false, "Ignoring mouseevent message", "Unknown message type");
 			printf("debug: wParam is: %d", wParam);
