@@ -113,11 +113,11 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 			printf("{\"type\":\"pointermove\",\"win_eventname\":\"WM_MOUSEMOVE\"");
 			break;
 		case WM_MOUSEWHEEL:
-			printf("{\"type\":\"wheel\",\"win_eventname\":\"WM_MOUSEWHEEL\",\"win_direction\":\"y\"");
+			printf("{\"type\":\"wheel\",\"win_eventname\":\"WM_MOUSEWHEEL\"");
 			iswheel = true;
 			break;
 		case WM_MOUSEHWHEEL:
-			printf("{\"type\":\"wheel\",\"win_eventname\":\"WM_MOUSEHWHEEL\",\"win_direction\":\"x\"");
+			printf("{\"type\":\"wheel\",\"win_eventname\":\"WM_MOUSEHWHEEL\"");
 			iswheel = true;
 			break;
 		case WM_LBUTTONDOWN:
@@ -208,7 +208,9 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 	}
 	if(iswheel) {
 		signed short wheelDelta = HIWORD(mouseData);
-		printf(",\"win_wheeldelta\":%5d", wheelDelta);
+		printf(",\"win_wheeldelta%s\":%5d"
+			, (wParam == WM_MOUSEHWHEEL) ? "x" : "y"
+			, wheelDelta);
 	}
 	if(isxbutton) {
 		switch(HIWORD(mouseData)) {
