@@ -17,7 +17,8 @@ from libkeyboa import *
 
 mapping={
 	"VK_CAPITAL": "VK_LCONTROL",
-	"VK_LCONTROL": "VK_CAPITAL"}
+	"VK_LCONTROL": "VK_CAPITAL",
+	}
 
 @retgen
 def remap(gen):

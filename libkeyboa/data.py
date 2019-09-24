@@ -37,7 +37,8 @@ for (win_virtualkey, win_virtualkey_symbol, win_virtualkey_description) in [
 	item={
 		"win_virtualkey": win_virtualkey,
 		"win_virtualkey_symbol": win_virtualkey_symbol,
-		"win_virtualkey_description": win_virtualkey_description}
+		"win_virtualkey_description": win_virtualkey_description,
+		}
 	if(win_virtualkey):
 		_vkeysdict[win_virtualkey]=item
 	if(win_virtualkey_symbol):
@@ -61,7 +62,8 @@ def _keysymobj_compareby(obj):
 		obj["x11_keysym_description"]=="deprecated",
 		obj["x11_keysym_description"].startswith("Alias for "),
 		obj["x11_keysym_description"].startswith("Same as "),
-		len(obj["x11_keysym_symbol"])]
+		len(obj["x11_keysym_symbol"]),
+		]
 def format_unicode(cp):
 	if(not cp): return None
 	return hex(cp).replace("0x", "U+")
@@ -72,7 +74,8 @@ for (keysym, keysym_symbol, keysym_description, unicode_codepoint) in [
 	item={"x11_keysym": keysym,
 		  "x11_keysym_symbol": keysym_symbol,
 		  "x11_keysym_description": keysym_description,
-		  "unicode_codepoint": unicode_codepoint}
+		  "unicode_codepoint": unicode_codepoint,
+		  }
 	cpkey=format_unicode(unicode_codepoint)
 	save=_keysymsdict[keysym] if keysym in _keysymsdict else item
 	save=_keysymsdict[cpkey] if cpkey in _keysymsdict else save
@@ -98,7 +101,8 @@ def keysyminfo(x):
 				("hpXK_", "hp"),
 				("DXK_", "D"),
 				("osfXK_", "osf"),
-				("XF86XK_", "XF86")]:
+				("XF86XK_", "XF86"),
+				]:
 			if(x.startswith(prefix)):
 				try: return _keysymsdict[replacement+x[(len(prefix)):]]
 				except KeyError: pass
@@ -174,7 +178,8 @@ def boxdrawings_bestmatch(prop):
 		ldur_+ d + a ,
 		ldur_+ d +"N",
 		ldur_+"N"+ a ,
-		ldur_+"N"+"N"]
+		ldur_+"N"+"N",
+		]
 	for candidate in candidates:
 		if(candidate in _boxdict):
 			return _boxdict[candidate]
@@ -186,4 +191,5 @@ __all__ = [
 	"add_commonname_mapping",
 	"add_commonname_alias",
 	"commonnameinfo",
-	"boxdrawings_bestmatch"]
+	"boxdrawings_bestmatch",
+	]

@@ -47,7 +47,8 @@ def input_events(inputformat="autodetect", file=sys.stdin):
 					"x11_xpos": int(xpos),
 					"x11_ypos": int(ypos),
 					"x11_buttonsdown": buttonsdown,
-					"vnc_hint": hint}
+					"vnc_hint": hint,
+					}
 			elif(line.startswith('Keysym ')):
 				line=line.split(" ")
 				line[1:4]=map(int, line[1:4])
@@ -57,7 +58,8 @@ def input_events(inputformat="autodetect", file=sys.stdin):
 					"vnc_client_id": int(client_id),
 					"x11_keysym": int(keysym),
 					"x11_keysym_symbol": keysym_symbol,
-					"vnc_hint": hint}
+					"vnc_hint": hint,
+					}
 			else:
 				raise Exception("Unknown x11vnc event")
 	def input_events_autodetect_format(gen):
@@ -122,7 +124,8 @@ def resolve_commonname(gen):
 			else:
 				ret={**ret,
 					 **data.vkeyinfo(cn),
-					 **data.keysyminfo(cn)}
+					 **data.keysyminfo(cn),
+					 }
 			yield ret
 		else:
 			yield obj
@@ -308,7 +311,8 @@ def enrich_input(gen):
 			yield {**obj,
 				"physkey_keyname_dict":physkey_keyname_dict,
 				"keyboard_hash": hashobj(kb_layout),
-				"keyboard_hw_hash": hashobj(kb_phys)}
+				"keyboard_hw_hash": hashobj(kb_phys),
+				}
 		elif(obj["type"] in ["keydown", "keyup", "keypress"] and
 			 set(["win_extended", "win_scancode", "win_virtualkey"]) <
 			 obj.keys()):
@@ -324,7 +328,8 @@ def enrich_input(gen):
 			vko=data.vkeyinfo(ret["win_virtualkey"])
 			ret={**ret,
 				"win_virtualkey_symbol": vko["win_virtualkey_symbol"],
-				"win_virtualkey_description": vko["win_virtualkey_description"]}
+				"win_virtualkey_description": vko["win_virtualkey_description"],
+				}
 			if("win_time" in ret):
 				if(prev_win_time!=None):
 					ret["delay"]=ret["win_time"]-prev_win_time
@@ -429,7 +434,8 @@ def events_to_chords(field):
 					if(mods<=i):
 						if("noop" not in obj):
 							yield {"type":"chord",
-							       "chord":keysdown[:i+1]}
+							       "chord":keysdown[:i+1],
+								   }
 							mods=i
 					else:
 						mods-=1
@@ -531,7 +537,8 @@ def macro(macrotest, statekey=None):
 				newmacro=[]
 				yield {"type":"ui","data":{
 					"macro.state": "recording",
-					"macro.transition": "record"}}
+					"macro.transition": "record",
+					}}
 				for obj in gen:
 					[mt2_op, mt2_arg]=macrotest(obj, True)
 					if(mt2_op=="save"):
@@ -545,7 +552,8 @@ def macro(macrotest, statekey=None):
 						yield {"type":"ui","data":{
 							"macro.state": "waiting",
 							"macro.transition": "save",
-							"macro.key": mt2_arg}}
+							"macro.key": mt2_arg,
+							}}
 						break
 					elif(mt2_op=="cancel"):
 						# Cancel recording
@@ -564,7 +572,8 @@ def macro(macrotest, statekey=None):
 				yield {"type":"ui","data":{
 					"macro.state": "playback",
 					"macro.transition": "playback",
-					"macro.key": mt_arg}}
+					"macro.key": mt_arg,
+					}}
 				yield from macros[mt_arg]
 				yield {"type":"ui","data":{
 					"macro.state": "waiting",
@@ -574,7 +583,8 @@ def macro(macrotest, statekey=None):
 				yield {"type":"ui","data":{
 					"macro.state": "waiting",
 					"macro.transition": "emptyplayback",
-					"macro.key": mt_arg}}
+					"macro.key": mt_arg,
+					}}
 			else:
 				# Pass-through when not in record or playback
 				yield obj
@@ -691,7 +701,8 @@ def altgr_workaround_output(gen):
 				"type":t,
 				"win_scancode": altgr_lctrl_sc,
 				"win_extended": altgr_lctrl_ext,
-				"win_virtualkey": lctrl}
+				"win_virtualkey": lctrl,
+				}
 			if("win_time" in obj):
 				altgr_lctrl_event["win_time"]=obj["win_time"]
 			if(vk==lctrl and (not sc or sc<=0x200)):
@@ -783,4 +794,5 @@ __all__ = [
 	"selecttypes",
 	"selecttypesexcept",
 	"selectfields",
-	"ratelimit"]
+	"ratelimit",
+	]

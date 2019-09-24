@@ -39,7 +39,8 @@ def enrich_chord(modifierplane, modeplane):
 					"key": key,
 					"downmods": downmods,
 					"keyasmod": keyasmod,
-					"keyasmode": keyasmode}
+					"keyasmode": keyasmode,
+					}
 				yield {"type":"ui","data":info}
 				yield {**obj, **info}
 			else:
@@ -67,7 +68,8 @@ def modlock(modlockset, modlockname, clearkey):
 						"lockedmods":lockedmods,
 						"scriptmods": set(),
 						"planename": modlockname,
-						"script": "CLEAR" if key==clearkey else keyasmod}}
+						"script": "CLEAR" if key==clearkey else keyasmod,
+						}}
 					yield {"type":"savestate","data":{"lockedmods":lockedmods}}
 				else:
 					yield {**obj, "lockedmods":lockedmods}
@@ -101,7 +103,8 @@ def modeswitch(modeswitchset, modeswitchname):
 						"modes": modes,
 						"scriptmods": set(),
 						"planename": modeswitchname,
-						"script": keyasmode}}
+						"script": keyasmode,
+						}}
 					yield {"type":"savestate","data":{"modes":modes}}
 				else:
 					yield {**obj, "modes": modes}
@@ -137,7 +140,8 @@ def numarg_multiplier(gen):
 				repeat=int(numarg)
 				yield {"type":"ui","data":{
 					"multiplier":"",
-					"multiplier_executing":numarg}}
+					"multiplier_executing":numarg,
+					}}
 				for _ in range(repeat):
 					yield obj
 				numarg=""
@@ -233,11 +237,13 @@ def chords_to_scripts(gen):
 			yield {"type":"ui","data":{
 				"scriptmods": outmods,
 				"planename": planename,
-				"script": str(out)}}
+				"script": str(out),
+				}}
 			assert isinstance(out,str) and len(out)>0, "Script must be non-empty string"
 			yield {"type": "script",
 				"script": out,
-				"scriptmods": outmods}
+				"scriptmods": outmods,
+				}
 		else:
 			yield obj
 
@@ -294,7 +300,8 @@ def boxdrawings(modifier):
 			"up": "l",
 			"rig":"l",
 			"das":"N",
-			"arc":"N"}
+			"arc":"N",
+			}
 		yield {"type":"ui", "data":{"boxdrawings": {**settings}}}
 		for obj in gen:
 			if(obj["type"]=="loadstate" and "boxdrawing_state" in obj["data"]):
@@ -316,7 +323,8 @@ def boxdrawings(modifier):
 						settings["up"]  if "U" in command else "-",
 						settings["rig"] if "R" in command else "-",
 						settings["das"],
-						settings["arc"]])
+						settings["arc"],
+						])
 					boxobj=data.boxdrawings_bestmatch(prop)
 					if(boxobj):
 						yield from printstring(boxobj["char"])
@@ -354,7 +362,8 @@ def unicode_input(gen):
 						yield from printstring(resolve(str))
 						yield {"type":"ui","data":{
 							"planename":"Unicode",
-							"script":charname(str)}}
+							"script":charname(str),
+							}}
 						if(s!="ret"):
 							yield obj
 						break
@@ -418,7 +427,8 @@ def boxdrawings_ui(settings):
 				settings["up"]  if y in [2,3] else "-",
 				settings["rig"] if x in [1,2] else "-",
 				settings["das"],
-				settings["arc"]])
+				settings["arc"],
+				])
 			boxobj=data.boxdrawings_bestmatch(prop)
 			ret[y]+=(boxobj["char"] if boxobj else " ")
 	return ret
@@ -452,7 +462,8 @@ def termui(file=sys.stderr):
 			"planename":None,
 			"scriptmods":set(),
 			"script":None,
-			"multiplier_executing":""}
+			"multiplier_executing":"",
+			}
 		defaultdata={
 			**on_keyup_all,
 			"printdate.timezone":None,
@@ -464,7 +475,8 @@ def termui(file=sys.stderr):
 			"macro.state":"waiting",
 			"macro.transition":"finishplayback",
 			"macro.key":"",
-			"unicode_input": None}
+			"unicode_input": None,
+			}
 		script_newer_than_macro_transition=True
 		data=defaultdata
 		maxlen=0
@@ -623,7 +635,8 @@ def macro_and_multiplier_controller(gen):
 		if(downmods=={"Macro"} and key=="space"):
 			yield {**obj,
 				"macrotest": ["cancel" if in_recording else "record", None],
-				"multiplier_ignore": True}
+				"multiplier_ignore": True,
+				}
 			in_recording=not in_recording
 			continue
 		if("Macro" in downmods):
@@ -632,12 +645,14 @@ def macro_and_multiplier_controller(gen):
 				"macrotest": [
 					"save" if in_recording else "playback",
 					macroname],
-				"multiplier_ignore": in_recording}
+				"multiplier_ignore": in_recording,
+				}
 			in_recording=False
 			continue
 		if(in_recording):
 			yield {**obj,
-				"macrotest": ["recordable", obj]}
+				"macrotest": ["recordable", obj],
+				}
 			continue
 		yield obj
 
@@ -695,4 +710,5 @@ __all__=[
 	"ratelimit_filter_keyevent",
 	"macrotest",
 	"macro_and_multiplier_controller",
-	"resolve_characters"]
+	"resolve_characters",
+	]

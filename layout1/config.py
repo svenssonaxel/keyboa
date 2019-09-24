@@ -49,7 +49,8 @@ load("modes",[
 	("C", "^Cyr,-Box"),
 	("B", "^Box,-Cyr"),
 	("R", "+RedactUI"),
-	("4", "-RedactUI")])
+	("4", "-RedactUI"),
+	])
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
 ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
@@ -64,9 +65,13 @@ ch("Cyr-Shift",     """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛД
 ch("Bats",          """ ♭♮♯♩♪♫♬         ✆☎        ✧✦✓➔✗ ◇◆●                """)
 ch("HyperNum",      """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
 
-load("Sym", [("0","space"),
-             ("Z2","begin_unicode_input")])
-load("HyperNum",[("space","₀")])
+load("Sym", [
+	("0","space"),
+	("Z2","begin_unicode_input"),
+	])
+load("HyperNum", [
+	("space","₀"),
+	])
 
 w("Nav",
  ".       .       .      C-S-LTab C-Tab   .       .       .       10*Up   .       .       .       .       " +
@@ -89,7 +94,8 @@ load("Nav3",[
 	("O", "S-end"),
 	("U", "S-home"),
 	("8", "10*S-up"),
-	("M2","10*S-down")])
+	("M2","10*S-down"),
+	])
 
 load("Nav4",[
 	("I", "S-pgup"),
@@ -99,7 +105,8 @@ load("Nav4",[
 	("O", "S-C-end"),
 	("U", "S-C-home"),
 	("P2","S-C-right,S-del"),
-	("P", "S-C-left,S-del")])
+	("P", "S-C-left,S-del"),
+	])
 
 w("WM",
  ".       .       .       .       .       .       .       .       .       .       .       .       .       " +
@@ -110,7 +117,8 @@ w("WM",
 
 load("WM",[
 	("Q", "A-space,Wait-250,X"),
-	("M4","A-space,Wait-250,N")])
+	("M4","A-space,Wait-250,N"),
+	])
 
 for key in planes["from"]:
 	if(key): load("X11-WM",[(key, "C-M-section,Wait-100,"+key)])
@@ -137,7 +145,8 @@ load("Shell",[
 	("O", """C-A,C-K,.cd -,Ret"""),
 	("U", """C-A,C-K,.jobs,Ret"""),
 	("E", """S-pgup"""),
-	("D", """S-pgdn""")])
+	("D", """S-pgdn"""),
+	])
 
 w("TeX-Greek", # lower-case greek letters for TeX
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
@@ -164,7 +173,8 @@ nativemods=set(["Super", "Hyper", "Meta", "Alt", "Ctrl", "Shift"])
 planeprefixes=[
 	{"Shift"},
 	{"Hyper"},
-	set()]
+	set(),
+	]
 
 # List and priority of mode combinations together with allowed effective mods.
 # The empty set represents ignoring all modes and allowing no effective mods,
@@ -175,7 +185,8 @@ modespriority=[
 	({"Box"},set()),
 	({"Cyr"},set()),
 	({"TeX"},set()),
-	(set(),nativemods)]
+	(set(),nativemods),
+	]
 
 modnotation={
 	"s": "Super",
@@ -183,7 +194,8 @@ modnotation={
 	"M": "Meta",
 	"A": "Alt",
 	"C": "Ctrl",
-	"S": "Shift"}
+	"S": "Shift",
+	}
 
 def planelookup(key, plane, default=None):
 	fr=planes["from"]
@@ -210,7 +222,8 @@ load("Univ",[
 	("G", "Printdate-%H:%M"),
 	("J", "Printdate-TZ_decrease"),
 	("K", "Printdate-TZ_increase"),
-	("L", "Printdate-TZ_local")])
+	("L", "Printdate-TZ_local"),
+	])
 load("X11-Univ",[
 	("Y", "NONE"),            # Toggle light/dark color theme
 	("U", "NONE"),            # Reset zoom
@@ -232,13 +245,15 @@ load("Win-Univ",[
 	("X", "S-del"),           # Cut
 	("C", "C-ins"),           # Copy
 	("V", "S-ins"),           # Paste
-	("N", "NONE")])           # Scroll down
+	("N", "NONE"),            # Scroll down
+	])
 
 key_timeouts={
 	"S3": 10,
 	"L": 10,
 	"S2": 15,
-	"Q2": 5}
+	"Q2": 5,
+	}
 
 __all__=[
 	"nativemods",
@@ -247,4 +262,5 @@ __all__=[
 	"modnotation",
 	"planelookup",
 	"max_numarg_digits",
-	"key_timeouts"]
+	"key_timeouts",
+	]
