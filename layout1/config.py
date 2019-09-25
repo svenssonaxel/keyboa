@@ -104,6 +104,8 @@ load("Nav4",[
 	("L", "S-C-right"),
 	("O", "S-C-end"),
 	("U", "S-C-home"),
+	("8", "10*S-pgup"),
+	("M2","10*S-pgdn"),
 	("P2","S-C-right,S-del"),
 	("P", "S-C-left,S-del"),
 	])
