@@ -133,9 +133,9 @@ w("Num",
  "           .       .      space             0               Period  Comma  .                            " )
 
 load("Shell",[
-	("Y", """C-A,C-K,.cd "$dir3",Ret"""),
-	("H", """C-A,C-K,.cd "$dir2",Ret"""),
-	("N", """C-A,C-K,.cd "$dir1",Ret"""),
+	("Y", ". \"$dir3\""),
+	("H", ". \"$dir2\""),
+	("N", ". \"$dir1\""),
 	("T", """C-A,C-K,.dir3="`pwd`",Ret"""),
 	("G", """C-A,C-K,.dir2="`pwd`",Ret"""),
 	("B", """C-A,C-K,.dir1="`pwd`",Ret"""),
