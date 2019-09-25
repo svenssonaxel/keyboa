@@ -63,14 +63,22 @@ ch("ShiftGreek",    """               ¨ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ   
 ch("Cyr-",          """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
 ch("Cyr-Shift",     """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
 ch("Bats",          """ ♭♮♯♩♪♫♬         ✆☎        ✧✦✓➔✗ ◇◆●                """)
-ch("HyperNum",      """        ₍₎₌₊        ₇₈₉          ₄₅₆ₓ         ₁₂₃₋  """)
+ch("HyperNum",      """        ₍₎₌         ₇₈₉         ₓ₄₅₆        ₙ₊₁₂₃₋  """) # Subscript numpad
+ch("HyperMath",     """        ⁽⁾⁼         ⁷⁸⁹          ⁴⁵⁶        ⁿ⁺¹²³⁻  """) # Superscript numpad
 
 load("Sym", [
 	("0","space"),
 	("Z2","begin_unicode_input"),
 	])
 load("HyperNum", [
-	("space","₀"),
+	("D2","₀"),
+	("S3","₍"),
+	("S2","₎"),
+	])
+load("HyperMath", [
+	("D2","⁰"),
+	("S3","⁽"),
+	("S2","⁾"),
 	])
 
 w("Nav",
@@ -127,10 +135,10 @@ for key in planes["from"]:
 
 w("Num",
  ".       .       F12     F11     F10     .       .e      .a      .b      .c      .d      .f      .       " +
- ".       F12     F9      F8      F7      [       ]       7       8       9       back    /       .       " +
- ".       F11     F6      F5      F4      (       )       4       5       6       ret     *       .       " +
- ".       F10     F3      F2      F1      space   +       1       2       3       -       :       .       " +
- "           .       .      space             0               Period  Comma  .                            " )
+ ".       F12     F9      F8      F7      .       /       7       8       9      back    Comma    .       " +
+ ".       F11     F6      F5      F4      .       *       4       5       6      ret     Period   .       " +
+ ".       F10     F3      F2      F1      .       +       1       2       3       -       :       .       " +
+ "           .       (       )              space                 0   [       ]                           " )
 
 load("Shell",[
 	("Y", ". \"$dir3\""),
