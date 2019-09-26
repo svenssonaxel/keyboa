@@ -51,12 +51,12 @@ bool processKeyEvent(WPARAM wParam, KBDLLHOOKSTRUCT* hooked) {
 		case WM_KEYUP:
 			lleventname="WM_KEYUP";
 			break;
-//		case WM_SYSKEYDOWN:
-//			lleventname="WM_SYSKEYDOWN";
-//			break;
-//		case WM_SYSKEYUP:
-//			lleventname="WM_SYSKEYUP";
-//			break;
+		case WM_SYSKEYDOWN:
+			lleventname="WM_SYSKEYDOWN";
+			break;
+		case WM_SYSKEYUP:
+			lleventname="WM_SYSKEYUP";
+			break;
 		default:
 			error_handler(false, "Ignoring keyevent message", "Unknown message type");
 			return false;
