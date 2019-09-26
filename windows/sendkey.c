@@ -107,6 +107,7 @@ void printhelp() {
 		" -o Also print events on stdout.\n"
 		" -p Pretty-print on stdout (implies -o).\n"
 		" -h Print this help text and exit.\n\n"
+		"For more help: man sendkey\n\n"
 		"sendkey is part of keyboa version %s\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
 		,KEYBOAVERSION

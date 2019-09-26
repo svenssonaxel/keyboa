@@ -383,6 +383,7 @@ void printhelp() {
 		"    keyboard layout and state.\n\n"
 		" -L Exit after printing startup message (implies -l).\n\n"
 		" -h Print this help text and exit.\n\n"
+		"For more help: man listenkey\n\n"
 		"listenkey is part of keyboa version %s\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
 		,KEYBOAVERSION

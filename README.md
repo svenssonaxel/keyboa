@@ -23,7 +23,13 @@ Currently, only Windows is supported. The ambition is to support Linux soon. Mac
 
 ## Building from source
 
-To build from source, you will need cygwin with the mingw64-i686-gcc-core package installed. Run `make`. Done.
+Currently, building is only tested on Cygwin.
+
+Dependencies:
+- mingw32 compiler (cygwin package mingw64-i686-gcc-core)
+- scdoc (https://git.sr.ht/~sircmpwn/scdoc)
+
+Run `make`. Done.
 
 ## Running
 

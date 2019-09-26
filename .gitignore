@@ -4,3 +4,4 @@ __pycache__/
 release/
 /windows/version.h
 /libkeyboa/keysyms.csv
+/doc/*.[15]
