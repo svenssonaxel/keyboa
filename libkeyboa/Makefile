@@ -1,9 +1,9 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 # License: See LICENSE
 
-VERSION = $(shell ../makeversion)
+VERSION := $(shell ../makeversion)
 
-default: *.py win_vkeys.csv keysyms.csv commonname.csv
+default: *.py win_vkeys.csv keysyms.csv commonname.csv boxdrawings.csv
 	$(if $(findstring UNKNOWN,$(VERSION)),$(error Couldn't determine VERSION. Provide it manually or install git))
 	mkdir -p release
 	cp $^ release/

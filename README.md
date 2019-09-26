@@ -30,6 +30,7 @@ Dependencies:
 - scdoc (https://git.sr.ht/~sircmpwn/scdoc)
 
 Run `make`. Done.
+You can install with `make install` and uninstall with `make uninstall`.
 
 ## Running
 

@@ -10,7 +10,7 @@ ifeq (,$(shell which $(CC)))
 $(error mingw32 compiler not found. Install cygwin package mingw64-i686-gcc-core)
 endif
 
-VERSION = $(shell ../makeversion)
+VERSION := $(shell ../makeversion)
 VERSION_H = \#define KEYBOAVERSION "$(VERSION)"
 
 ifneq ($(shell [ -e version.h ] && cat version.h),$(VERSION_H))
