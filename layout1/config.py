@@ -27,6 +27,12 @@ def ch(plane, string):
 	load(plane,
 		[char if char!=" " else None
 		 for char in string])
+composition={}
+def compose(composedict):
+	global composition
+	composition={**composition,
+		**{tuple(key):composedict[key]
+		   for key in composedict}}
 
 w("from",
  "12      1       2       3       4       5       6       7       8       9       0       02      03      " +
@@ -54,12 +60,10 @@ load("modes",[
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
 ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
-ch("ShiftSym",      """              ⋀⋁⋂⋃⊂⊃¬∅⇓⇑   ≤≥≡∘  ⇐⇒⇔    ∀∃«»∈ℕℤℚℝℂ  """) # Inspired by the Knight keyboard
 ch("HyperSym",      """              ⫷⫸【】  ‹›«»         ⸨⸩—         „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
-ch("Math",          """             ¬⋀⋁∈ ⇒ ≈∞∅∝   ∀∫∂ ⊂⊃ ⇔    ≤ ∃  ⇐ℕℤℚℝℂ  """)
-ch("ShiftMath",     """          ≠   ⋂⋃∉ ∴ ≉       ∮  ⊏⊐      ≥ ∄  ∵∇      """)
-ch("Greek",         """               ςερτυθιοπ   ασδφγηξκλ´   ζχψωβνμ     """)
-ch("ShiftGreek",    """               ¨ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒΝΜ     """)
+ch("Math",          """       ≡⇔⇒           ↔→         ∘∧∨⊤⊥         ∀∃⊢⊨  """) # Logic-related symbols
+ch("Greek",         """              ;ςερτυθιοπ   ασδφγηξκλ    ζχψωβνμ     """)
+ch("ShiftGreek",    """                ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒΝΜ·    """)
 ch("Cyr-",          """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
 ch("Cyr-Shift",     """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
 ch("Bats",          """ ♭♮♯♩♪♫♬         ✆☎        ✧✦✓➔✗ ◇◆●                """)
@@ -80,6 +84,37 @@ load("HyperMath", [
 	("S3","⁽"),
 	("S2","⁾"),
 	])
+load("Math", [
+	("P", "back"),
+	("U", "compose:¬"),
+	])
+# Composing negation for logic symbols
+compose({
+	"¬≡": "≢",
+	"¬↔": "⊻",
+	"¬∧": "⊼",
+	"¬∨": "⊽",
+	"¬∃": "∄",
+	"¬⊢": "⊬",
+	"¬⊨": "⊭",
+	"¬=": "≠",
+	})
+
+# Composing accents for Greek
+load("Greek", [
+	("L2", "compose:΄"), # Dead tonos
+])
+load("ShiftGreek", [
+	("L2", "compose:¨"), # Dead diaeresis (used for dialytika)
+	("W", "compose:΅"), # Dead dialytika tonos
+])
+compose({
+	"΄Α": "Ά","΄Ε": "Έ","΄Η": "Ή","΄Ι": "Ί","΄Ο": "Ό","΄Υ": "Ύ","΄Ω": "Ώ",
+	"΄α": "ά","΄ε": "έ","΄η": "ή","΄ι": "ί","΄ο": "ό","΄υ": "ύ","΄ω": "ώ",
+	                              "¨Ι": "Ϊ",          "¨Υ": "Ϋ",
+	                              "¨ι": "ϊ",          "¨υ": "ϋ",
+	"΄¨": "΅","¨΄": "΅",          "΅ι": "ΐ",          "΅υ": "ΰ",
+})
 
 w("Nav",
  ".       .       .      C-S-LTab C-Tab   .       .       .       10*Up   .       .       .       .       " +
@@ -151,12 +186,42 @@ load("Shell",[
 	("L", """C-A,C-K,.cd ,tab,tab"""),
 	("K", """C-A,C-K,.ls -l,Ret"""),
 	("M2","""C-A,C-K,.ls -la,Ret"""),
-	("I", """C-A,C-K,.clear,Ret"""),
+	("I", """C-L"""),
 	("O", """C-A,C-K,.cd -,Ret"""),
 	("U", """C-A,C-K,.jobs,Ret"""),
+	("L2", """C-A,C-K,.ok p,Ret"""),
 	("E", """S-pgup"""),
 	("D", """S-pgdn"""),
 	])
+
+load("TeX-Math",[
+	("7", ".\\equiv"),
+	("8", ".\\Leftrightarrow"),
+	("9", ".\\Rightarrow"),
+	("U", "compose:.\\neg"),
+	("I", ".\\leftrightarrow"),
+	("O", ".\\to"),
+	("P", "C-back,back"),
+	("H", ".\\circ"),
+	("J", ".\\land"),
+	("K", ".\\lor"),
+	("L", ".\\top"),
+	("L2",".\\bot"),
+	("M", ".\\forall"),
+	("M2",".\\exists"),
+	("M3",".\\vdash"),
+	("M4",".\\models"),
+	])
+compose({
+	(".\\neg",".\\equiv"): ".\\not\\equiv",
+	(".\\neg",".\\leftrightarrow"): ".\\veebar",
+	(".\\neg",".\\land"): ".\\barwedge",
+	(".\\neg",".\\lor"): ".\\bar\\lor",
+	(".\\neg",".\\exists"): ".\\nexists",
+	(".\\neg",".\\vdash"): ".\\nvdash",
+	(".\\neg",".\\models"): ".\\nvDash",
+	(".\\neg","="): ".\\neq",
+	})
 
 w("TeX-Greek", # lower-case greek letters for TeX
 	""".          .          .          .          .          .          .          .          .          .          .          .          .  """ +
@@ -259,8 +324,8 @@ load("Win-Univ",[
 	])
 
 key_timeouts={
-	"S3": 10,
-	"L": 10,
+	"S3": 20,
+	"L": 30,
 	"S2": 15,
 	"Q2": 5,
 	}
@@ -273,4 +338,5 @@ __all__=[
 	"planelookup",
 	"max_numarg_digits",
 	"key_timeouts",
+	"composition",
 	]

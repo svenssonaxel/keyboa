@@ -10,10 +10,11 @@
 # - Chords transformed to other operations (chords_to_scripts)
 # - Notation for key combinations, series, and repetition (scripts_to_chords)
 # - Key renaming and aliasing (using commonnamesdict)
-# - Chords manipulating state (boxdrawing)
+# - Chords manipulating state (boxdrawing, unicode_input, compose)
 # - Repetition of chords based on a numeric argument (numarg_multiplier)
 # - Output depending on time (printdate)
 # - Input characters by unicode codepoint (unicode_input)
+# - Dead chords for composing characters
 #
 # Run in cmd:
 #   listenkey -cel | python3 -m layout1 | sendkey
@@ -59,6 +60,7 @@ list_of_transformations = [
 	l1.numarg_multiplier(),                                 # layout1
 	tr.macro(l1.macrotest, "macros"),                       # libkeyboa
 	l1.chords_to_scripts(),                                 # layout1
+	l1.compose("compose:"),                                 # layout1
 	l1.scripts_to_chords(),                                 # layout1
 	l1.boxdrawings("b"),                                    # layout1
 	l1.unicode_input(),                                     # layout1

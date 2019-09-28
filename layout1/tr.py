@@ -406,6 +406,39 @@ def printdate(modifier):
 				yield obj
 	return ret
 
+def compose(prefix):
+	def ret(gen):
+		def objs(buf):
+			for scr in buf:
+				yield {"type": "script", "script": scr, "scriptmods":set()}
+		for obj in gen:
+			if(obj["type"]=="script" and
+			   obj["scriptmods"]==set() and
+			   obj["script"].startswith(prefix)):
+				buf=(obj["script"][len(prefix):],)
+				for obj in gen:
+					if(obj["type"]=="script"):
+						scr=obj["script"]
+						isspace=scr in {"space","sp"}
+						if(len(obj["scriptmods"])>0 or
+						   isspace):
+							yield from objs(buf)
+							if(not isspace):
+								yield obj
+							break
+						if(scr.startswith(prefix)):
+							scr=scr[len(prefix):]
+						buf=(*buf, scr)
+						if(buf in composition):
+							buf=(composition[buf],)
+						f=lambda x:x[:len(buf)]==buf and len(buf)<len(x)
+						if(len(list(filter(f, composition.keys())))==0):
+							yield from objs(buf)
+							break
+					else: yield obj
+			else: yield obj
+	return ret
+
 def wait(modifier):
 	def ret(gen):
 		for obj in gen:
@@ -702,6 +735,7 @@ __all__=[
 	"boxdrawings",
 	"unicode_input",
 	"printdate",
+	"compose",
 	"wait",
 	"boxdrawings_ui",
 	"color_ui",
