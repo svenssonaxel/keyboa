@@ -176,8 +176,12 @@ def output_events(outputformat="autodetect", file=sys.stdout):
 					cpkey=data.format_unicode(cp)
 					ksobj=data.keysyminfo(cpkey)
 					obj={**obj, **ksobj}
-				# Output using keysym or keysym_symbol if present
-				if("x11_keysym" in obj or
+				cp=obj["unicode_codepoint"] if "unicode_codepoint" in obj else None
+				# Output using codepoint if present
+				if(t=="keypress" and cp and cp>=0x30):
+					print("type '"+chr(cp)+"'", file=file, flush=True)
+				# Otherwise output using keysym or keysym_symbol
+				elif("x11_keysym" in obj or
 				   "x11_keysym_symbol" in obj):
 					print(
 						t.replace("press","") + " " +
@@ -186,10 +190,6 @@ def output_events(outputformat="autodetect", file=sys.stdout):
 						 else obj["x11_keysym_symbol"]),
 						file=file,
 						flush=True)
-				# Otherwise output using codepoint
-				elif("unicode_codepoint" in obj and t=="keypress"):
-					cp=obj["unicode_codepoint"]
-					print("type '"+chr(cp)+"'", file=file, flush=True)
 			elif(t=="pointerstate"):
 				new_pos=[obj["x11_xpos"], obj["x11_ypos"]]
 				if(pos!=new_pos):
