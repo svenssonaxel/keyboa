@@ -1,7 +1,7 @@
 // Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 // License: See LICENSE
-#ifndef keyboa_win_libsendkey_h
-#define keyboa_win_libsendkey_h
+#ifndef keyboa_libsendkey_h
+#define keyboa_libsendkey_h
 
 #include "common.h"
 #include <stdio.h>

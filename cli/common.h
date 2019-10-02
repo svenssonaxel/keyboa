@@ -1,7 +1,7 @@
 // Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 // License: See LICENSE
-#ifndef keyboa_win_common_h
-#define keyboa_win_common_h
+#ifndef keyboa_common_h
+#define keyboa_common_h
 
 #define WINVER 0x0500
 #include <windows.h>
