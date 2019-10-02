@@ -1,4 +1,6 @@
 *.exe
+/cli/listenkey
+/cli/sendkey
 *.pyc
 __pycache__/
 release/

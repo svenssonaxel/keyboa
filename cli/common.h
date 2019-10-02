@@ -3,24 +3,10 @@
 #ifndef keyboa_common_h
 #define keyboa_common_h
 
-#define WINVER 0x0500
-#include <windows.h>
-
 #include <stdbool.h>
+#include <stdint.h>
 
-#ifndef LLKHF_LOWER_IL_INJECTED
-#define LLKHF_LOWER_IL_INJECTED 0x02
-#endif
-
-#ifndef WM_MOUSEHWHEEL
-#define WM_MOUSEHWHEEL 0x020E
-#endif
-
-#ifndef LLMHF_LOWER_IL_INJECTED
-#define LLMHF_LOWER_IL_INJECTED 0x00000002
-#endif
-
-typedef unsigned __int32 ucodepoint;
+typedef uint32_t ucodepoint;
 
 bool validate_unicode_codepoint(ucodepoint cp) {
 	//Too high codes are invalid

@@ -2,12 +2,13 @@
 # License: See LICENSE
 
 VERSION := $(shell ./makeversion)
+EXE := $(if $(eq $(OSTYPE),cygwin),.exe,)
 
 default: release
 
-install:
-	install -Dpvt /usr/local/bin release/listenkey.exe
-	install -Dpvt /usr/local/bin release/sendkey.exe
+install: release
+	install -Dpvt /usr/local/bin release/listenkey$(EXE)
+	install -Dpvt /usr/local/bin release/sendkey$(EXE)
 	install -Dpvt /usr/lib/python3.6/site-packages/libkeyboa release/libkeyboa/*
 	install -Dpvt /usr/lib/python3.7/site-packages/libkeyboa release/libkeyboa/*
 	install -Dpvt /usr/local/share/man/man1 release/man/listenkey.1
@@ -17,8 +18,8 @@ install:
 
 uninstall:
 	rm -rf \
-		/usr/local/bin/listenkey.exe \
-		/usr/local/bin/sendkey.exe \
+		/usr/local/bin/listenkey$(EXE) \
+		/usr/local/bin/sendkey$(EXE) \
 		/usr/lib/python3.6/site-packages/libkeyboa \
 		/usr/lib/python3.7/site-packages/libkeyboa \
 		/usr/local/share/man/man1/listenkey.1 \
@@ -43,7 +44,7 @@ doc:
 
 release: libkeyboa cli doc *LICENSE README.md
 	mkdir -p release/libkeyboa release/man release/layout1
-	cp -pr cli/*.exe *LICENSE README.md layout2.py release/
+	cp -pr cli/listenkey$(EXE) cli/sendkey$(EXE) *LICENSE README.md layout2.py release/
 	cp -pr libkeyboa/release/* release/libkeyboa
 	cp -pr doc/release/*.[15] release/man
 	cp -pr layout1/*.py layout1/*.csv release/layout1

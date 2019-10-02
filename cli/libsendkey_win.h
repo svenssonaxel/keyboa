@@ -5,30 +5,9 @@
 
 #include "common.h"
 #include <stdio.h>
+#include "libsendkey.h"
 
-enum keyevent_type {
-	KEYEVENT_T_UNDEFINED = 0,
-	KEYEVENT_T_KEYDOWN = 1,
-	KEYEVENT_T_KEYUP = 2,
-	KEYEVENT_T_KEYPRESS = 3 //means keydown followed by keyup
-};
-
-struct keyevent {
-	enum keyevent_type eventtype; bool eventtype_present;
-	DWORD scancode; bool scancode_present;
-	bool extended; bool extended_present;
-	DWORD virtualkey; bool virtualkey_present;
-	ucodepoint unicode_codepoint; bool unicode_codepoint_present;
-	DWORD time; bool time_present;
-};
-
-typedef void (*sendkey_keyevent_handler)(struct keyevent *ke);
-sendkey_keyevent_handler global_sendkey_keyevent_handler;
-
-typedef void (*sendkey_error_handler)(bool critical, char* errclass, char* errmsg);
-sendkey_error_handler global_sendkey_error_handler;
-
-char* validate_keyevent(struct keyevent *ke) {
+char* sendkey_validate_win(struct keyevent *ke) {
 	//check eventtype
 	if(!ke->eventtype_present) {
 		return "Missing type field";
@@ -39,27 +18,27 @@ char* validate_keyevent(struct keyevent *ke) {
 		return "Unknown type";
 	}
 	//check scancode
-	if(ke->scancode_present) {
-		if(!(1<=ke->scancode && ke->scancode<=127)) {
+	if(ke->win_scancode_present) {
+		if(!(1<=ke->win_scancode && ke->win_scancode<=127)) {
 			return "Invalid scancode";
 		}
 	}
 	//check extended
-	if(ke->extended_present && ke->extended && !ke->scancode_present) {
+	if(ke->win_extended_present && ke->win_extended && !ke->win_scancode_present) {
 		return "Keyevent cannot have extended flag set without scancode";
 	}
 	//check virtualkey
-	if(ke->virtualkey_present) {
-		if(!(1<=ke->virtualkey && ke->virtualkey<=254)) {
+	if(ke->win_virtualkey_present) {
+		if(!(1<=ke->win_virtualkey && ke->win_virtualkey<=254)) {
 			return "Invalid virtualkey";
 		}
 	}
 	//check unicode_codepoint
 	if(ke->unicode_codepoint_present) {
-		if(ke->scancode_present) {
+		if(ke->win_scancode_present) {
 			return "Keyevent cannot have both scancode and unicode_codepoint";
 		}
-		if(ke->virtualkey_present) {
+		if(ke->win_virtualkey_present) {
 			return "Keyevent cannot have both virtualkey and unicode_codepoint";
 		}
 		if(!validate_unicode_codepoint(ke->unicode_codepoint)) {
@@ -67,7 +46,7 @@ char* validate_keyevent(struct keyevent *ke) {
 		}
 	}
 	else {
-		if(!(ke->scancode_present || ke->virtualkey_present)) {
+		if(!(ke->win_scancode_present || ke->win_virtualkey_present)) {
 			return "Keyevent must have at least one of scancode, virtualkey, or unicode_codepoint";
 		}
 	}
@@ -99,13 +78,13 @@ void mkinput(
 }
 
 DWORD maxtime = 0;
-void send_keyevent(struct keyevent *ke) {
+void sendkey_send_win(struct keyevent *ke) {
 	//init input structs
 	INPUT input[4];
 	int idx = 0;
 	//init time
-	bool calctime = !ke->time_present;
-	DWORD sendtime = ke->time;
+	bool calctime = !ke->win_time_present;
+	DWORD sendtime = ke->win_time;
 	if(calctime) {
 		sendtime=max(GetTickCount(), maxtime+1);
 	}
@@ -132,14 +111,14 @@ void send_keyevent(struct keyevent *ke) {
 			}
 		}
 		else {
-			bool hw = ke->scancode_present;
+			bool hw = ke->win_scancode_present;
 			mkinput(
 				&(input[idx]),
-				ke->scancode,
-				ke->virtualkey,
+				ke->win_scancode,
+				ke->win_virtualkey,
 				up,
 				hw,
-				ke->extended,
+				ke->win_extended,
 				false,
 				sendtime);
 			idx++;
@@ -153,6 +132,11 @@ void send_keyevent(struct keyevent *ke) {
 		fflush(stderr);
 	}
 	maxtime=max(sendtime, maxtime);
+}
+
+void sendkey_init_win() {
+	global_sendkey_validator = sendkey_validate_win;
+	global_sendkey_sender = sendkey_send_win;
 }
 
 #endif
