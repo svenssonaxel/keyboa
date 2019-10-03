@@ -1,5 +1,5 @@
 // Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
-// License: See LICENSE
+// Legal: See COPYING.txt
 #ifndef keyboa_win_libsendkey_h
 #define keyboa_win_libsendkey_h
 

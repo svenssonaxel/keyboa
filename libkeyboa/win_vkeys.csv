@@ -1,6 +1,6 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 # This file is part of keyboa version <VERSION>
-# License: See LICENSE
+# Legal: See COPYING.txt
 #
 #Vkey,  Symbol,                  Description
  0x01,  VK_LBUTTON,              "Left mouse button"

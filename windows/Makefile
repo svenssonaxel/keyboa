@@ -1,5 +1,5 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
-# License: See LICENSE
+# Legal: See COPYING.txt
 
 CC = i686-w64-mingw32-gcc
 

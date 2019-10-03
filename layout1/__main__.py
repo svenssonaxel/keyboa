@@ -2,7 +2,7 @@
 
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 # This file is part of keyboa version <VERSION>
-# License: See LICENSE
+# Legal: See COPYING.txt
 
 # This is a rather involved example, including
 # - Any key functioning as both modifier and letter (events_to_chords)

@@ -1,5 +1,5 @@
 # Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
-# License: See LICENSE
+# Legal: See COPYING.txt
 
 VERSION := $(shell ./makeversion)
 
@@ -41,9 +41,9 @@ windows:
 doc:
 	cd doc; make VERSION=$(VERSION)
 
-release: libkeyboa windows doc *LICENSE README.md
+release: libkeyboa windows doc *COPYING.txt README.md
 	mkdir -p release/libkeyboa release/man release/layout1
-	cp -pr windows/*.exe *LICENSE README.md layout2.py release/
+	cp -pr windows/*.exe *COPYING.txt README.md layout2.py release/
 	cp -pr libkeyboa/release/* release/libkeyboa
 	cp -pr doc/release/*.[15] release/man
 	cp -pr layout1/*.py layout1/*.csv release/layout1

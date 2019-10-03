@@ -1,5 +1,5 @@
 // Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
-// License: See LICENSE
+// Legal: See COPYING.txt
 #include "common.h"
 #include "json-str.c"
 #include <stdio.h>
