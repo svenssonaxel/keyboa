@@ -3,7 +3,12 @@
 
 VERSION := $(shell ../makeversion)
 VERSION_H = \#define KEYBOAVERSION "$(VERSION)"
-EXE := $(if $(eq $(OSTYPE),cygwin),.exe,)
+OSTYPE := $(shell echo $${OSTYPE})
+ifeq ($(OSTYPE),cygwin)
+EXE := .exe
+else
+EXE :=
+endif
 
 ifneq ($(shell [ -e version.h ] && cat version.h),$(VERSION_H))
 $(shell rm version.h)
