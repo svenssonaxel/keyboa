@@ -2,12 +2,19 @@
 // Legal: See COPYING.txt
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #include "common.h"
 #include "liblistenkey.h"
+#include "json-str.c"
 #include "version.h"
 
-bool opt_k, opt_m, opt_b, opt_c, opt_C, opt_i, opt_e, opt_d, opt_l, opt_L;
+#ifdef keyboa_win
+#include "common_win.h"
+#include "liblistenkey_win.h"
+#endif
+
+bool opt_w, opt_v, opt_k, opt_m, opt_b, opt_c, opt_C, opt_i, opt_e, opt_d, opt_s, opt_S;
 int evcount;
 
 void error_handler(bool critical, char* errclass, char* errmsg) {
@@ -24,6 +31,7 @@ void error_handler(bool critical, char* errclass, char* errmsg) {
 	fflush(stderr);
 }
 
+#ifdef keyboa_win
 bool processKeyEvent(WPARAM wParam, KBDLLHOOKSTRUCT* hooked) {
 	DWORD     virtualkey = hooked->vkCode;
 	DWORD     scancode = hooked->scanCode;
@@ -250,7 +258,7 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 	return consume;
 }
 
-void printinit(FILE* stream) {
+void printinit_win(FILE* stream) {
 	fprintf(stream, "{\"type\":\"init\",\"platform\":\"windows\"");
 
 	//Retrieve current state for virtualkeys
@@ -366,24 +374,38 @@ void printinit(FILE* stream) {
 	fprintf(stream, "}\n");
 	fflush(stream);
 }
+#endif
+
+void printinit_x(FILE* stream) {
+	fprintf(stream, "X11 support not yet implemented.\n");
+	exit(1);
+}
+
+void quitsignal() {
+	fprintf(stderr, "Quitting due to signal.\n");
+	fflush(stderr);
+	exit(0);
+}
 
 void printhelp() {
 	fprintf(stderr,
-		"\nPrint Windows keyboard events on stdout.\n\n"
-		"Options:\n\n"
-		" -k Print keyboard events (on by default unless -m or -b is provided).\n\n"
-		" -m Print mouse move events.\n\n"
-		" -b Print mouse button and wheel events.\n\n"
-		" -c Consume non-injected events.\n\n"
-		" -C Consume injected events.\n\n"
-		" -i Print injected events.\n\n"
-		" -e Exit when escape key is pressed.\n\n"
-		" -d Exit after 20 events are processed (useful for debugging).\n\n"
-		" -l At startup, print a message containing information about the current\n"
-		"    keyboard layout and state.\n\n"
-		" -L Exit after printing startup message (implies -l).\n\n"
-		" -h Print this help text and exit.\n\n"
-		"For more help: man listenkey\n\n"
+		"\nPrint user input events on stdout, optionally consuming them.\n"
+		"\nOptions:\n\n"
+		" -w Windows mode: Receive events through Windows API.\n"
+		" -v VNC mode: Receive events through an x11vnc proxy.\n"
+		" -k Print keyboard events (on by default unless -m or -b is provided).\n"
+		" -m Print mouse move events.\n"
+		" -b Print mouse button and wheel events.\n"
+		" -c Consume non-injected events.\n"
+		" -C Consume injected events.\n"
+		" -i Print injected events.\n"
+		" -e Exit when escape key is pressed.\n"
+		" -d Exit after 20 events are processed (useful for debugging).\n"
+		" -s At startup, print a message containing information about the current\n"
+		"    keyboard layout and state.\n"
+		" -S Exit after printing startup message (implies -s).\n"
+		" -h Print this help text and exit.\n"
+		"\nFor more help: man listenkey\n\n"
 		"listenkey is part of keyboa version %s\n"
 		"Copyright © 2019 Axel Svensson <mail@axelsvensson.com>\n"
 		,KEYBOAVERSION
@@ -395,8 +417,10 @@ void printhelp() {
 int main(int argc, char** argv) {
 	char* progname = argv[0];
 	int c;
-	while ((c = getopt (argc, argv, "kmbcCiedjflLh")) != -1) {
+	while ((c = getopt (argc, argv, "wvkmbcCiedjfsSh")) != -1) {
 		switch (c) {
+			case 'w': opt_w = true;  break;
+			case 'v': opt_v = true;  break;
 			case 'k': opt_k = true;  break;
 			case 'm': opt_m = true;  break;
 			case 'b': opt_b = true;  break;
@@ -405,26 +429,69 @@ int main(int argc, char** argv) {
 			case 'i': opt_i = true;  break;
 			case 'e': opt_e = true;  break;
 			case 'd': opt_d = true;  break;
-			case 'l': opt_l = true;  break;
-			case 'L': opt_L = true; opt_l = true;  break;
+			case 's': opt_s = true;  break;
+			case 'S': opt_S = true; opt_s = true;  break;
 			case 'h': printhelp();
 			default: abort();
 		}
 	}
 	// -k is on by default unless -m or -b is provided.
 	if(!(opt_m || opt_b)) { opt_k = true; }
-	signal(SIGINT, quitlistenkey);
-	signal(SIGTERM, quitlistenkey);
-	if(opt_l) {
-		printinit(stdout);
-		if(opt_L) {
+	if(((opt_w?1:0)+(opt_v?1:0))>1) {
+		printf("Only one of -wv can be given.\n");
+		exit(1);
+	}
+	if(!(opt_w||opt_v)) {
+#ifdef keyboa_win
+		opt_w = true;
+#else
+		opt_v = true;
+#endif
+	}
+
+#ifdef keyboa_win
+	if(opt_s) {
+		if(opt_w)
+			printinit_win(stdout);
+		if(opt_v)
+			printinit_x(stdout);
+		if(opt_S) {
 			exit(0);
 		}
 	}
-	runlistenkey(
-		// Listen to key events if we need to print them or exit on Esc.
-		(opt_k || opt_e) ? processKeyEvent : NULL,
-		// Listen to mouse events if we need to print move or button events.
-		(opt_m || opt_b) ? processMouseEvent : NULL,
-		progname);
+	if(opt_w) {
+		signal(SIGINT, quitlistenkey);
+		signal(SIGTERM, quitlistenkey);
+		runlistenkey(
+			// Listen to key events if we need to print them or exit on Esc.
+			(opt_k || opt_e) ? processKeyEvent : NULL,
+			// Listen to mouse events if we need to print move or button events.
+			(opt_m || opt_b) ? processMouseEvent : NULL,
+			progname);
+	}
+	else {
+		signal(SIGINT, quitsignal);
+		signal(SIGTERM, quitsignal);
+	}
+#else
+	if(opt_w) {
+		printf("This version of listenkey is compiled without Windows API support.\n");
+		exit(1);
+	}
+	else {
+		if(opt_s) {
+			if(opt_v)
+				printinit_x(stdout);
+			if(opt_S) {
+				exit(0);
+			}
+		}
+		signal(SIGINT, quitsignal);
+		signal(SIGTERM, quitsignal);
+	}
+#endif
+	if(opt_v) {
+		printf("x11vnc support not yet implemented.\n");
+		exit(1);
+	}
 }

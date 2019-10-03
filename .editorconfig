@@ -3,12 +3,15 @@
 
 root = true
 
-[{*.c,*.h,*.py,*.csv,Makefile}]
+[{*.c,*.h,*.py,*.csv,*.scd,Makefile}]
 end_of_line = lf
 insert_final_newline = true
 charset = utf-8
 indent_style = tab
 indent_size = 4
+
+[*.scd]
+indent_size = 7
 
 [jsonsl*]
 indent_style = space

@@ -2,7 +2,7 @@ listenkey(1) "keyboa <VERSION>"
 
 # NAME
 
-listenkey - access incoming key events, optionally consuming them
+listenkey - access incoming user input events, optionally consuming them
 
 # SYNOPSIS
 
@@ -10,12 +10,19 @@ listenkey [-cCiedlLfh]
 
 # DESCRIPTION
 
-*listenkey* provides access to incoming key events, optionally withholding them from applications.
-This will for example allow a user to process key events arbitrarily and send them along to applications using *sendkey*(1).
+*listenkey* provides access to incoming user input events, optionally withholding them from applications.
+This will for example allow a user to process key or mouse events arbitrarily and send them along to applications using *sendkey*(1).
 The output format is described in *keyboa*(5).
+If none of *-wv* is given, the default is
+- *-w* if Windows mode is supported
+- *-v* otherwise
 
 # OPTIONS
 
+*-w*
+	Windows mode: Receive events through Windows API.
+*-v*
+	VNC mode: Receive events through an x11vnc proxy.
 *-k*
 	Print keyboard events. This option is on by default unless -m or -b is provided.
 
@@ -43,11 +50,11 @@ The output format is described in *keyboa*(5).
 *-d*
 	Exit after 20 events are processed (useful for debugging).
 
-*-l*
+*-s*
 	At startup, print a message containing information about the current keyboard layout and state.
 
-*-L*
-	Exit after printing startup message (implies -l).
+*-S*
+	Exit after printing startup message (implies -s).
 
 *-h*
 	Print help and exit.

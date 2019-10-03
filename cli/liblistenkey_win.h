@@ -1,7 +1,6 @@
 // Copyright © 2019 Axel Svensson <mail@axelsvensson.com>
 // Legal: See COPYING.txt
 #include "common.h"
-#include "json-str.c"
 #include <stdio.h>
 
 //This code is an adaptation of:

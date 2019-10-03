@@ -52,16 +52,16 @@ void callback(jsonsl_t jsn,
 		//reset key event data
 		ke->eventtype = KEYEVENT_T_UNDEFINED;
 		ke->eventtype_present = false;
-		ke->scancode = 0;
-		ke->scancode_present = false;
-		ke->extended = false;
-		ke->extended_present = false;
-		ke->virtualkey = 0;
-		ke->virtualkey_present = false;
+		ke->win_scancode = 0;
+		ke->win_scancode_present = false;
+		ke->win_extended = false;
+		ke->win_extended_present = false;
+		ke->win_virtualkey = 0;
+		ke->win_virtualkey_present = false;
 		ke->unicode_codepoint = 0;
 		ke->unicode_codepoint_present = false;
-		ke->time = 0;
-		ke->time_present = false;
+		ke->win_time = 0;
+		ke->win_time_present = false;
 	}
 
 	//at end of top-level object
@@ -145,8 +145,8 @@ void callback(jsonsl_t jsn,
 			}
 			else if(strcmp(keyname, "win_scancode")==0) {
 				if(ispint) {
-					ke->scancode = intval;
-					ke->scancode_present = true;
+					ke->win_scancode = intval;
+					ke->win_scancode_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
@@ -154,8 +154,8 @@ void callback(jsonsl_t jsn,
 			}
 			else if(strcmp(keyname, "win_extended")==0) {
 				if(isbool) {
-					ke->extended = boolval;
-					ke->extended_present = true;
+					ke->win_extended = boolval;
+					ke->win_extended_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a boolean\n", keyname);
@@ -163,8 +163,8 @@ void callback(jsonsl_t jsn,
 			}
 			else if(strcmp(keyname, "win_virtualkey")==0) {
 				if(ispint) {
-					ke->virtualkey = intval;
-					ke->virtualkey_present = true;
+					ke->win_virtualkey = intval;
+					ke->win_virtualkey_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);
@@ -181,8 +181,8 @@ void callback(jsonsl_t jsn,
 			}
 			else if(strcmp(keyname, "win_time")==0) {
 				if(ispint) {
-					ke->time = intval;
-					ke->time_present = true;
+					ke->win_time = intval;
+					ke->win_time_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be a positive integer\n", keyname);

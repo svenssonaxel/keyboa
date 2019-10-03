@@ -2,12 +2,13 @@
 # Legal: See COPYING.txt
 
 VERSION := $(shell ./makeversion)
+EXE := $(if $(eq $(OSTYPE),cygwin),.exe,)
 
 default: release
 
-install:
-	install -Dpvt /usr/local/bin release/listenkey.exe
-	install -Dpvt /usr/local/bin release/sendkey.exe
+install: release
+	install -Dpvt /usr/local/bin release/listenkey$(EXE)
+	install -Dpvt /usr/local/bin release/sendkey$(EXE)
 	install -Dpvt /usr/lib/python3.6/site-packages/libkeyboa release/libkeyboa/*
 	install -Dpvt /usr/lib/python3.7/site-packages/libkeyboa release/libkeyboa/*
 	install -Dpvt /usr/local/share/man/man1 release/man/listenkey.1
@@ -17,8 +18,8 @@ install:
 
 uninstall:
 	rm -rf \
-		/usr/local/bin/listenkey.exe \
-		/usr/local/bin/sendkey.exe \
+		/usr/local/bin/listenkey$(EXE) \
+		/usr/local/bin/sendkey$(EXE) \
 		/usr/lib/python3.6/site-packages/libkeyboa \
 		/usr/lib/python3.7/site-packages/libkeyboa \
 		/usr/local/share/man/man1/listenkey.1 \
@@ -27,7 +28,7 @@ uninstall:
 	echo Done uninstalling
 
 clean:
-	cd windows; make clean
+	cd cli; make clean
 	cd libkeyboa; make clean
 	cd doc; make clean
 	rm -rf __pycache__/ release/
@@ -35,18 +36,18 @@ clean:
 libkeyboa:
 	cd libkeyboa; make VERSION=$(VERSION)
 
-windows:
-	cd windows; make VERSION=$(VERSION)
+cli:
+	cd cli; make VERSION=$(VERSION)
 
 doc:
 	cd doc; make VERSION=$(VERSION)
 
-release: libkeyboa windows doc *COPYING.txt README.md
+release: libkeyboa cli doc COPYING.txt README.md
 	mkdir -p release/libkeyboa release/man release/layout1
-	cp -pr windows/*.exe *COPYING.txt README.md layout2.py release/
+	cp -pr cli/listenkey$(EXE) cli/sendkey$(EXE) COPYING.txt README.md layout2.py release/
 	cp -pr libkeyboa/release/* release/libkeyboa
 	cp -pr doc/release/*.[15] release/man
 	cp -pr layout1/*.py layout1/*.csv release/layout1
 	echo === Finished building keyboa version $(VERSION)
 
-.PHONY: default install uninstall clean libkeyboa windows doc
+.PHONY: default install uninstall clean libkeyboa cli doc

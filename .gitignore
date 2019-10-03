@@ -1,7 +1,9 @@
 *.exe
+/cli/listenkey
+/cli/sendkey
 *.pyc
 __pycache__/
 release/
-/windows/version.h
+/cli/version.h
 /libkeyboa/keysyms.csv
 /doc/*.[15]

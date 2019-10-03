@@ -40,7 +40,7 @@ The message type is specified in the "type" field of the message.
 
 ## init
 - Represents: No event
-- Produced by listenkey: At startup, if the *-l* option is provided
+- Produced by listenkey: At startup, if the *-s* option is provided
 - Handled by sendkey: never
 
 Contains information about the current keyboard layout and state.
