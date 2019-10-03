@@ -44,7 +44,7 @@ See `layout1.py` and `layout2.py` for examples of how to write and run a process
 
 ### Use with care
 
-listenkey.exe with the -c option will prevent key events from reaching the applications. Unless you use it in combination with the -e or -d option, you run the risk of partly losing control of your computer. This particular foot gun is necessary for the core functionality, so it will stay this way. The recommended and conservative use is to always have the -e option turned on. This way, if your processor hits a snag you can always press Esc to exit listenkey.exe. In order to make use of this option, you will need a layout that doesn't require using the Esc key.
+listenkey.exe with the -c option will prevent key events from reaching the applications. Unless you use it in combination with the -e or -d option, you run the risk of partially losing control of your computer. This particular foot gun is necessary for the core functionality, so it will stay this way. The recommended and conservative use is to always have the -e option turned on. This way, if your processor hits a snag you can always press Esc to exit listenkey.exe. In order to make use of this option, you will need a layout that doesn't require using the Esc key.
 
 ### Known bugs
 

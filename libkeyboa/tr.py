@@ -383,12 +383,16 @@ def unstick_keys(field, timeouts):
 					key_history_state=sorted([*filter(lambda x: x[1]!=key, key_history_state), (this_time+timeouts[key], key, obj)])
 			if(t=="keyup"):
 				key=obj[field]
+				key_was_in_history_state=len([*filter(lambda x: x[1]==key, key_history_state)])>0
 				key_history_state=[*filter(lambda x: x[1]!=key, key_history_state)]
-				if(obj[field] in timeouts):
+				if(obj[field] in timeouts and not key_was_in_history_state):
 					# Probably switched from a privileged window, so we tunnel
 					# a key release through the rest of the processing, since
 					# it is otherwise likely to be silenced.
 					yield {"type":"output","data":obj}
+				else:
+					yield obj
+				continue
 			yield obj
 	return ret
 

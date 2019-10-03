@@ -40,7 +40,8 @@ char* validate_keyevent(struct keyevent *ke) {
 	}
 	//check scancode
 	if(ke->scancode_present) {
-		if(!(1<=ke->scancode && ke->scancode<=127)) {
+		// scancode 0x21d is for AltGr
+		if(!(1<=ke->scancode && ke->scancode<=0x7f) && ke->scancode!=0x21d) {
 			return "Invalid scancode";
 		}
 	}
@@ -50,7 +51,7 @@ char* validate_keyevent(struct keyevent *ke) {
 	}
 	//check virtualkey
 	if(ke->virtualkey_present) {
-		if(!(1<=ke->virtualkey && ke->virtualkey<=254)) {
+		if(!(1<=ke->virtualkey && ke->virtualkey<=0xfe)) {
 			return "Invalid virtualkey";
 		}
 	}
