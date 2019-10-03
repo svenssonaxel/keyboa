@@ -14,77 +14,67 @@
 #include "libsendkey_win.h"
 #endif
 
-bool opt_d, opt_w, opt_x, opt_o, opt_p;
+bool opt_d, opt_w, opt_x, opt_o;
 
-void printjson(struct keyevent *ke, FILE *stream) {
-	bool td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
-	bool tu = (ke->eventtype == KEYEVENT_T_KEYUP);
-	bool tp = (ke->eventtype == KEYEVENT_T_KEYPRESS);
-	bool to = !(td || tu || tp);
-	if(td) fprintf(stream, "{\"type\":\"keydown\"");
-	if(tu) fprintf(stream, "{\"type\":\"keyup\"");
-	if(tp) fprintf(stream, "{\"type\":\"keypress\"");
-	if(to) fprintf(stream, "{\"type\":\"nothing\"");
-	if(opt_w) {
-		if(ke->win_scancode)
-			fprintf(stream, ",\"win_scancode\":%u", ke->win_scancode);
-		if(ke->win_virtualkey)
-			fprintf(stream, ",\"win_virtualkey\":%u,\"win_extended\":%s",
-				ke->win_virtualkey,
-				ke->win_extended ? "true" : "false");
-		if(ke->win_time)
-			fprintf(stream, ",\"win_time\":%u", ke->win_time);
+void printjson(struct kmevent *kme, FILE *stream) {
+	enum kmevent_type t=kme->eventtype;
+	if(!t) return;
+	fprintf(stream,
+	        "{\"type\":\"%s\"",
+	        kmevent_type_names[kme->eventtype]);
+	bool is_kev = kmevent_type_is_kev(t);
+	if(is_kev && kme->unicode_codepoint_present) {
+		fprintf(stream, ",\"unicode_codepoint\":%u", kme->unicode_codepoint);
 	}
-	if(ke->unicode_codepoint) {
-		fprintf(stream, ",\"unicode_codepoint\":%u", ke->unicode_codepoint);
+	if(opt_w && is_kev) {
+		if(kme->win_scancode_present)
+			fprintf(stream, ",\"win_scancode\":%u", kme->win_scancode);
+		if(kme->win_virtualkey_present)
+			fprintf(stream, ",\"win_virtualkey\":%u,\"win_extended\":%s",
+				kme->win_virtualkey,
+				kme->win_extended ? "true" : "false");
+		if(kme->win_time_present)
+			fprintf(stream, ",\"win_time\":%u", kme->win_time);
+	}
+	if(opt_w && (t==KMEVENT_T_BUTTONDOWN || t==KMEVENT_T_BUTTONUP)) {
+		if(kme->win_button_present)
+			fprintf(stream,
+				",\"win_button\":%s",
+				win_button_names[kme->win_button]);
+	}
+	if(opt_w && t==KMEVENT_T_POINTERMOVE) {
+		fprintf(stream,
+				",\"win_pointerx\":%d,\"win_pointery\":%d,\"win_coord_system\":%s",
+				kme->win_pointerx, kme->win_pointery,
+				win_coord_system_names[kme->win_coord_system]);
+	}
+	if(opt_w && t==KMEVENT_T_WHEEL) {
+		if(kme->win_wheeldeltax_present)
+			fprintf(stream,
+				",\"win_wheeldeltax\":%d",
+				kme->win_wheeldeltax);
+		if(kme->win_wheeldeltay_present)
+			fprintf(stream,
+				",\"win_wheeldeltay\":%d",
+				kme->win_wheeldeltay);
 	}
 	fprintf(stream, "}\n");
 	fflush(stream);
 }
 
-void printprettyjson(struct keyevent *ke, FILE *stream) {
-	bool td = (ke->eventtype == KEYEVENT_T_KEYDOWN);
-	bool tu = (ke->eventtype == KEYEVENT_T_KEYUP);
-	bool tp = (ke->eventtype == KEYEVENT_T_KEYPRESS);
-	bool to = !(td || tu || tp);
-	fprintf(stream, "{\"type\":         ");
-	if(td) fprintf(stream, " \"keydown\"");
-	if(tu) fprintf(stream, "   \"keyup\"");
-	if(tp) fprintf(stream, "\"keypress\"");
-	if(to) fprintf(stream, " \"nothing\"");
-	if(opt_w) {
-		if(ke->win_scancode_present)
-			fprintf(stream, ",\n \"win_scancode\":      %5u", ke->win_scancode);
-		if(ke->win_virtualkey_present)
-			fprintf(stream, ",\n \"win_virtualkey\":    %5u,\n \"win_extended\":       %s",
-				ke->win_virtualkey,
-				ke->win_extended ? "true" : "false");
-		if(ke->win_time_present)
-			fprintf(stream, ",\n \"win_time\": %u", ke->win_time);
-	}
-	if(ke->unicode_codepoint_present) {
-		fprintf(stream, ",\n \"unicode_codepoint\": %u", ke->unicode_codepoint);
-	}
-	fprintf(stream, "}\n\n");
-	fflush(stream);
-}
-
-void sendkey_dispatch_handler(struct keyevent *ke) {
-	char* ke_error = global_sendkey_validator(ke);
-	if(ke_error) {
-		global_sendkey_error_handler(false, "Ignoring keyevent", ke_error);
+void sendkey_dispatch_handler(struct kmevent *kme) {
+	char* kme_error = global_sendkey_validator(kme);
+	if(kme_error) {
+		global_sendkey_error_handler(false, "Ignoring keyevent", kme_error);
 		return;
 	}
-	if(opt_p) {
-		printprettyjson(ke, stdout);
-	}
-	else if(opt_o) {
-		printjson(ke, stdout);
+	if(opt_o) {
+		printjson(kme, stdout);
 	}
 	if(opt_d) {
 		return;
 	}
-	global_sendkey_sender(ke);
+	global_sendkey_sender(kme);
 }
 
 void error_handler(bool critical, char* errclass, char* errmsg) {
@@ -114,7 +104,6 @@ void printhelp() {
 		" -w Windows mode: Inject using Windows API.\n"
 		" -x X11 mode: Inject into X11 session.\n"
 		" -o Also print events on stdout.\n"
-		" -p Pretty-print on stdout (implies -o).\n"
 		" -d Dry run: Do not inject events.\n"
 		" -h Print this help text and exit.\n"
 		"\nFor more help: man sendkey\n\n"
@@ -126,7 +115,7 @@ void printhelp() {
 }
 
 int main(int argc, char* argv[]) {
-	global_sendkey_keyevent_handler = sendkey_dispatch_handler;
+	global_sendkey_kmevent_handler = sendkey_dispatch_handler;
 	global_sendkey_error_handler = error_handler;
 	char* progname = argv[0];
 	int c;
@@ -135,7 +124,6 @@ int main(int argc, char* argv[]) {
 			case 'w': opt_w = true;  break;
 			case 'x': opt_x = true;  break;
 			case 'o': opt_o = true;  break;
-			case 'p': opt_p = true;  break;
 			case 'd': opt_d = true;  break;
 			case 'h': printhelp();
 			default: abort();

@@ -6,7 +6,7 @@ sendkey - send user input events to applications
 
 # SYNOPSIS
 
-sendkey [-doph]
+sendkey [-wxopdh]
 
 # DESCRIPTION
 
@@ -20,16 +20,27 @@ If none of *-wx* is given, the default is
 
 *-w*
 	Windows mode: Inject events using Windows API.
+
 *-x*
 	X11 mode: Inject events into X11 session.
+
 *-o*
 	Print events on stdout, in the form they are interpreted.
+
 *-p*
 	Pretty-print on stdout (implies -o).
+
 *-d*
 	Dry run: Do not inject events.
+
 *-h*
 	Print help and exit.
+
+# BUGS
+
+Currently, sendkey does not support the "AbsPixelactual" coordinate system.
+(This is set in the win_coord_system field in pointermove events.)
+Since this is the coordinate system used by listenkey, it means that mousemove events cannot be piped directly from listenkey to sendkey.
 
 # AUTHOR
 

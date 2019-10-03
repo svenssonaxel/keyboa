@@ -6,7 +6,7 @@ listenkey - access incoming user input events, optionally consuming them
 
 # SYNOPSIS
 
-listenkey [-cCiedlLfh]
+listenkey [-wvkmbcCiedsSh]
 
 # DESCRIPTION
 
@@ -21,8 +21,10 @@ If none of *-wv* is given, the default is
 
 *-w*
 	Windows mode: Receive events through Windows API.
+
 *-v*
 	VNC mode: Receive events through an x11vnc proxy.
+
 *-k*
 	Print keyboard events. This option is on by default unless -m or -b is provided.
 

@@ -7,56 +7,93 @@
 #include <stdio.h>
 #include "libsendkey.h"
 
-char* sendkey_validate_win(struct keyevent *ke) {
+#ifndef MOUSEEVENTF_HWHEEL
+#define MOUSEEVENTF_HWHEEL 0x01000
+#endif
+
+char* sendkey_validate_win(struct kmevent *kme) {
 	//check eventtype
-	if(!ke->eventtype_present) {
+	if(!kme->eventtype_present) {
 		return "Missing type field";
 	}
-	if(ke->eventtype!=KEYEVENT_T_KEYDOWN &&
-	   ke->eventtype!=KEYEVENT_T_KEYUP &&
-	   ke->eventtype!=KEYEVENT_T_KEYPRESS) {
+	enum kmevent_type t=kme->eventtype;
+	//check type
+	if(!(
+		 0<t && t<(sizeof(kmevent_type_names)/sizeof(char*)) &&
+		 kmevent_type_names[t]!=NULL))
 		return "Unknown type";
+	bool is_kev = kmevent_type_is_kev(t);
+	bool is_mev = kmevent_type_is_mev(t);
+	//check unicode_codepoint
+	if(is_kev && kme->unicode_codepoint_present &&
+	   !validate_unicode_codepoint(kme->unicode_codepoint)) {
+		return "Invalid unicode codepoint";
 	}
-	//check scancode
-	if(ke->win_scancode_present) {
-		// scancode 0x21d is for AltGr
-		if(!(1<=ke->win_scancode && ke->win_scancode<=0x7f) && ke->win_scancode!=0x21d) {
-			return "Invalid scancode";
-		}
+	//check win_button
+	if(t==KMEVENT_T_BUTTONDOWN ||
+	   t==KMEVENT_T_BUTTONUP) {
+		if(!kme->win_button_present)
+			return "Missing win_button";
+		if(!win_button_names[kme->win_button])
+			return "Invalid win_button";
 	}
-	//check extended
-	if(ke->win_extended_present && ke->win_extended && !ke->win_scancode_present) {
+	//check win_coord_system
+	if(t==KMEVENT_T_POINTERMOVE) {
+		if(!kme->win_coord_system_present)
+			return "win_coord_system is required in pointermove events";
+		if(kme->win_coord_system==0 ||
+		   kme->win_coord_system==COORD_SYSTEM_ABS_PIXELACTUAL)
+			return "Unsupported win_coord_system";
+	}
+	//check win_extended
+	if(is_kev &&
+	   kme->win_extended_present &&
+	   kme->win_extended &&
+	   !kme->win_scancode_present) {
 		return "Keyevent cannot have extended flag set without scancode";
 	}
-	//check virtualkey
-	if(ke->win_virtualkey_present) {
-		if(!(1<=ke->win_virtualkey && ke->win_virtualkey<=0xfe)) {
-			return "Invalid virtualkey";
+	//no need to check win_pointerx, win_pointery
+	//check win_scancode
+	if(is_kev && kme->win_scancode_present) {
+		// scancode 0x21d is for AltGr
+		if(!(1<=kme->win_scancode && kme->win_scancode<=0x7f) && kme->win_scancode!=0x21d) {
+			return "Invalid win_scancode";
 		}
 	}
-	//check unicode_codepoint
-	if(ke->unicode_codepoint_present) {
-		if(ke->win_scancode_present) {
-			return "Keyevent cannot have both scancode and unicode_codepoint";
-		}
-		if(ke->win_virtualkey_present) {
-			return "Keyevent cannot have both virtualkey and unicode_codepoint";
-		}
-		if(!validate_unicode_codepoint(ke->unicode_codepoint)) {
-			return "Invalid unicode codepoint";
+	//no need to check win_time since no invalid state is representable
+	//check win_virtualkey
+	if(is_kev && kme->win_virtualkey_present) {
+		if(!(1<=kme->win_virtualkey && kme->win_virtualkey<=0xfe)) {
+			return "Invalid win_virtualkey";
 		}
 	}
-	else {
-		if(!(ke->win_scancode_present || ke->win_virtualkey_present)) {
-			return "Keyevent must have at least one of scancode, virtualkey, or unicode_codepoint";
+	if(is_kev &&
+	   !kme->unicode_codepoint_present &&
+	   !kme->win_scancode_present &&
+	   !kme->win_virtualkey_present)
+		return "Keyevent must have at least one of unicode_codepoint, scancode or virtualkey ";
+	//check win_wheeldeltax, win_wheeldeltay
+	if(t==KMEVENT_T_WHEEL) {
+		bool xp=kme->win_wheeldeltax_present;
+		bool yp=kme->win_wheeldeltay_present;
+		if(!xp && !yp)
+			return "Either win_wheeldeltax or win_wheeldeltay required in wheel events";
+		if(xp && yp)
+			return "Only one of win_wheeldeltax and win_wheeldeltay can be present in wheel events";
+		if(xp) {
+			if(kme->win_wheeldeltax < -12000 || 12000 < kme->win_wheeldeltax)
+				return "win_wheeldeltax out of bounds (-12000, 12000)";
+		}
+		if(yp) {
+			if(kme->win_wheeldeltay < -12000 || 12000 < kme->win_wheeldeltay)
+				return "win_wheeldeltay out of bounds (-12000, 12000)";
 		}
 	}
 	return 0;
-	//no need to check time since no invalid state is representable
 }
 
-//Helper for sending an injected keyboard event.
-void mkinput(
+//Helper for sending injected keyboard events
+void mkinput_k(
 	INPUT* i,
 	DWORD scancode,
 	DWORD virtualkey,
@@ -79,47 +116,49 @@ void mkinput(
 }
 
 DWORD maxtime = 0;
-void sendkey_send_win(struct keyevent *ke) {
+
+//Function for sending injected keyboard events
+void sendkey_send_win_k(struct kmevent *kme) {
 	//init input structs
 	INPUT input[4];
 	int idx = 0;
 	//init time
-	bool calctime = !ke->win_time_present;
-	DWORD sendtime = ke->win_time;
+	bool calctime = !kme->win_time_present;
+	DWORD sendtime = kme->win_time;
 	if(calctime) {
 		sendtime=max(GetTickCount(), maxtime+1);
 	}
 	//prepare input structs
 	for(int k=0;k<2;k++) {
 		bool up = k==1;
-		if(!up && ke->eventtype==KEYEVENT_T_KEYUP) continue;
-		if(up && ke->eventtype==KEYEVENT_T_KEYDOWN) continue;
-		if(ke->unicode_codepoint_present) {
-			ucodepoint cp = ke->unicode_codepoint;
+		if(!up && kme->eventtype==KMEVENT_T_KEYUP) continue;
+		if(up && kme->eventtype==KMEVENT_T_KEYDOWN) continue;
+		if(kme->unicode_codepoint_present) {
+			ucodepoint cp = kme->unicode_codepoint;
 			if(cp & 0x00FF0000) {
 				cp -= 0x10000;
-				mkinput(&(input[idx]), 0xD800 | (cp >> 10), 0, up, false, false, true, sendtime);
+				mkinput_k(&(input[idx]), 0xD800 | (cp >> 10), 0, up, false, false, true, sendtime);
 				idx++;
 				if(calctime) sendtime++;
-				mkinput(&(input[idx]), 0xDC00 | (cp & 0x3FF), 0, up, false, false, true, sendtime);
+				mkinput_k(&(input[idx]), 0xDC00 | (cp & 0x3FF), 0, up, false, false, true, sendtime);
 				idx++;
 				if(calctime) sendtime++;
 			}
 			else {
-				mkinput(&(input[idx]), cp, 0, up, false, false, true, sendtime);
+				mkinput_k(&(input[idx]), cp, 0, up, false, false, true, sendtime);
 				idx++;
 				if(calctime) sendtime++;
 			}
 		}
 		else {
-			bool hw = ke->win_scancode_present;
-			mkinput(
+			bool hw = kme->win_scancode_present;
+			mkinput_k(
 				&(input[idx]),
-				ke->win_scancode,
-				ke->win_virtualkey,
+				kme->win_scancode,
+				kme->win_virtualkey,
 				up,
 				hw,
-				ke->win_extended,
+				kme->win_extended,
 				false,
 				sendtime);
 			idx++;
@@ -133,6 +172,91 @@ void sendkey_send_win(struct keyevent *ke) {
 		fflush(stderr);
 	}
 	maxtime=max(sendtime, maxtime);
+}
+
+//Function for sending injected mouse events
+void sendkey_send_win_m(struct kmevent *kme) {
+	INPUT i;
+	bool calctime = !kme->win_time_present;
+	DWORD sendtime = kme->win_time;
+	if(calctime) {
+		sendtime=max(GetTickCount(), maxtime+1);
+	}
+	i.type = INPUT_MOUSE;
+	// initialization
+	i.mi.dx = 0;
+	i.mi.dy = 0;
+	i.mi.mouseData = 0;
+	i.mi.dwFlags = 0;
+	i.mi.time = 0;
+	i.mi.dwExtraInfo = 0;
+	// populate depending on event type
+	switch(kme->eventtype) {
+	case KMEVENT_T_BUTTONDOWN:
+		switch(kme->win_button) {
+		case BUTTON_L:  i.mi.dwFlags |= MOUSEEVENTF_LEFTDOWN; break;
+		case BUTTON_R:  i.mi.dwFlags |= MOUSEEVENTF_RIGHTDOWN; break;
+		case BUTTON_M:  i.mi.dwFlags |= MOUSEEVENTF_MIDDLEDOWN; break;
+		case BUTTON_X1: i.mi.dwFlags |= MOUSEEVENTF_XDOWN;
+			i.mi.mouseData = XBUTTON1; break;
+		case BUTTON_X2: i.mi.dwFlags |= MOUSEEVENTF_XDOWN;
+			i.mi.mouseData = XBUTTON2; break;
+		}
+		break;
+	case KMEVENT_T_BUTTONUP:
+		switch(kme->win_button) {
+		case BUTTON_L:  i.mi.dwFlags |= MOUSEEVENTF_LEFTUP; break;
+		case BUTTON_R:  i.mi.dwFlags |= MOUSEEVENTF_RIGHTUP; break;
+		case BUTTON_M:  i.mi.dwFlags |= MOUSEEVENTF_MIDDLEUP; break;
+		case BUTTON_X1: i.mi.dwFlags |= MOUSEEVENTF_XUP;
+			i.mi.mouseData = XBUTTON1; break;
+		case BUTTON_X2: i.mi.dwFlags |= MOUSEEVENTF_XUP;
+			i.mi.mouseData = XBUTTON2; break;
+		}
+		break;
+	case KMEVENT_T_POINTERMOVE:
+		i.mi.dwFlags |= MOUSEEVENTF_MOVE;
+		i.mi.dx = kme->win_pointerx;
+		i.mi.dy = kme->win_pointery;
+		switch(kme->win_coord_system) {
+		case COORD_SYSTEM_ABS_NORMPRIMARY:
+			i.mi.dwFlags |= MOUSEEVENTF_ABSOLUTE;
+			break;
+		case COORD_SYSTEM_ABS_NORMVIRTUAL:
+			i.mi.dwFlags |= MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
+			break;
+		case COORD_SYSTEM_REL_PIXELSCALED:
+			//no flags necessary
+			break;
+		}
+		break;
+	case KMEVENT_T_WHEEL:
+			if(kme->win_wheeldeltax_present) {
+				i.mi.mouseData = kme->win_wheeldeltax_present;
+				i.mi.dwFlags |= MOUSEEVENTF_HWHEEL;
+			}
+			if(kme->win_wheeldeltay_present) {
+				i.mi.mouseData = kme->win_wheeldeltay_present;
+				i.mi.dwFlags |= MOUSEEVENTF_WHEEL;
+			}
+		break;
+	}
+	//Send events and handle failure
+	i.mi.time = sendtime;
+	if(1!=SendInput(1, &i, sizeof(INPUT))) {
+		fprintf(stderr,
+			"Failed sending events\n");
+		fflush(stderr);
+	}
+	if(calctime) sendtime++;
+	maxtime=max(sendtime, maxtime);
+}
+
+void sendkey_send_win(struct kmevent *kme) {
+	if(kmevent_type_is_kev(kme->eventtype))
+		sendkey_send_win_k(kme);
+	if(kmevent_type_is_mev(kme->eventtype))
+		sendkey_send_win_m(kme);
 }
 
 void sendkey_init_win() {

@@ -30,57 +30,57 @@ The message type is specified in the "type" field of the message.
 
 ## buttondown
 - Represents: The pressing down of a mouse button
-- Produced by listenkey: on all platforms
-- Handled by sendkey: on all platforms
+- Produced by listenkey: all modes
+- Handled by sendkey: all modes
 
 ## buttonup
 - Represents: The release of a mouse button
-- Produced by listenkey: on all platforms
-- Handled by sendkey: on all platforms
+- Produced by listenkey: all modes
+- Handled by sendkey: all modes
 
 ## init
 - Represents: No event
 - Produced by listenkey: At startup, if the *-s* option is provided
-- Handled by sendkey: never
+- Handled by sendkey: ignored
 
 Contains information about the current keyboard layout and state.
 
 ## keydown
 - Represents: The pressing down of a key
-- Produced by listenkey: on all platforms
-- Handled by sendkey: on all platforms
+- Produced by listenkey: all modes
+- Handled by sendkey: all modes
 
 ## keypress
 - Represents: The pressing down of a key followed by the release of the same key
 - Produced by listenkey: never
-- Handled by sendkey: on all platforms
+- Handled by sendkey: all modes
 
 ## keyup
 - Represents: The release of a key
-- Produced by listenkey: on all platforms
-- Handled by sendkey: on all platforms
+- Produced by listenkey: all modes
+- Handled by sendkey: all modes
 
 ## pointermove
 - Represents: The movement of a mouse or another pointing device
-- Produced by listenkey: on all platforms
-- Handled by sendkey: on all platforms
+- Produced by listenkey: all modes
+- Handled by sendkey: all modes
 
 ## wheel
 - Represents: The rotation of a mouse wheel or corresponding action from another pointing device
-- Produced by listenkey: on all platforms
-- Handled by sendkey: on all platforms
+- Produced by listenkey: all modes
+- Handled by sendkey: all modes
 
 # Fields
 
 ## unicode_codepoint
 
-- Present in message types: keydown, keyup, keypress
+- Present in message types: keydown, keyup and keypress
 - Produced by listenkey: never
-- Handled by sendkey: on all platforms
-- Values: integer, valid unicode codepoint
+- Handled by sendkey: all modes, optional
+- Value: integer, valid unicode codepoint
 
 If unicode_codepoint is present, sendkey will use it to construct the key events to send to the operating system.
-If unicode_codepoint is not present, sendkey requires a native key designator to be present, and uses that instead.
+If unicode_codepoint is not present, a native key designator is mandatory.
 
 On windows, a native key designator is one or both of:
 - win_scancode
@@ -88,24 +88,14 @@ On windows, a native key designator is one or both of:
 
 If present, it means that the key event is to be handled with a mechanism that allows any unicode character to be sent to an application.
 This differs from a native designator in several ways:
-- On windows, a virtualkey can represent different characters depending on the shift state, e.g. "T" and "t", or "5" and "%".
-When using unicode_codepoint, the 
-
-## win_button
-
-- Present in message types: buttondown, buttonup
-- Produced by listenkey: on windows only
-- Handled by sendkey: not implemented yet
-- Values: L, R, M, X1 or X2
-
-The name of the mouse button.
-L, R and M means left, right and middle, respectively.
+- On windows, a virtualkey can represent different characters depending on the shift state, e.g. "T" and "t", or "5" and "%", while a keyevent with a unicode codepoint depends on no such context.
+- On windows, if a unicode codepoint requires two utf-16 code units, it will be sent as who separate key events.
 
 ## win_altdown
 - Present in message types: keydown, keyup, keypress
-- Produced by listenkey: on windows only
-- Handled by sendkey: never
-- Values: true/false
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: ignored
+- Value: true/false
 
 The LLKHF_ALTDOWN flag.
 
@@ -114,23 +104,73 @@ This field is somewhat redundant, but is provided for completeness.
 
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
 
-## win_eventname
+## win_button
+- Present in message types: buttondown and buttonup
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: Windows mode only, required
+- Value: string
 
+The name of the mouse button.
+
+The value will typically be one of the following values:
+- "L" for the left mouse button
+- "R" for the right mouse button
+- "M" for the middle mouse button
+- "X1"
+- "X2"
+
+sendkey is guaranteed to handle the values listed above, but listenkey may emit others.
+
+## win_coord_system
+- Present in message types: pointermove, wheel, buttondown, buttonup
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: Windows mode only, pointermove message type only, required
+- Values: string
+
+The coordinate system used to interpret the values in win_pointerx and win_pointery.
+
+The first part of the value determines the type of motion:
+- Abs: Move to a specified point relative the upper left corner of the primary monitor.
+- Rel: Move relative the current pointer position, subject to acceleration.
+The second part of the value determines the unit:
+- Pixelactual: The unit is one pixel.
+- Pixelscaled: The coordinate system is scaled as for a non DPI aware application, catering to the legacy assumption of 96 DPI.
+- Normprimary: The coordinate system is scaled so that coordinate (0,0) maps onto the upper-left corner and (65535,65535) maps onto the lower-right corner of the primary monitor.
+- Normvirtual: The coordinate system is scaled so that coordinate (0,0) maps onto the upper-left corner and (65535,65535) maps onto the lower-right corner of the virtual desktop, i.e. the smallest rectangle enclosing all monitors.
+
+Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput
+
+Currently, listenkey can only report using the coordinate system "AbsPixelactual", while sendkey can accept "AbsPixelscaled", "RelNormprimary" and "RelNormvirtual".
+
+## win_eventname
 - Present in message types: keydown, keyup, pointermove, wheel, buttondown, buttonup
-- Produced by listenkey: on windows only
-- Handled by sendkey: never
-- Values: A string matching /WM_((SYS)?KEY(DOWN|UP)|MOUSE(MOVE|WHEEL)|(NC)?[LRMX]BUTTON(DOWN|UP|DBLCLK)|MENURBUTTONUP)/
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: ignored
+- Value: string
 
 The name of the Windows API message.
 
+The value will typically be, but is not guaranteed to be, one of the following:
+- "WM_LBUTTONDOWN"
+- "WM_LBUTTONUP"
+- "WM_MBUTTONDOWN"
+- "WM_MBUTTONUP"
+- "WM_MOUSEHWHEEL"
+- "WM_MOUSEMOVE"
+- "WM_MOUSEWHEEL"
+- "WM_RBUTTONDOWN"
+- "WM_RBUTTONUP"
+- "WM_XBUTTONDOWN"
+- "WM_XBUTTONUP"
+
 ## win_extended
 - Present in message types: keydown, keyup, keypress
-- Produced by listenkey: on windows only
-- Handled by sendkey: on windows only
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: Windows mode only, optional
 - Values: true/false
 
 The LLKHF_EXTENDED flag.
-If true, the scan code was preceded by a prefix byte that has the value 0xE0.
+If true, the scan code is preceded by a prefix byte that has the value 0xE0.
 
 Reference:
 - https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
@@ -138,7 +178,7 @@ Reference:
 
 ## win_injected
 - Present in message types: keydown, keyup, keypress
-- Produced by listenkey: on windows only
+- Produced by listenkey: Windows mode only
 - Handled by sendkey: ignored
 - Values: true/false
 
@@ -154,7 +194,7 @@ If you use the `-i` flag to make listenkey print injected events also and pipe t
 
 ## win_lower_il_injected
 - Present in message types: keydown, keyup, keypress
-- Produced by listenkey: on windows only
+- Produced by listenkey: Windows mode only
 - Handled by sendkey: ignored
 - Values: true/false
 
@@ -164,23 +204,26 @@ If win_injected and win_lower_il_injected are both true, then the event was inje
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
 
 ## win_pointerx, win_pointery
-
 - Present in message types: pointermove, wheel, buttondown, buttonup
-- Produced by listenkey: on windows only
-- Handled by sendkey: not implemented yet
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: Windows mode only, pointermove message type only, optional
 - Values: integer
 
 The x and y coordinate, respectively, for the new pointer position.
 
-These seem to be values calculated by adding the mouse move delta to the current pointer position.
+For listenkey, these seem to be values calculated by adding the mouse move delta to the current pointer position.
 This has a few implications:
-- The reported position may well be outside of the screen.
+- The reported coordinates may well be outside of the screen.
 - Attempting to calculated the delta by subtracting the previously reported position might yield incorrect results if the events are consumed.
+
+If either or both are absent from a pointermove message, zero is assumed by sendkey.
+
+The meaning of these coordinates depend on what coordinate system is in effect, see win_coord_system.
 
 ## win_scancode
 - Present in message types: keydown, keyup, keypress
-- Produced by listenkey: on windows only
-- Handled by sendkey: on windows only
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: Windows mode only, required if win_virtualkey and unicode_codepoint are both absent
 - Value: a valid scancode as an integer
 
 The hardware scan code for the key, as it is provided by the Windows API.
@@ -194,8 +237,8 @@ Reference:
 ## win_time
 
 - Present in message types: keydown, keyup, keypress
-- Produced by listenkey: on windows only
-- Handled by sendkey: on windows only
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: Windows mode only
 - Values: integer [0 - 4294967295]
 
 The elapsed time, in milliseconds, from the time the system was started to the time the key event was created.
@@ -207,8 +250,8 @@ Reference:
 
 ## win_virtualkey
 - Present in message types: keydown, keyup, keypress
-- Produced by listenkey: on windows only
-- Handled by sendkey: on windows only
+- Produced by listenkey: Windows mode only
+- Handled by sendkey: Windows mode only, required if win_scancode and unicode_codepoint are both absent
 - Value: a valid virtualkey as an integer
 
 The Windows virtual key code.
@@ -218,12 +261,18 @@ Reference: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-c
 ## win_wheeldeltax, win_wheeldeltay
 
 - Present in message types: wheel
-- Produced by listenkey: on windows only, when the event regards the horizontal or vertical mouse wheel, respectively
-- Handled by sendkey: not implemented yet
-- Values: integer
+- Produced by listenkey: Windows mode only, exactly one of win_wheeldeltax and win_wheeldeltay present
+- Handled by sendkey: Windows mode only, exactly one of win_wheeldeltax and win_wheeldeltay required
+- Values: integer, for sendkey in the range (-12000, 12000)
 
-A positive value means the horizontal wheel was rotated to the right, negative to the left.
-On wheel click is 120.
+For win_wheeldeltax, a positive value means the horizontal wheel was rotated to the right, and a negative value means to the left.
+
+For win_wheeldeltay, a positive value means the vertical wheel was rotated forward, away from the user, and a negative value means backward, toward the user.
+
+One wheel click is 120.
+
+The range limit is imposed by sendkey only, not by Windows.
+There is no range guarantee for listenkey.
 
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-msllhookstruct
 
