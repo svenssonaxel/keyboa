@@ -204,9 +204,9 @@ If win_injected and win_lower_il_injected are both true, then the event was inje
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
 
 ## win_pointerx, win_pointery
-- Present in message types: pointermove, wheel, buttondown, buttonup
+- Present in message types: pointermove
 - Produced by listenkey: Windows mode only
-- Handled by sendkey: Windows mode only, pointermove message type only, optional
+- Handled by sendkey: Windows mode only, optional
 - Values: integer
 
 The x and y coordinate, respectively, for the new pointer position.

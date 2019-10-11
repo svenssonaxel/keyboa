@@ -122,6 +122,14 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 	switch(wParam) {
 		case WM_MOUSEMOVE:
 			printf("{\"type\":\"pointermove\",\"win_eventname\":\"WM_MOUSEMOVE\"");
+			// Coordinates are present in all event types, but are assumed to
+			// change only in WM_MOUSEMOVE.
+			printf(
+				",\"win_pointerx\":%5d"
+				",\"win_pointery\":%5d"
+				,pt.x
+				,pt.y
+			);
 			break;
 		case WM_MOUSEWHEEL:
 			printf("{\"type\":\"wheel\",\"win_eventname\":\"WM_MOUSEWHEEL\"");
@@ -240,13 +248,9 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 		}
 	}
 	printf(
-		",\"win_pointerx\":%5d"
-		",\"win_pointery\":%5d"
 		",\"win_injected\":%s"
 		",\"win_lower_il_injected\":%s"
 		",\"win_time\":%10u}"
-		,pt.x
-		,pt.y
 		,isinjected ? "true " : "false"
 		,(flags & LLMHF_LOWER_IL_INJECTED) ? "true " : "false"
 		,time
