@@ -52,6 +52,7 @@ bool processKeyEvent(WPARAM wParam, KBDLLHOOKSTRUCT* hooked) {
 		return consume;
 	}
 	char* lleventname="";
+	char errmsg[0x100];
 	switch(wParam) {
 		case WM_KEYDOWN:
 			lleventname="WM_KEYDOWN";
@@ -66,7 +67,8 @@ bool processKeyEvent(WPARAM wParam, KBDLLHOOKSTRUCT* hooked) {
 			lleventname="WM_SYSKEYUP";
 			break;
 		default:
-			error_handler(false, "Ignoring keyevent message", "Unknown message type");
+			sprintf(errmsg, "Unknown message type %d", wParam);
+			error_handler(false, "Ignoring keyevent message", errmsg);
 			return false;
 	}
 	printf(
@@ -116,6 +118,7 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 	}
 	bool iswheel = false;
 	bool isxbutton = false;
+	char errmsg[0x100];
 	switch(wParam) {
 		case WM_MOUSEMOVE:
 			printf("{\"type\":\"pointermove\",\"win_eventname\":\"WM_MOUSEMOVE\"");
@@ -210,8 +213,8 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 //			isxbutton = true;
 //			break;
 		default:
-			error_handler(false, "Ignoring mouseevent message", "Unknown message type");
-			printf("debug: wParam is: %d", wParam);
+			sprintf(errmsg, "Unknown message type %d", wParam);
+			error_handler(false, "Ignoring mouseevent message", errmsg);
 			return false;
 	}
 	if(iswheel) {
@@ -221,6 +224,7 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 			, wheelDelta);
 	}
 	if(isxbutton) {
+		char errmsg[0x100];
 		switch(HIWORD(mouseData)) {
 			case 1:
 				printf(",\"win_button\":\"X1\"");
@@ -229,7 +233,8 @@ bool processMouseEvent(WPARAM wParam, MSLLHOOKSTRUCT* hooked) {
 				printf(",\"win_button\":\"X2\"");
 				break;
 			default:
-				error_handler(false, "Using null", "Unknown X button");
+				sprintf(errmsg, "Unknown X button %d", HIWORD(mouseData));
+				error_handler(false, "Using null for win_button", errmsg);
 				printf(",\"win_button\":null");
 				break;
 		}
@@ -316,6 +321,7 @@ void printinit_win(FILE* stream) {
 		char keyname[1000];
 		char keyname_json[6000];
 		int namelen;
+		char errmsg[0x800];
 		for(int extended=0; extended<2; extended++) {
 			for(int scancode=0; scancode<256; scancode++) {
 				namelen = GetKeyNameTextA(
@@ -324,7 +330,10 @@ void printinit_win(FILE* stream) {
 					keyname,
 					1000);
 				if(namelen) {
-					if(!latin1_string_to_json(keyname, keyname_json)){fprintf(stream,"\nerror latin1\n");}
+					if(!latin1_string_to_json(keyname, keyname_json)){
+						sprintf(errmsg, "Couldn't JSON-encode %s", keyname);
+						error_handler(false, "latin1_string_to_json failed", errmsg);
+					}
 					fprintf(stream, "%s{\"scancode\":%u,\"extended\":%s,\"keyname\":\"%s\"}",
 						first?"":",",
 						scancode,

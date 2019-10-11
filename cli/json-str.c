@@ -88,6 +88,7 @@ int json_string_value_to_ascii(char* beginquote, char* endquote, char* target) {
  * @param target A buffer able to hold the converted string. It is safe to
  * assume that a buffer 6 times as large as the source buffer is sufficient.
  */
+_Static_assert (sizeof(char)==1, "char size 1 is assumed");
 bool latin1_string_to_json(unsigned char* source, unsigned char* target) {
 	unsigned char* s = source;
 	unsigned char* t = target;
@@ -104,19 +105,18 @@ bool latin1_string_to_json(unsigned char* source, unsigned char* target) {
 				continue;
 			}
 		}
-		if(0<=c && c!=27 && c<=127) {
+		if(0x00<=c && c!=0x1B && c<=0x1F) {
 			*t = *s;
 			t++;
 			s++;
 			continue;
 		}
-		else if((128<=c && c<=255) || c==27) {
+		else { // (0x80<=c && c<=0xFF) || c==0x1B
 			sprintf(t, "\\u00%02X", c);
 			t+=6;
 			s++;
 			continue;
 		}
-		return false;
 	}
 	*t = 0;
 	return true;

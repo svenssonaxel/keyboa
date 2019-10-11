@@ -28,13 +28,12 @@ int error_callback(jsonsl_t jsn,
 				   jsonsl_error_t err,
 				   struct jsonsl_state_st *state,
 				   char *at) {
-	fprintf(stderr,
-			"JSON parse error: %s\n"
-			"Remaining text: %s\n",
+	char errmsg[BUFFER_SIZE + 0x100];
+	sprintf(errmsg,
+			"JSON parse error %s -- Remaining text: %s",
 			jsonsl_strerror(err),
 			at);
-	fflush(stderr);
-	exit(1);
+	global_sendkey_error_handler(true, "Cannot read input", errmsg);
 	return 0;
 }
 
@@ -310,9 +309,7 @@ void sendkey_json_parser() {
 	while(true) {
 		ssize_t maxread = pc.buffer_len-pc.buffer_writeat;
 		if(maxread<=0) {
-			fprintf(stderr, "Error: Buffer exhausted\n");
-			fflush(stderr);
-			exit(1);
+			global_sendkey_error_handler(true, "Cannot read input", "Buffer exhausted");
 		}
 		void* buffer_process = pc.buffer + pc.buffer_writeat;
 		ssize_t nread = read(0, buffer_process, maxread);
@@ -352,8 +349,7 @@ void sendkey_json_parser() {
 				exit(0);
 			}
 			else {
-				fprintf(stderr, "Error: Input ended during parsing.\n");
-				exit(1);
+				global_sendkey_error_handler(true, "Cannot read input", "Input ended during parsing");
 			}
 		}
 	}

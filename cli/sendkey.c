@@ -77,13 +77,15 @@ void sendkey_dispatch_handler(struct kmevent *kme) {
 	global_sendkey_sender(kme);
 }
 
-void error_handler(bool critical, char* errclass, char* errmsg) {
+void error_handler(bool critical, char* err_effect, char* err_cause) {
 	fflush(stdout);
-	fprintf(
-		stderr,
-		"%s: %s\n",
-		errclass ? errclass : "",
-		errmsg ? errmsg : "");
+	if(err_effect)
+		fprintf(stderr,"%s", err_effect);
+	if(err_effect && err_cause)
+		fprintf(stderr,": ");
+	if(err_cause)
+		fprintf(stderr,"%s", err_cause);
+	fprintf(stderr,"\n");
 	if(critical) {
 		fprintf(stderr, "Exiting due to critical error.\n");
 		exit(1);
