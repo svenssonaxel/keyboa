@@ -193,6 +193,9 @@ load("Shell",[
 	("E", """S-pgup"""),
 	("D", """S-pgdn"""),
 	])
+load("X11-Shell",[
+	("E", "s-XF86ScrollUp"),    # Scroll up
+	("D", "s-XF86ScrollDown")]) # Scroll down
 
 load("TeX-Math",[
 	("7", ".\\equiv"),
@@ -300,8 +303,8 @@ load("Univ",[
 	("L", "Printdate-TZ_local"),
 	])
 load("X11-Univ",[
-	("Y", "NONE"),            # Toggle light/dark color theme
-	("U", "NONE"),            # Reset zoom
+	("Y", "XF86Red"),         # Toggle light/dark color theme
+	("U", "XF86Yellow"),      # Reset zoom
 	("I", "XF86ZoomIn"),      # Zoom in
 	("O", "XF86ZoomOut"),     # Zoom out
 	("H", "XF86ScrollUp"),    # Scroll up
