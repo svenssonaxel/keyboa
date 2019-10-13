@@ -340,12 +340,12 @@ def enrich_input(gen):
 		else:
 			yield obj
 
-# When a key is held down, the operating system sends repeated keydown events
+# When a key is held down, some operating systems send repeated keydown events
 # with no intervening keyup event. Most applications recognize this as a
 # repetition. The events_to_chords transformation does not. Put the allow_repeat
 # transformation before events_to_chords in order to let repeated keys cause
-# repeated chords. The field argument designates what field to use for detection
-# of repetition. "physkey" or "win_virtualkey" probably works fine for that.
+# repeated chords. The field argument designates what field to use to identify a
+# key.
 def allow_repeat(field):
 	def ret(gen):
 		keysdown=set()
@@ -355,6 +355,28 @@ def allow_repeat(field):
 			if(t in ["keydown", "keypress"] and key in keysdown):
 				yield {**obj, "type":"keyup"}
 			if(t=="keydown"):
+				keysdown.add(key)
+			if(t in ["keyup", "keypress"] and key in keysdown):
+				keysdown.remove(key)
+			yield obj
+	return ret
+
+# When a key is held down, some operating systems send repeated keydown events
+# with no intervening keyup event. The suppress_repeat transformation drops such
+# repeated keydown events so that every event will correspond to a physical key
+# push or release. The field argument designates what field to use to identify a
+# key.
+def suppress_repeat(field):
+	def ret(gen):
+		keysdown=set()
+		for obj in gen:
+			t=obj["type"]
+			key=obj[field] if field in obj else None
+			if(t=="keydown" and key in keysdown):
+				continue
+			if(t=="keypress" and key in keysdown):
+				obj={**obj, "type":"keyup"}
+			if(t=="keydown" and key is not None):
 				keysdown.add(key)
 			if(t in ["keyup", "keypress"] and key in keysdown):
 				keysdown.remove(key)

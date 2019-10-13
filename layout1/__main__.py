@@ -50,7 +50,7 @@ list_of_transformations = [
 	tr.altgr_workaround_input(),                            # libkeyboa
 	tr.loadstate(statefilename),                            # libkeyboa
 	tr.add_commonname(),                                    # libkeyboa
-	tr.allow_repeat("physkey"),                             # libkeyboa
+	tr.suppress_repeat("commonname"),                       # libkeyboa
 	tr.unstick_keys("commonname", c.key_timeouts),          # libkeyboa
 	tr.events_to_chords("commonname"),                      # libkeyboa
 	l1.enrich_chord("mods", "modes"),                       # layout1
