@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define LEN(a) (sizeof(a) / sizeof(a)[0])
+
 typedef uint32_t ucodepoint;
 
 bool validate_unicode_codepoint(ucodepoint cp) {

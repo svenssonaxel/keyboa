@@ -126,7 +126,7 @@ void callback(jsonsl_t jsn,
 								stringvalue)) {
 						kme->eventtype_present = true;
 						kme->eventtype = 0;
-						for(int i=0; i<(sizeof(kmevent_type_names)/sizeof(char*)); i++) {
+						for(int i=0; i<LEN(kmevent_type_names); i++) {
 							if(kmevent_type_names[i])
 								if(strcmp(stringvalue, kmevent_type_names[i])==0)
 									kme->eventtype=i;
@@ -164,7 +164,7 @@ void callback(jsonsl_t jsn,
 								stringvalue)) {
 						kme->win_button_present = true;
 						kme->win_button = 0;
-						for(int i=0; i<(sizeof(win_button_names)/sizeof(char*)); i++) {
+						for(int i=0; i<LEN(win_button_names); i++) {
 							if(win_button_names[i])
 								if(strcmp(stringvalue, win_button_names[i])==0)
 									kme->win_button=i;

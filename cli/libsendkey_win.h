@@ -19,7 +19,7 @@ char* sendkey_validate_win(struct kmevent *kme) {
 	enum kmevent_type t=kme->eventtype;
 	//check type
 	if(!(
-		 0<t && t<(sizeof(kmevent_type_names)/sizeof(char*)) &&
+		 0<t && t<LEN(kmevent_type_names) &&
 		 kmevent_type_names[t]!=NULL))
 		return "Unknown type";
 	bool is_kev = kmevent_type_is_kev(t);
