@@ -49,18 +49,23 @@ void callback(jsonsl_t jsn,
 	//at beginning of top-level object
 	if(level == 1 && type == JSONSL_T_OBJECT && action == JSONSL_ACTION_PUSH) {
 		//reset key event data
-		kme->eventtype = 0;              kme->eventtype_present         = false;
-		kme->unicode_codepoint = 0;      kme->unicode_codepoint_present = false;
-		kme->win_button = 0;             kme->win_button_present        = false;
-		kme->win_coord_system = 0;       kme->win_coord_system_present  = false;
-		kme->win_extended = false;       kme->win_extended_present      = false;
-		kme->win_pointerx = 0;           kme->win_pointerx_present      = false;
-		kme->win_pointery = 0;           kme->win_pointery_present      = false;
-		kme->win_scancode = 0;           kme->win_scancode_present      = false;
-		kme->win_time = 0;               kme->win_time_present          = false;
-		kme->win_virtualkey = 0;         kme->win_virtualkey_present    = false;
-		kme->win_wheeldeltax = 0;        kme->win_wheeldeltax_present   = false;
-		kme->win_wheeldeltay = 0;        kme->win_wheeldeltay_present   = false;
+#define X(f, v) kme->f = v; kme->f##_present = false;
+		X(eventtype, 0)
+		X(unicode_codepoint, 0)
+		X(win_button, 0)
+		X(win_extended, false)
+		X(win_pointerx_primprim, 0)
+		X(win_pointery_primprim, 0)
+		X(win_pointerx_rellegacyacc, 0)
+		X(win_pointery_rellegacyacc, 0)
+		X(win_pointerx_virtvirt, 0)
+		X(win_pointery_virtvirt, 0)
+		X(win_scancode, 0)
+		X(win_time, 0)
+		X(win_virtualkey, 0)
+		X(win_wheeldeltax, 0)
+		X(win_wheeldeltay, 0)
+#undef  X
 	}
 
 	//at end of top-level object
@@ -177,34 +182,6 @@ void callback(jsonsl_t jsn,
 					fprintf(stderr, "Value for %s must be a string\n", keyname);
 				}
 			}
-			// parse win_coord_system
-			else if(strcmp(keyname, "win_coord_system")==0) {
-				if(t == JSONSL_T_STRING) {
-					char* stringvalue = malloc(sizeof(char) * (state->pos_cur - state->pos_begin));
-					if(0 <= json_string_value_to_ascii(
-								pc->buffer + state->pos_begin - pc->min_available,
-								pc->buffer + state->pos_cur - pc->min_available,
-								stringvalue)) {
-						kme->win_coord_system_present = true;
-						kme->win_coord_system = 0;
-						for(int i=0; i<(sizeof(win_coord_system_names)/sizeof(char*)); i++) {
-							if(win_coord_system_names[i])
-								if(strcmp(stringvalue, win_coord_system_names[i])==0)
-									kme->win_coord_system=i;
-						}
-						if(!kme->win_coord_system){
-							fprintf(stderr, "Invalid value for %s\n", keyname);
-						}
-					}
-					else {
-						fprintf(stderr, "Illegal value for %s\n", keyname);
-					}
-					free(stringvalue);
-				}
-				else {
-					fprintf(stderr, "Value for %s must be a string\n", keyname);
-				}
-			}
 			// parse win_extended
 			else if(strcmp(keyname, "win_extended")==0) {
 				if(isbool) {
@@ -215,21 +192,61 @@ void callback(jsonsl_t jsn,
 					fprintf(stderr, "Value for %s must be a boolean\n", keyname);
 				}
 			}
-			// parse win_pointerx
-			else if(strcmp(keyname, "win_pointerx")==0) {
+			// parse win_pointerx_primprim
+			else if(strcmp(keyname, "win_pointerx_primprim")==0) {
 				if(isint) {
-					kme->win_pointerx = intval;
-					kme->win_pointerx_present = true;
+					kme->win_pointerx_primprim = intval;
+					kme->win_pointerx_primprim_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be an integer\n", keyname);
 				}
 			}
-			// parse win_pointery
-			else if(strcmp(keyname, "win_pointery")==0) {
+			// parse win_pointery_primprim
+			else if(strcmp(keyname, "win_pointery_primprim")==0) {
 				if(isint) {
-					kme->win_pointery = intval;
-					kme->win_pointery_present = true;
+					kme->win_pointery_primprim = intval;
+					kme->win_pointery_primprim_present = true;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be an integer\n", keyname);
+				}
+			}
+			// parse win_pointerx_rellegacyacc
+			else if(strcmp(keyname, "win_pointerx_rellegacyacc")==0) {
+				if(isint) {
+					kme->win_pointerx_rellegacyacc = intval;
+					kme->win_pointerx_rellegacyacc_present = true;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be an integer\n", keyname);
+				}
+			}
+			// parse win_pointery_rellegacyacc
+			else if(strcmp(keyname, "win_pointery_rellegacyacc")==0) {
+				if(isint) {
+					kme->win_pointery_rellegacyacc = intval;
+					kme->win_pointery_rellegacyacc_present = true;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be an integer\n", keyname);
+				}
+			}
+			// parse win_pointerx_virtvirt
+			else if(strcmp(keyname, "win_pointerx_virtvirt")==0) {
+				if(isint) {
+					kme->win_pointerx_virtvirt = intval;
+					kme->win_pointerx_virtvirt_present = true;
+				}
+				else {
+					fprintf(stderr, "Value for %s must be an integer\n", keyname);
+				}
+			}
+			// parse win_pointery_virtvirt
+			else if(strcmp(keyname, "win_pointery_virtvirt")==0) {
+				if(isint) {
+					kme->win_pointery_virtvirt = intval;
+					kme->win_pointery_virtvirt_present = true;
 				}
 				else {
 					fprintf(stderr, "Value for %s must be an integer\n", keyname);

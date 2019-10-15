@@ -38,8 +38,8 @@ If none of *-wx* is given, the default is
 
 # BUGS
 
-Currently, sendkey does not support the "AbsPixelactual" coordinate system.
-(This is set in the win_coord_system field in pointermove events.)
+Currently, sendkey does not support the "primpixel" coordinate system.
+(I.e. the win_pointerx_primpixel and win_pointery_primpixel fields in pointermove events.)
 Since this is the coordinate system used by listenkey, it means that mousemove events cannot be piped directly from listenkey to sendkey.
 
 # AUTHOR

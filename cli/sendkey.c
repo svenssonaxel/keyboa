@@ -43,10 +43,20 @@ void printjson(struct kmevent *kme, FILE *stream) {
 				win_button_names[kme->win_button]);
 	}
 	if(opt_w && t==KMEVENT_T_POINTERMOVE) {
-		fprintf(stream,
-				",\"win_pointerx\":%d,\"win_pointery\":%d,\"win_coord_system\":%s",
-				kme->win_pointerx, kme->win_pointery,
-				win_coord_system_names[kme->win_coord_system]);
+		if(kme->win_pointerx_rellegacyacc_present || kme->win_pointery_rellegacyacc_present)
+			fprintf(stream,
+				",\"win_pointerx_rellegacyacc\":%d,\"win_pointery_rellegacyacc\":%d",
+				kme->win_pointerx_rellegacyacc, kme->win_pointery_rellegacyacc);
+		else if(kme->win_pointerx_primprim_present ||
+			kme->win_pointery_primprim_present)
+			fprintf(stream,
+				",\"win_pointerx_primprim\":%d,\"win_pointery_primprim\":%d",
+				kme->win_pointerx_primprim, kme->win_pointery_primprim);
+		else if(kme->win_pointerx_virtvirt_present ||
+			kme->win_pointery_virtvirt_present)
+			fprintf(stream,
+				",\"win_pointerx_virtvirt\":%d,\"win_pointery_virtvirt\":%d",
+				kme->win_pointerx_virtvirt, kme->win_pointery_virtvirt);
 	}
 	if(opt_w && t==KMEVENT_T_WHEEL) {
 		if(kme->win_wheeldeltax_present)

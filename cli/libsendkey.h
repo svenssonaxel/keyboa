@@ -48,21 +48,6 @@ const char *win_button_names[7]={
 	NULL, "L", "R", "M", NULL, "X1", "X2",
 };
 
-enum win_coord_system {
-	COORD_SYSTEM_ABS_PIXELACTUAL = 1,
-	COORD_SYSTEM_ABS_NORMPRIMARY = 2,
-	COORD_SYSTEM_ABS_NORMVIRTUAL = 3,
-	COORD_SYSTEM_REL_PIXELSCALED = 4,
-};
-
-const char *win_coord_system_names[5]={
-	NULL,
-	"AbsPixelactual",
-	"AbsNormprimary",
-	"AbsNormvirtual",
-	"RelPixelscaled",
-};
-
 #ifndef keyboa_win
 typedef unsigned long DWORD;
 #endif
@@ -71,10 +56,13 @@ struct kmevent {
 	enum kmevent_type eventtype; bool eventtype_present;
 	ucodepoint unicode_codepoint; bool unicode_codepoint_present;
 	enum win_button win_button; bool win_button_present;
-	enum win_coord_system win_coord_system; bool win_coord_system_present;
 	bool win_extended; bool win_extended_present;
-	signed int win_pointerx; bool win_pointerx_present;
-	signed int win_pointery; bool win_pointery_present;
+	signed int win_pointerx_primprim; bool win_pointerx_primprim_present;
+	signed int win_pointery_primprim; bool win_pointery_primprim_present;
+	signed int win_pointerx_rellegacyacc; bool win_pointerx_rellegacyacc_present;
+	signed int win_pointery_rellegacyacc; bool win_pointery_rellegacyacc_present;
+	signed int win_pointerx_virtvirt; bool win_pointerx_virtvirt_present;
+	signed int win_pointery_virtvirt; bool win_pointery_virtvirt_present;
 	DWORD win_scancode; bool win_scancode_present;
 	DWORD win_time; bool win_time_present;
 	DWORD win_virtualkey; bool win_virtualkey_present;

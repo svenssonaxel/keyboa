@@ -37,14 +37,6 @@ char* sendkey_validate_win(struct kmevent *kme) {
 		if(!win_button_names[kme->win_button])
 			return "Invalid win_button";
 	}
-	//check win_coord_system
-	if(t==KMEVENT_T_POINTERMOVE) {
-		if(!kme->win_coord_system_present)
-			return "win_coord_system is required in pointermove events";
-		if(kme->win_coord_system==0 ||
-		   kme->win_coord_system==COORD_SYSTEM_ABS_PIXELACTUAL)
-			return "Unsupported win_coord_system";
-	}
 	//check win_extended
 	if(is_kev &&
 	   kme->win_extended_present &&
@@ -52,7 +44,16 @@ char* sendkey_validate_win(struct kmevent *kme) {
 	   !kme->win_scancode_present) {
 		return "Keyevent cannot have extended flag set without scancode";
 	}
-	//no need to check win_pointerx, win_pointery
+	//check win_pointer*
+	if(t==KMEVENT_T_POINTERMOVE) {
+		if(!kme->win_pointerx_primprim_present &&
+		   !kme->win_pointery_primprim_present &&
+		   !kme->win_pointerx_rellegacyacc_present &&
+		   !kme->win_pointery_rellegacyacc_present &&
+		   !kme->win_pointerx_virtvirt_present &&
+		   !kme->win_pointery_virtvirt_present)
+			return "In pointermove events, at least one coordinate in coordinate system rellegacyacc, primprim or virtvirt, is required.";
+	}
 	//check win_scancode
 	if(is_kev && kme->win_scancode_present) {
 		// scancode 0x21d is for AltGr
@@ -216,18 +217,20 @@ void sendkey_send_win_m(struct kmevent *kme) {
 		break;
 	case KMEVENT_T_POINTERMOVE:
 		i.mi.dwFlags |= MOUSEEVENTF_MOVE;
-		i.mi.dx = kme->win_pointerx;
-		i.mi.dy = kme->win_pointery;
-		switch(kme->win_coord_system) {
-		case COORD_SYSTEM_ABS_NORMPRIMARY:
+		if (kme->win_pointerx_rellegacyacc_present || kme->win_pointery_rellegacyacc_present) {
+			i.mi.dx = kme->win_pointerx_rellegacyacc;
+			i.mi.dy = kme->win_pointery_rellegacyacc;
+			//no more flags necessary
+		}
+		else if (kme->win_pointerx_primprim_present || kme->win_pointery_primprim_present) {
+			i.mi.dx = kme->win_pointerx_primprim;
+			i.mi.dy = kme->win_pointery_primprim;
 			i.mi.dwFlags |= MOUSEEVENTF_ABSOLUTE;
-			break;
-		case COORD_SYSTEM_ABS_NORMVIRTUAL:
+		}
+		else if (kme->win_pointerx_virtvirt_present || kme->win_pointery_virtvirt_present) {
+			i.mi.dx = kme->win_pointerx_virtvirt;
+			i.mi.dy = kme->win_pointery_virtvirt;
 			i.mi.dwFlags |= MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
-			break;
-		case COORD_SYSTEM_REL_PIXELSCALED:
-			//no flags necessary
-			break;
 		}
 		break;
 	case KMEVENT_T_WHEEL:

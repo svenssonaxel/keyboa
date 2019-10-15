@@ -121,27 +121,6 @@ The value will typically be one of the following values:
 
 sendkey is guaranteed to handle the values listed above, but listenkey may emit others.
 
-## win_coord_system
-- Present in message types: pointermove, wheel, buttondown, buttonup
-- Produced by listenkey: Windows mode only
-- Handled by sendkey: Windows mode only, pointermove message type only, required
-- Values: string
-
-The coordinate system used to interpret the values in win_pointerx and win_pointery.
-
-The first part of the value determines the type of motion:
-- Abs: Move to a specified point relative the upper left corner of the primary monitor.
-- Rel: Move relative the current pointer position, subject to acceleration.
-The second part of the value determines the unit:
-- Pixelactual: The unit is one pixel.
-- Pixelscaled: The coordinate system is scaled as for a non DPI aware application, catering to the legacy assumption of 96 DPI.
-- Normprimary: The coordinate system is scaled so that coordinate (0,0) maps onto the upper-left corner and (65535,65535) maps onto the lower-right corner of the primary monitor.
-- Normvirtual: The coordinate system is scaled so that coordinate (0,0) maps onto the upper-left corner and (65535,65535) maps onto the lower-right corner of the virtual desktop, i.e. the smallest rectangle enclosing all monitors.
-
-Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput
-
-Currently, listenkey can only report using the coordinate system "AbsPixelactual", while sendkey can accept "AbsPixelscaled", "RelNormprimary" and "RelNormvirtual".
-
 ## win_eventname
 - Present in message types: keydown, keyup, pointermove, wheel, buttondown, buttonup
 - Produced by listenkey: Windows mode only
@@ -203,22 +182,42 @@ If win_injected and win_lower_il_injected are both true, then the event was inje
 
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
 
-## win_pointerx, win_pointery
+## win_pointerx_primpixel, win_pointery_primpixel
+## win_pointerx_primprim, win_pointery_primprim
+## win_pointerx_rellegacyacc, win_pointery_rellegacyacc
+## win_pointerx_virtvirt, win_pointery_virtvirt
+
+win_pointerx_C and win_pointery_C are the x and y coordinates, respectively, for the new pointer position, in coordinate system C.
+
 - Present in message types: pointermove
-- Produced by listenkey: Windows mode only
-- Handled by sendkey: Windows mode only, optional
+- Produced by listenkey: Windows mode only, primpixel coordinate system only
+- Handled by sendkey: Windows mode only, at least one of coordinate systems "rellegacyacc", "primprim" or "virtvirt", required
 - Values: integer
 
-The x and y coordinate, respectively, for the new pointer position.
+Currently, listenkey can only report using the coordinate system "primpixel", while sendkey can only accept "rellegacyacc", "primprim" and "virtvirt".
 
-For listenkey, these seem to be values calculated by adding the mouse move delta to the current pointer position.
+For listenkey, the coordinates seem to be values calculated by adding the mouse move delta to the current pointer position.
+
 This has a few implications:
 - The reported coordinates may well be outside of the screen.
-- Attempting to calculated the delta by subtracting the previously reported position might yield incorrect results if the events are consumed.
+- Attempting to calculate the delta by subtracting the previously reported position might yield incorrect results if the events are consumed.
 
-If either or both are absent from a pointermove message, zero is assumed by sendkey.
+If one coordinate is present but not the other, sendkey will assume the other coordinate is zero.
+If coordinates from more than one system are present, sendkey will attempt to use, in order: "rellegacyacc", "primprim" and "virtvirt".
 
-The meaning of these coordinates depend on what coordinate system is in effect, see win_coord_system.
+The coordinate system C is "<origin><scale><acc>" where
+- <origin> determines the placement of the origin, coordinate (0,0):
+  - "Rel": The origin is at the current pointer position.
+  - "Prim": The origin is at the top-left corner of the primary monitor.
+  - "Virt": The origin is at the top-left corner of the virtual desktop (the smallest rectangle enclosing all monitors).
+- <scale> determines the unit:
+  - "Pixel": The unit is 1 pixel.
+  - "Legacy": The unit is one pixel scaled as for a non DPI aware application, catering to the legacy assumption of 96 DPI.
+  - "Prim": The system is normalized so that both the width and height of the primary monitor is 65536.
+  - "Virt": The system is normalized so that both the width and height of the virtual desktop (the smallest rectangle enclosing all monitors) is 65536.
+- <acc> is "Acc" if the motion is subject to acceleration, otherwise nothing.
+
+Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput
 
 ## win_scancode
 - Present in message types: keydown, keyup, keypress
