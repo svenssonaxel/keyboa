@@ -14,7 +14,7 @@ install: release
 	install -Dpvt /usr/local/share/man/man1 release/doc/listenkey.1
 	install -Dpvt /usr/local/share/man/man1 release/doc/sendkey.1
 	install -Dpvt /usr/local/share/man/man5 release/doc/keyboa.5
-	echo Done installing
+	@echo Done installing
 
 uninstall:
 	rm -rf \
@@ -25,7 +25,7 @@ uninstall:
 		/usr/local/share/man/man1/listenkey.1 \
 		/usr/local/share/man/man1/sendkey.1 \
 		/usr/local/share/man/man5/keyboa.5
-	echo Done uninstalling
+	@echo Done uninstalling
 
 clean:
 	cd cli; make clean
@@ -43,11 +43,12 @@ doc:
 	cd doc; make VERSION=$(VERSION)
 
 release: libkeyboa cli doc COPYING.txt README.md
+	rm -rf release
 	mkdir -p release/libkeyboa release/doc release/layout1
 	cp -pr cli/listenkey$(EXE) cli/sendkey$(EXE) COPYING.txt README.md layout2.py release/
 	cp -pr libkeyboa/release/* release/libkeyboa
 	cp -pr doc/*.[15] doc/*.[15].html doc/*.[15].pdf release/doc
 	cp -pr layout1/*.py layout1/*.csv release/layout1
-	echo === Finished building keyboa version $(VERSION)
+	@echo === Finished building keyboa version $(VERSION)
 
-.PHONY: default install uninstall clean libkeyboa cli doc
+.PHONY: default install uninstall release clean libkeyboa cli doc

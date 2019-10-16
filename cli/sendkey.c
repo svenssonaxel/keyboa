@@ -7,9 +7,8 @@
 #include "common.h"
 #include "libsendkey.h"
 #include "sendkey-json-parser.c"
-#include "version.h"
 
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 #include "common_win.h"
 #include "libsendkey_win.h"
 #endif
@@ -146,14 +145,14 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 	if(!(opt_w||opt_x)) {
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 		opt_w = true;
 #else
 		opt_x = true;
 #endif
 	}
 	if(opt_w) {
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 		sendkey_init_win();
 #else
 		printf("This version of sendkey is compiled without Windows API support.\n");

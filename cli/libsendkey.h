@@ -3,7 +3,7 @@
 #ifndef keyboa_libsendkey_h
 #define keyboa_libsendkey_h
 
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 #include "common_win.h"
 #endif
 
@@ -48,7 +48,7 @@ const char *win_button_names[7]={
 	NULL, "L", "R", "M", NULL, "X1", "X2",
 };
 
-#ifndef keyboa_win
+#ifndef KEYBOA_WIN
 typedef unsigned long DWORD;
 #endif
 

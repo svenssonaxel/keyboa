@@ -23,7 +23,8 @@ Currently, only Windows is supported. The ambition is to support Linux soon. Mac
 
 ## Building from source
 
-Currently, building is only tested on Cygwin.
+Building is tested on Cygwin and Debian.
+The make scripts will attempt to detect missing dependencies and give hints on how to install them.
 
 Dependencies:
 - mingw32 for building Windows executables
@@ -41,7 +42,7 @@ To use the release, you will probably want to have Python 3 installed but it is 
 
 listenkey.exe and sendkey.exe are standalone applications. Run `listenkey -h` and `sendkey -h` for help.
 
-See `layout1.py` and `layout2.py` for examples of how to write and run a processor.
+See `layout1/__main__.py` and `layout2.py` for examples of how to write and run a processor.
 
 ## Warnings
 

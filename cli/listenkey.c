@@ -7,9 +7,8 @@
 #include "common.h"
 #include "liblistenkey.h"
 #include "json-str.c"
-#include "version.h"
 
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 #include "common_win.h"
 #include "liblistenkey_win.h"
 #endif
@@ -31,7 +30,7 @@ void error_handler(bool critical, char* errclass, char* errmsg) {
 	fflush(stderr);
 }
 
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 bool processKeyEvent(WPARAM wParam, KBDLLHOOKSTRUCT* hooked) {
 	DWORD     virtualkey = hooked->vkCode;
 	DWORD     scancode = hooked->scanCode;
@@ -455,14 +454,14 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 	if(!(opt_w||opt_v)) {
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 		opt_w = true;
 #else
 		opt_v = true;
 #endif
 	}
 
-#ifdef keyboa_win
+#ifdef KEYBOA_WIN
 	if(opt_s) {
 		if(opt_w)
 			printinit_win(stdout);

@@ -6,6 +6,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifndef KEYBOAVERSION
+#error KEYBOAVERSION not set
+#endif
+
 #define LEN(a) (sizeof(a) / sizeof(a)[0])
 
 typedef uint32_t ucodepoint;
