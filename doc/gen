@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# arguments from Makefile
+outfile="$1"
+format="$2"
+infile="$3"
+VERSION="$4"
+
+gen_man() {
+    name="$1"
+    chapter="$2"
+    # Prepend scdoc title line
+    (echo "$name($chapter) \"keyboa <VERSION>\""; cat -) |
+        #  Process using scdoc
+        scdoc |
+        # Insert version as indicated, anywhere in the man/troff output
+        sed -r 's/<VERSION>/'"$VERSION"'/;'
+}
+
+gen_html() {
+    name="$1"
+    chapter="$2"
+    title="$name($chapter) -- keyboa $VERSION"
+    # Use HTML prelude
+    (cat prelude.html;
+     # Add and process scd source
+     cat - |
+         # Interlink documents and protect literal underscores
+         sed -r 's@\*([a-z]+)\*\(([1-9])\)@<a href="\1.\2.html">*\1(\2)*</a>@g;s/_/\\_/g' |
+         # Process with markdown
+         markdown;
+     # Add HTML postlude
+     echo '</body></html>'; ) |
+        # Insert title and version as indicated, anywhere in the HTML output
+        sed -r 's/<TITLE\/>/'"$title/g" |
+        sed -r 's/<VERSION>/'"$VERSION"'/;'
+}
+
+# Process infile using the generator for the given format, with name and chapter
+# designated by outfile name
+cat $infile | gen_$format $(echo $outfile|sed -r 's/\./ /g') > $outfile

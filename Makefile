@@ -11,9 +11,9 @@ install: release
 	install -Dpvt /usr/local/bin release/sendkey$(EXE)
 	install -Dpvt /usr/lib/python3.6/site-packages/libkeyboa release/libkeyboa/*
 	install -Dpvt /usr/lib/python3.7/site-packages/libkeyboa release/libkeyboa/*
-	install -Dpvt /usr/local/share/man/man1 release/man/listenkey.1
-	install -Dpvt /usr/local/share/man/man1 release/man/sendkey.1
-	install -Dpvt /usr/local/share/man/man5 release/man/keyboa.5
+	install -Dpvt /usr/local/share/man/man1 release/doc/listenkey.1
+	install -Dpvt /usr/local/share/man/man1 release/doc/sendkey.1
+	install -Dpvt /usr/local/share/man/man5 release/doc/keyboa.5
 	echo Done installing
 
 uninstall:
@@ -43,10 +43,10 @@ doc:
 	cd doc; make VERSION=$(VERSION)
 
 release: libkeyboa cli doc COPYING.txt README.md
-	mkdir -p release/libkeyboa release/man release/layout1
+	mkdir -p release/libkeyboa release/doc release/layout1
 	cp -pr cli/listenkey$(EXE) cli/sendkey$(EXE) COPYING.txt README.md layout2.py release/
 	cp -pr libkeyboa/release/* release/libkeyboa
-	cp -pr doc/release/*.[15] release/man
+	cp -pr doc/*.[15] doc/*.[15].html doc/*.[15].pdf release/doc
 	cp -pr layout1/*.py layout1/*.csv release/layout1
 	echo === Finished building keyboa version $(VERSION)
 

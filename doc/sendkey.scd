@@ -1,4 +1,3 @@
-sendkey(1) "keyboa <VERSION>"
 
 # NAME
 
@@ -13,6 +12,7 @@ sendkey [-wxopdh]
 *sendkey* reads user input events on stdin and injects them in the event queue so that they are sent to applications.
 The expected format is described in *keyboa*(5).
 If none of *-wx* is given, the default is
+
 - *-w* if Windows mode is supported
 - *-x* otherwise
 

@@ -1,4 +1,3 @@
-listenkey(1) "keyboa <VERSION>"
 
 # NAME
 
@@ -14,6 +13,7 @@ listenkey [-wvkmbcCiedsSh]
 This will for example allow a user to process key or mouse events arbitrarily and send them along to applications using *sendkey*(1).
 The output format is described in *keyboa*(5).
 If none of *-wv* is given, the default is
+
 - *-w* if Windows mode is supported
 - *-v* otherwise
 

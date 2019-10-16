@@ -26,8 +26,11 @@ Currently, only Windows is supported. The ambition is to support Linux soon. Mac
 Currently, building is only tested on Cygwin.
 
 Dependencies:
-- mingw32 compiler (cygwin package mingw64-i686-gcc-core)
-- scdoc (https://git.sr.ht/~sircmpwn/scdoc)
+- mingw32 for building Windows executables
+- gcc for building Linux executables
+- scdoc for building man pages
+- markdown for building html and pdf documentation
+- pandoc for building pdf documentation
 
 Run `make`. Done.
 You can install with `make install` and uninstall with `make uninstall`.
