@@ -1,4 +1,6 @@
 
+# INTRODUCTION
+
 This is a description of the format used by *listenkey* and *sendkey*.
 
 The keyboa tools attempt to do one thing only and do it well, namely
@@ -194,14 +196,31 @@ If win_injected and win_lower_il_injected are both true, then the event was inje
 
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
 
-## win_pointerx_primpixel, win_pointery_primpixel, win_pointerx_primprim, win_pointery_primprim, win_pointerx_rellegacyacc, win_pointery_rellegacyacc, win_pointerx_virtvirt, win_pointery_virtvirt
-
-win_pointerx_C and win_pointery_C are the x and y coordinates, respectively, for the new pointer position, in coordinate system C.
-
+## win_pointerx_..., win_pointery_...
 - Present in message types: pointermove
 - Produced by listenkey: Windows mode only, primpixel coordinate system only
 - Handled by sendkey: Windows mode only, at least one of coordinate systems "rellegacyacc", "primprim" or "virtvirt", required
 - Values: integer
+
+win_pointerx_[CS] and win_pointery_[CS] are the x and y coordinates, respectively, for the new pointer position, in coordinate system [CS]. The Windows API has at least four separate coordinate systems, each having a pair of fields:
+
+- win_pointerx_primpixel, win_pointery_primpixel
+- win_pointerx_primprim, win_pointery_primprim
+- win_pointerx_rellegacyacc, win_pointery_rellegacyacc
+- win_pointerx_virtvirt, win_pointery_virtvirt
+
+The coordinate system is [origin][scale][acc] where
+
+- [origin] determines the placement of the origin, coordinate (0,0):
+  - "Rel": The origin is at the current pointer position.
+  - "Prim": The origin is at the top-left corner of the primary monitor.
+  - "Virt": The origin is at the top-left corner of the virtual desktop (the smallest rectangle enclosing all monitors).
+- [scale] determines the unit:
+  - "Pixel": The unit is 1 pixel.
+  - "Legacy": The unit is one pixel scaled as for a non DPI aware application, catering to the legacy assumption of 96 DPI.
+  - "Prim": The system is normalized so that both the width and height of the primary monitor is 65536.
+  - "Virt": The system is normalized so that both the width and height of the virtual desktop (the smallest rectangle enclosing all monitors) is 65536.
+- [acc] is "Acc" if the motion is subject to acceleration, otherwise nothing.
 
 Currently, listenkey can only report using the coordinate system "primpixel", while sendkey can only accept "rellegacyacc", "primprim" and "virtvirt".
 
@@ -214,19 +233,6 @@ This has a few implications:
 
 If one coordinate is present but not the other, sendkey will assume the other coordinate is zero.
 If coordinates from more than one system are present, sendkey will attempt to use, in order: "rellegacyacc", "primprim" and "virtvirt".
-
-The coordinate system C is [origin][scale][acc] where
-
-- [origin] determines the placement of the origin, coordinate (0,0):
-  - "Rel": The origin is at the current pointer position.
-  - "Prim": The origin is at the top-left corner of the primary monitor.
-  - "Virt": The origin is at the top-left corner of the virtual desktop (the smallest rectangle enclosing all monitors).
-- [scale] determines the unit:
-  - "Pixel": The unit is 1 pixel.
-  - "Legacy": The unit is one pixel scaled as for a non DPI aware application, catering to the legacy assumption of 96 DPI.
-  - "Prim": The system is normalized so that both the width and height of the primary monitor is 65536.
-  - "Virt": The system is normalized so that both the width and height of the virtual desktop (the smallest rectangle enclosing all monitors) is 65536.
-- [acc] is "Acc" if the motion is subject to acceleration, otherwise nothing.
 
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput
 

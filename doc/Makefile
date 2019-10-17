@@ -28,12 +28,13 @@ clean:
 	$(if $(findstring UNKNOWN,$(VERSION)),$(error Could not determine VERSION. Provide it manually or install git))
 	./gen $@ man $< "$(VERSION)"
 
-%.1.html %.5.html: %.scd .dep-markdown prelude.html .version
+%.1.html %.5.html: %.scd .dep-pandoc template.html .version
 	$(if $(findstring UNKNOWN,$(VERSION)),$(error Could not determine VERSION. Provide it manually or install git))
 	./gen $@ html $< "$(VERSION)"
 
-%.pdf: %.html .dep-pandoc
-	pandoc -o $@ $<
+%.1.pdf %.5.pdf: %.scd .dep-pandoc .version
+	$(if $(findstring UNKNOWN,$(VERSION)),$(error Could not determine VERSION. Provide it manually or install git))
+	./gen $@ pdf $< "$(VERSION)"
 
 .version:
 	$(if $(findstring UNKNOWN,$(VERSION)),$(error Could not determine VERSION. Provide it manually or install git))
@@ -43,13 +44,6 @@ clean:
 	@if which scdoc; then echo found scdoc compiler; touch $@; else \
 		echo Missing scdoc.; \
 		echo Install scdoc from https://git.sr.ht/~sircmpwn/scdoc; \
-		false; fi
-
-.dep-markdown:
-	@if which markdown; then echo found markdown; touch $@; else \
-		echo Missing markdown.; \
-		echo On Cygwin, install package todo; \
-		echo On Debian: apt-get update && apt-get install markdown; \
 		false; fi
 
 .dep-pandoc:

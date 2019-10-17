@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="pandoc" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>$pagetitle$</title>
+    <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+      header h1 {
+          font-size: 2em;
+          font-weight: bold;
+      }
+      h1 {
+          font-size: 1.4em;
+          font-weight: bold;
+      }
+      h2 {
+          font-size: 1em;
+          font-weight: bold;
+      }
+      /* Use boldface for emphasis, similarly to man */
+      em {
+          font-weight: bold;
+          font-style: normal;
+      }
+      /* references to another man page */
+      a em {
+          font-weight: normal;
+          font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    $if(headertitle)$
+    <header>
+      <h1 class="title">$headertitle$</h1>
+    </header>
+    $endif$
+    $if(toc)$
+    <nav id="$idprefix$TOC">
+      $table-of-contents$
+    </nav>
+    $endif$
+    $body$
+  </body>
+</html>

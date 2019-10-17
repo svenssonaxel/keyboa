@@ -30,8 +30,7 @@ Dependencies:
 - mingw32 for building Windows executables
 - gcc for building Linux executables
 - scdoc for building man pages
-- markdown for building html and pdf documentation
-- pandoc for building pdf documentation
+- pandoc for building html and pdf documentation
 
 Run `make`. Done.
 You can install with `make install` and uninstall with `make uninstall`.

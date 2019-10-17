@@ -4,38 +4,61 @@
 outfile="$1"
 format="$2"
 infile="$3"
-VERSION="$4"
+version="$4"
 
-gen_man() {
+# extract name and chapter from outfile
+setnamechapter() {
     name="$1"
     chapter="$2"
-    # Prepend scdoc title line
-    (echo "$name($chapter) \"keyboa <VERSION>\""; cat -) |
+}
+setnamechapter $(echo $outfile|sed -r 's/\./ /g')
+
+insert_version() {
+    sed -r 's/<VERSION>/'"$version"'/;'
+}
+
+gen_man() {
+    (echo "$name($chapter) -- keyboa $version";
+     cat $infile ) |
+        # Insert version as indicated, anywhere in the scm source
+        insert_version |
         #  Process using scdoc
-        scdoc |
-        # Insert version as indicated, anywhere in the man/troff output
-        sed -r 's/<VERSION>/'"$VERSION"'/;'
+        scdoc > $outfile
 }
 
 gen_html() {
-    name="$1"
-    chapter="$2"
-    title="$name($chapter) -- keyboa $VERSION"
-    # Use HTML prelude
-    (cat prelude.html;
-     # Add and process scd source
-     cat - |
-         # Interlink documents and protect literal underscores
-         sed -r 's@\*([a-z]+)\*\(([1-9])\)@<a href="\1.\2.html">*\1(\2)*</a>@g;s/_/\\_/g' |
-         # Process with markdown
-         markdown;
-     # Add HTML postlude
-     echo '</body></html>'; ) |
-        # Insert title and version as indicated, anywhere in the HTML output
-        sed -r 's/<TITLE\/>/'"$title/g" |
-        sed -r 's/<VERSION>/'"$VERSION"'/;'
+    if [ $chapter == 1 ]; then toc=""; else toc=--toc; fi
+    cat $infile |
+        # Insert version as indicated, anywhere in the scm source
+        insert_version |
+        # Interlink documents and protect literal underscores
+        sed -r 's@\*([a-z]+)\*\(([1-9])\)@<a href="\1.\2.html">*\1(\2)*</a>@g;s/_/\\_/g' |
+        # Process using pandoc
+        pandoc \
+            -V version="$version" \
+            -V pagetitle="$name($chapter) -- keyboa $version" \
+            -V headertitle="$name($chapter) -- keyboa $version" \
+            --template=template.html \
+            $toc \
+            -t html \
+            -o $outfile -
 }
 
-# Process infile using the generator for the given format, with name and chapter
-# designated by outfile name
-cat $infile | gen_$format $(echo $outfile|sed -r 's/\./ /g') > $outfile
+gen_pdf() {
+    if [ $chapter == 1 ]; then toc=""; else toc=--toc; fi
+    cat $infile |
+        # Insert version
+        insert_version |
+        # Use boldface for emphasis, similarly to man
+        pandoc \
+            -V title="$name($chapter) -- keyboa $version" \
+            -V title-meta="$name($chapter) -- keyboa $version" \
+            -V papersize=A4 \
+            -V header-includes="\\renewcommand\em\bf" \
+            $toc \
+            -f markdown \
+            -o $outfile -
+}
+
+# Process using the generator for the given format
+gen_$format
