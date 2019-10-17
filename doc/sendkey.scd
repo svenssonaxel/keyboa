@@ -27,9 +27,6 @@ If none of *-wx* is given, the default is
 *-o*
 	Print events on stdout, in the form they are interpreted.
 
-*-p*
-	Pretty-print on stdout (implies -o).
-
 *-d*
 	Dry run: Do not inject events.
 

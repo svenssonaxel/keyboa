@@ -429,7 +429,7 @@ void printhelp() {
 int main(int argc, char** argv) {
 	char* progname = argv[0];
 	int c;
-	while ((c = getopt (argc, argv, "wvkmbcCiedjfsSh")) != -1) {
+	while ((c = getopt (argc, argv, "wvkmbcCiedsSh")) != -1) {
 		switch (c) {
 			case 'w': opt_w = true;  break;
 			case 'v': opt_v = true;  break;

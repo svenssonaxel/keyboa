@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 	global_sendkey_error_handler = error_handler;
 	char* progname = argv[0];
 	int c;
-	while ((c = getopt (argc, argv, "wxopdh")) != -1) {
+	while ((c = getopt (argc, argv, "wxodh")) != -1) {
 		switch (c) {
 			case 'w': opt_w = true;  break;
 			case 'x': opt_x = true;  break;
