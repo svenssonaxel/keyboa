@@ -61,14 +61,18 @@ If none of *-wv* is given, the default is
 *-h*
 	Print help and exit.
 
-# WARNING
+# WARNINGS AND BUGS
+
+Keyboa is in alpha stage. The CLI interface to *listenkey* and its output format *keyboa-API* will not be stable until the release of keyboa version 2.0.0.
 
 When *listenkey* is called with the *-c* option, it will prevent key events from reaching the applications.
 Unless you use it in combination with the *-e* or *-d* option, you run the risk of partially losing control of your computer.
 This particular foot gun is necessary for the core functionality, so it will stay this way.
 For every-day use, the recommended and conservative choice is to use *-c* in combination with *-e*.
 This way you can at least exit *listenkey* by pressing Esc.
-This will unfortunately prevent you from using Esc normally.
+Unfortunately, this means you will have to design your layout to not rely on the Esc key.
+
+For security reasons, Windows does not allow all key events to be scoped up by an application like keyboa is attempting to do. Sometimes, a key down event can be sent to keyboa while the key up event is withheld. This can for example happen when Win+L is pressed to lock the desktop, or when switching to an application running with elevated privileges. From the perspective of a processor consuming the listenkey output stream, this will appear like a key being held down indefinitely. There is library functionality that attempts to compensate for this situation (unstick_keys), but it is not perfect.
 
 # AUTHOR
 
@@ -80,4 +84,4 @@ This manual page is part of keyboa version <VERSION>.
 
 # SEE ALSO
 
-*sendkey*(1), *keyboa*(5)
+*sendkey*(1), *keyboa-API*(5)

@@ -7,7 +7,7 @@ ifneq ($(shell [ -e .version ] && cat .version),$(VERSION))
 $(shell rm .version)
 endif
 
-MANPAGES := listenkey.1 sendkey.1 keyboa.5
+MANPAGES := listenkey.1 sendkey.1 keyboa-API.5
 
 default: .release
 

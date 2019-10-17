@@ -293,6 +293,10 @@ There is no range guarantee for listenkey.
 
 Reference: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-msllhookstruct
 
+# WARNINGS AND BUGS
+
+Keyboa is in alpha stage. This API will not be stable until the release of keyboa version 2.0.0.
+
 # AUTHOR
 
 Axel Svensson <mail@axelsvensson.com>

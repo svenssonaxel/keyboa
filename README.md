@@ -21,6 +21,10 @@ The third part reads key events on stdin and sends them along to applications as
 
 Currently, only Windows is supported. The ambition is to support Linux soon. MacOS could be considered at a later time.
 
+## Downloading
+
+You can download a release at https://github.com/svenssonaxel/keyboa/releases
+
 ## Building from source
 
 Building is tested on Cygwin and Debian.
@@ -33,26 +37,26 @@ Dependencies:
 - pandoc for building html and pdf documentation
 
 Run `make`. Done.
-You can install with `make install` and uninstall with `make uninstall`.
+You can then install with `make install` and uninstall with `make uninstall`.
 
 ## Running
 
-To use the release, you will probably want to have Python 3 installed but it is not required.
+A release contains:
 
-listenkey.exe and sendkey.exe are standalone applications. Run `listenkey -h` and `sendkey -h` for help.
+- Pre-built, standalone executables `listenkey.exe` and `sendkey.exe`
+- Ready-to-use Python 3 library `libkeyboa`
+- Documentation in man, HTML and PDF formats
 
-See `layout1/__main__.py` and `layout2.py` for examples of how to write and run a processor.
+For quick reference, run `listenkey -h` and `sendkey -h`.
+
+See `layout1/__main__.py` and `layout2.py` for examples of how to write and run a processor using `libkeyboa`.
 
 ## Warnings
 
 ### Use with care
 
-listenkey.exe with the -c option will prevent key events from reaching the applications. Unless you use it in combination with the -e or -d option, you run the risk of partially losing control of your computer. This particular foot gun is necessary for the core functionality, so it will stay this way. The recommended and conservative use is to always have the -e option turned on. This way, if your processor hits a snag you can always press Esc to exit listenkey.exe. In order to make use of this option, you will need a layout that doesn't require using the Esc key.
-
-### Known bugs
-
-For security reasons, Windows does not allow all key event to be scoped up by an application like keyboa is attempting to do. Sometimes, a key down event can be sent to keyboa while the key up event is withheld. This can for example happen when Win+L is pressed to lock the desktop, or when switching to an application running with elevated privileges. From the perspective of your processor, this will look like a key being held down indefinitely. There is library functionality that attempts to compensate for this situation (unstick_keys), but it is not perfect.
+`listenkey` with the `-c` option will prevent key events from reaching the applications. Unless you use it in combination with the `-e` or `-d` option, you run the risk of partially losing control of your computer. This particular foot gun is necessary for the core functionality, so it will stay this way. For every-day use, the recommended and conservative choice is to use `-c` in combination with `-e`. This way you can at least exit `listenkey` by pressing Esc.
 
 ### Alpha stage code
 
-This code is in alpha stage, and the API will not be stable before release of version 2.0.0.
+Keyboa is in alpha stage. The `keyboa-API` format and the CLI interface to `listenkey` and `sendkey` will not be stable until the release of keyboa version 2.0.0.

@@ -33,11 +33,14 @@ If none of *-wx* is given, the default is
 *-h*
 	Print help and exit.
 
-# BUGS
+# WARNINGS AND BUGS
 
-Currently, sendkey does not support the "primpixel" coordinate system.
-(I.e. the win_pointerx_primpixel and win_pointery_primpixel fields in pointermove events.)
-Since this is the coordinate system used by listenkey, it means that mousemove events cannot be piped directly from listenkey to sendkey.
+Keyboa is in alpha stage. The CLI interface to *sendkey* and its input format *keyboa-API* will not be stable until the release of keyboa version 2.0.0.
+
+Currently, *sendkey* does not support the "primpixel" coordinate system (i.e. the win_pointerx_primpixel and win_pointery_primpixel fields in pointermove events.)
+Since this is the coordinate system used by *listenkey*, it means that mousemove events cannot be piped directly from *listenkey* to *sendkey*.
+
+Under some circumstances, *sendkey* can cause the Windows desktop to lock when sending a `mousemove` event, requiring the user to log in again.
 
 # AUTHOR
 
