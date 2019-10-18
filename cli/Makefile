@@ -17,7 +17,7 @@ default: .release
 
 .release: listenkey$(EXE) sendkey$(EXE)
 	touch .release
-	@echo === Finished building listenkey$(EXE) and sendkey$(EXE) version $(VERSION)
+	@echo ━━━┫ Finished building listenkey$(EXE) and sendkey$(EXE) version $(VERSION)
 
 clean:
 	rm -rf listenkey sendkey *.exe .dep-* .version .release
@@ -39,17 +39,19 @@ sendkey: .dep-gcc *sendkey*.[ch] json-str.c common*.h .version jsonsl/jsonsl.*
 	echo '$(VERSION)' > .version
 
 .dep-mingw64:
-	@if which i686-w64-mingw32-gcc; then echo found mingw64 compiler; touch $@; else \
-		echo Missing Mingw-W64.; \
-		echo On Cygwin, install package mingw64-i686-gcc-core.; \
-		echo On Debian, install package gcc-mingw-w64-i686.; \
+	@if ! which i686-w64-mingw32-gcc; then \
+		echo '━━━┓ Missing Mingw-W64.'; \
+		echo '   ┃ On Cygwin, install package mingw64-i686-gcc-core'; \
+		echo '━━━┛ On Debian, install package gcc-mingw-w64-i686'; \
 		false; fi
+	touch $@
 
 .dep-gcc:
-	@if which gcc; then echo found gcc compiler; touch $@; else \
-		echo Missing GCC.; \
-		echo On Cygwin: install package gcc-core.; \
-		echo On Debian: apt-get update && apt-get install build-essential; \
+	@if ! which gcc; then \
+		echo '━━━┓ Missing GCC.'; \
+		echo '   ┃ On Cygwin: install package gcc-core'; \
+		echo '━━━┛ On Debian: apt-get update && apt-get install build-essential'; \
 		false; fi
+	touch $@
 
 .PHONY: default clean

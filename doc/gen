@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # arguments from Makefile
 outfile="$1"
 format="$2"
@@ -41,23 +43,39 @@ gen_html() {
             --template=template.html \
             $toc \
             -t html \
-            -o $outfile -
+            -o $outfile
+    chmod a-x $outfile
 }
 
 gen_pdf() {
     if [ $chapter == 1 ]; then toc=""; else toc=--toc; fi
+    # Generate .tex file in temp dir
+    texfile=$name.$chapter.tex
     cat $infile |
         # Insert version
         insert_version |
         # Use boldface for emphasis, similarly to man
         pandoc \
+            -s \
             -V title="$name($chapter) -- keyboa $version" \
             -V title-meta="$name($chapter) -- keyboa $version" \
             -V papersize=A4 \
             -V header-includes="\\renewcommand\em\bf" \
             $toc \
             -f markdown \
-            -o $outfile -
+            -o $texfile
+    # Generate .pdf file in temp dir
+    tmpdir=`mktemp -d`
+    mv $texfile $tmpdir
+    pushd $tmpdir
+    # Run pdflatex separately since pandoc on Windows is not cygwin-aware
+    for a in `seq 3`; do \
+        pdflatex -halt-on-error -interaction=nonstopmode $texfile > $texfile.out; \
+        done
+    # Move .pdf file back to build dir
+    popd
+    mv $tmpdir/*.pdf .
+    rm -rf $tmpdir
 }
 
 # Process using the generator for the given format

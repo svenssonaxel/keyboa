@@ -16,7 +16,7 @@ default: .release
 	cp *.py *.csv release/
 	sed -ri 's/<VERSION>/'"$(VERSION)"'/;' release/*.py release/*.csv
 	touch .release
-	@echo === Finished building libkeyboa version $(VERSION)
+	@echo ━━━┫ Finished building libkeyboa version $(VERSION)
 
 clean:
 	rm -rf *.pyc __pycache__/ keysyms.csv release/ .version .release
