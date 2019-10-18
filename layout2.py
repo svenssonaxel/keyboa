@@ -8,10 +8,10 @@
 # and Caps Lock.
 #
 # Run in cmd:
-#   listenkey -cel | python3 layout2.py | sendkey
+#   listenkey -ces | python3 layout2.py | sendkey
 #
 # Or in cygwin:
-#   ./listenkey -cel | ./layout2.py | ./sendkey
+#   ./listenkey -ces | ./layout2.py | ./sendkey
 
 from libkeyboa import *
 

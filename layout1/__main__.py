@@ -17,10 +17,10 @@
 # - Dead chords for composing characters
 #
 # Run in cmd:
-#   listenkey -cel | python3 -m layout1 | sendkey
+#   listenkey -ces | python3 -m layout1 | sendkey
 #
 # Or in cygwin:
-#   ./listenkey -cel | python3 -m layout1 | ./sendkey
+#   ./listenkey -ces | python3 -m layout1 | ./sendkey
 
 import layout1.config as c
 import layout1.tr as l1
