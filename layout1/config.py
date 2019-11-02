@@ -59,7 +59,7 @@ load("modes",[
 	])
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
-ch("Sym",           """ ⁿ²³    ⁽⁾ ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
+ch("Sym",           """           ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
 ch("HyperSym",      """              ⫷⫸【】  ‹›«»         ⸨⸩—         „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
 ch("Math",          """       ≡⇔⇒           ↔→         ∘∧∨⊤⊥         ∀∃⊢⊨  """) # Logic-related symbols
 ch("Greek",         """              ;ςερτυθιοπ   ασδφγηξκλ    ζχψωβνμ     """)
@@ -67,8 +67,8 @@ ch("ShiftGreek",    """                ΕΡΤΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    
 ch("Cyr-",          """              йцукенгшщзхъ фывапролджэ  ячсмитьбю   """)
 ch("Cyr-Shift",     """              ЙЦУКЕНГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИТЬБЮ   """)
 ch("Bats",          """ ♭♮♯♩♪♫♬         ✆☎        ✧✦✓➔✗ ◇◆●                """)
-ch("HyperNum",      """        ₍₎₌         ₇₈₉         ₓ₄₅₆        ₙ₊₁₂₃₋  """) # Subscript numpad
-ch("HyperMath",     """        ⁽⁾⁼         ⁷⁸⁹          ⁴⁵⁶        ⁿ⁺¹²³⁻  """) # Superscript numpad
+ch("HyperNum",      """                    ₇₈₉          ₄₅₆         ₊₁₂₃₋  """) # Subscript numpad
+ch("HyperMath",     """                    ⁷⁸⁹          ⁴⁵⁶         ⁺¹²³⁻  """) # Superscript numpad
 
 load("Sym", [
 	("0","space"),
@@ -86,9 +86,10 @@ load("HyperMath", [
 	])
 load("Math", [
 	("P", "back"),
-	("U", "compose:¬"),
 	])
+
 # Composing negation for logic symbols
+load("Math", [("U", "compose:¬")])
 compose({
 	"¬≡": "≢",
 	"¬↔": "⊻",
@@ -98,6 +99,40 @@ compose({
 	"¬⊢": "⊬",
 	"¬⊨": "⊭",
 	"¬=": "≠",
+	"¬<": "≥",
+	"¬>": "≤",
+	"¬→": "∧¬",
+	})
+
+# Composing superscript and subscript
+load("Sym", [
+	("5", "compose:^"),
+	("3", "compose:^"),
+	("2", "compose:_"),
+	])
+compose({
+	"_0":"₀","_1":"₁","_2":"₂","_3":"₃","_4":"₄","_5":"₅","_6":"₆","_7":"₇","_8":"₈","_9":"₉",
+	"_A":"ₐ",                           "_E":"ₑ",                  "_H":"ₕ","_I":"ᵢ","_J":"ⱼ",
+	"_K":"ₖ","_L":"ₗ","_M":"ₘ","_N":"ₙ","_O":"ₒ","_P":"ₚ",         "_R":"ᵣ","_S":"ₛ","_T":"ₜ",
+	"_U":"ᵤ","_V":"ᵥ",         "_X":"ₓ",
+	"_+":"₊","_-":"₋","_=":"₌","_(":"₍","_)":"₎",
+
+	"^0":"⁰","^1":"¹","^2":"²","^3":"³","^4":"⁴","^5":"⁵","^6":"⁶","^7":"⁷","^8":"⁸","^9":"⁹",
+	"^A":"ᵃ","^B":"ᵇ","^C":"ᶜ","^D":"ᵈ","^E":"ᵉ","^F":"ᶠ","^G":"ᵍ","^H":"ʰ","^I":"ⁱ","^J":"ʲ",
+	"^K":"ᵏ","^L":"ˡ","^M":"ᵐ","^N":"ⁿ","^O":"ᵒ","^P":"ᵖ",         "^R":"ʳ","^S":"ˢ","^T":"ᵗ",
+	"^U":"ᵘ","^V":"ᵛ","^W":"ʷ","^X":"ˣ","^Y":"ʸ","^Z":"ᶻ",
+	"^+":"⁺","^-":"⁻","^=":"⁼","^(":"⁽","^)":"⁾",
+	})
+
+# Composing math blackboard bold
+load("Math", [("B", "compose:BB")])
+compose({
+	("BB","N"): "ℕ",
+	("BB","Z"): "ℤ",
+	("BB","Q"): "ℚ",
+	("BB","R"): "ℝ",
+	("BB","C"): "ℂ",
+	("BB","I"): "ⅈ",
 	})
 
 # Composing accents for Greek
