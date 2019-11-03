@@ -11,11 +11,22 @@ listenkey [-wvkmbcCiedsSh]
 
 *listenkey* provides access to incoming user input events, optionally withholding them from applications.
 This will for example allow a user to process key or mouse events arbitrarily and send them along to applications using *sendkey*(1).
-The output format is described in *keyboa*(5).
-If none of *-wv* is given, the default is
+The output format is described in *keyboa-API*(5).
+If none of *-wv* is given, libkeyboa will guess at the most appropriate mode in the current environment.
+This may change, but currently means:
 
 - *-w* if Windows mode is supported
 - *-v* otherwise
+
+*listenkey* distinguishes between **injected** and **non-injected** events.
+The exact meanings of these depend on the mode, but the general idea is that
+non-injected events are considered manually or naturally produced, e.g. they originate with hardware,
+while injected events are considered artificial, e.g. they originate with automation software.
+This distinction is what makes it possible to pipe events from *listenkey* to *sendkey* without creating an infinite loop.
+A common usage is to let *listenkey* consume and print only non-injected events, which will exclude the events sent (injected) by *sendkey*.
+In Windows mode, an event is considered injected if and only if it has the LLKHF_INJECTED flag set (see the **win_injected** field in *keyboa-API*(5)).
+
+Note that not all combinations of options are supported.
 
 # OPTIONS
 
@@ -32,7 +43,7 @@ If none of *-wv* is given, the default is
 	Print mouse move events.
 
 *-b*
-	Print mouse button and wheel events.
+	Print mouse button and mouse wheel events (all mouse events except mouse move).
 
 *-c*
 	Consume non-injected events, of all types specified with *-k*, *-m* and *-b*.

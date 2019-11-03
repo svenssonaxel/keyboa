@@ -5,7 +5,7 @@ sendkey - send user input events to applications
 
 # SYNOPSIS
 
-sendkey [-wxopdh]
+sendkey [-wxodh]
 
 # DESCRIPTION
 
