@@ -97,6 +97,28 @@ Contains information about the current keyboard layout and state.
   Unless stated as "required", it is only for information about the current version.
 
 Note that non-breaking changes to the API may make a field present in more message types, as well as produced and handled in more situations.
+
+## listen_mode
+- Present in message types: all except init.
+- Produced by listenkey: always, guaranteed.
+- Handled by sendkey: guaranteed to be ignored.
+- Value: string.
+
+The mode *listenkey* used to obtain the information in the message.
+What modes are attempted depends on the command line arguments to *listenkey*.
+
+Currently, the following values are possible:
+
+- "windows": The event was acquired through the Windows API
+
+## listen_modes
+- Present in message types: init
+- Produced by listenkey: always, guaranteed.
+- Handled by sendkey: guaranteed to be ignored.
+- Value: string.
+
+An array of the values that may appear in the listen_mode field of any event in the current session.
+
 ## type
 - Present in message types: all.
 - Produced by listenkey: always, in all modes, guaranteed.

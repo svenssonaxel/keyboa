@@ -14,7 +14,7 @@ MOUSEEVENTPROCESSOR mouseEventProcessor;
 HHOOK hMouseHook;
 bool quitListenKey;
 
-void quitlistenkey() {
+void quitlistenkey_win() {
 	quitListenKey = true;
 	PostMessage(NULL, 0, 0, 0);
 }

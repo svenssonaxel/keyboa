@@ -2,3 +2,10 @@
 // License: See LICENSE
 #include "common.h"
 #include <stdio.h>
+
+void quitlistenkey() {
+#ifdef KEYBOA_WIN
+	if(opt_w)
+		quitlistenkey_win();
+#endif
+}
