@@ -113,7 +113,7 @@ void callback(jsonsl_t jsn,
 			jsonsl_special_t f = state->special_flags;
 			bool isint = (t == JSONSL_T_SPECIAL) && !(f & JSONSL_SPECIALf_NUMNOINT) && !(f & JSONSL_SPECIALf_FLOAT) && ((f & JSONSL_SPECIALf_SIGNED) || (f & JSONSL_SPECIALf_UNSIGNED));
 			bool ispint = isint && (f & JSONSL_SPECIALf_UNSIGNED);
-			uint32_t intval = state->nelem;
+			int32_t intval = ((f & JSONSL_SPECIALf_SIGNED) ? -state->nelem : state->nelem);
 			bool isbool = ((t == JSONSL_T_SPECIAL) && (f & JSONSL_SPECIALf_BOOLEAN));
 			bool boolval = (f & JSONSL_SPECIALf_TRUE)?true:false;
 			// parse type
