@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Translate to man, html and pdf, from a format that is markdown except that
+# - underscore is not a special character
+# - a single asterisk makes bold
+# - a double asterisk makes italics
+
 set -e
 
 # arguments from Makefile
@@ -19,11 +24,22 @@ insert_version() {
     sed -r 's/<VERSION>/'"$version"'/;'
 }
 
+translate_flavour() {
+    # Replace
+    # * with $1
+    # ** with $2
+    # _ with \_
+    sed -r 's@\*\*@【2A】@g;s@\*@【1A】@g;s@_@【1U】@g' |
+    sed -r 's@【2A】@'$2'@g;s@【1A】@'$1'@g;s@【1U】@\\_@g'
+}
+
 gen_man() {
-    (echo "$name($chapter) -- keyboa $version";
+    (echo "$name($chapter) \"keyboa $version\"";
      cat $infile ) |
         # Insert version as indicated, anywhere in the scm source
         insert_version |
+        # Translate to scdoc flavour
+        translate_flavour '\*' '_' |
         #  Process using scdoc
         scdoc > $outfile
 }
@@ -33,8 +49,10 @@ gen_html() {
     cat $infile |
         # Insert version as indicated, anywhere in the scm source
         insert_version |
-        # Interlink documents and protect literal underscores
-        sed -r 's@\*([a-z]+)\*\(([1-9])\)@<a href="\1.\2.html">*\1(\2)*</a>@g;s/_/\\_/g' |
+        # Translate to markdown
+        translate_flavour '\*\*' '\*' |
+        # Interlink documents
+        sed -r 's@\*([a-z]+)\*\(([1-9])\)@<a href="\1.\2.html">*\1(\2)*</a>@g' |
         # Process using pandoc
         pandoc \
             -V version="$version" \
@@ -42,6 +60,7 @@ gen_html() {
             -V headertitle="$name($chapter) -- keyboa $version" \
             --template=template.html \
             $toc \
+            -f markdown_strict \
             -t html \
             -o $outfile
     chmod a-x $outfile
@@ -54,13 +73,14 @@ gen_pdf() {
     cat $infile |
         # Insert version
         insert_version |
+        # Translate to markdown
+        translate_flavour '\*\*' '\*' |
         # Use boldface for emphasis, similarly to man
         pandoc \
             -s \
             -V title="$name($chapter) -- keyboa $version" \
             -V title-meta="$name($chapter) -- keyboa $version" \
             -V papersize=A4 \
-            -V header-includes="\\renewcommand\em\bf" \
             $toc \
             -f markdown \
             -o $texfile

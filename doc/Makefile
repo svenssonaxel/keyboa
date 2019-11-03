@@ -8,32 +8,34 @@ $(shell rm .version)
 endif
 
 MANPAGES := listenkey.1 sendkey.1 keyboa-API.5
+HTMLPAGES := $(MANPAGES:=.html)
+PDFPAGES := $(MANPAGES:=.pdf)
+ALLPAGES := $(MANPAGES) $(HTMLPAGES) $(PDFPAGES)
 
 default: .release
 
-.release: $(MANPAGES) $(MANPAGES:=.html) $(MANPAGES:=.pdf)
+.release: $(ALLPAGES)
 	touch .release
 	@echo ━━━┫ Finished building documentation for keyboa $(VERSION)
 
 man: $MANPAGES
 
-html: $(MANPAGES:=.html)
+html: $HTMLPAGES
 
-pdf: $(MANPAGES:=.pdf)
+pdf: $PDFPAGES
 
 clean:
-	rm -rf *.[15]* .dep-* .version .release
+	rm -rf $(ALLPAGES) .dep-* .version .release
 
-%.1 %.5: %.scd .dep-scdoc .version
-	$(if $(findstring UNKNOWN,$(VERSION)),$(error Could not determine VERSION. Provide it manually or install git))
+%.1: %.1.txt .dep-scdoc .version
+	./gen $@ man $< "$(VERSION)"
+%.5: %.5.txt .dep-scdoc .version
 	./gen $@ man $< "$(VERSION)"
 
-%.1.html %.5.html: %.scd .dep-pandoc template.html .version
-	$(if $(findstring UNKNOWN,$(VERSION)),$(error Could not determine VERSION. Provide it manually or install git))
+%.html: %.txt .dep-pandoc template.html .version
 	./gen $@ html $< "$(VERSION)"
 
-%.1.pdf %.5.pdf: %.scd .dep-pandoc .dep-pdflatex .version
-	$(if $(findstring UNKNOWN,$(VERSION)),$(error Could not determine VERSION. Provide it manually or install git))
+%.pdf: %.txt .dep-pandoc .dep-pdflatex .version
 	./gen $@ pdf $< "$(VERSION)"
 
 .version:
