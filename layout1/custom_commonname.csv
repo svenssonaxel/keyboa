@@ -66,6 +66,7 @@
  Z3,         Shift_L,          VK_LSHIFT
  Z2,         less,             VK_OEM_102
  Z2,         greater,
+ M,          mu,
  M2,         comma,            VK_OEM_COMMA
  M2,         semicolon,
  M2,         dead_cedilla,
