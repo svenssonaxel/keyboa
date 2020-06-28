@@ -227,6 +227,7 @@ load("Shell",[
 	("L2", """C-A,C-K,.ok p,Ret"""),
 	("E", """S-pgup"""),
 	("D", """S-pgdn"""),
+	("F", """C-A,C-K,.history_sync,Ret"""),
 	])
 load("X11-Shell",[
 	("E", "s-XF86ScrollUp"),    # Scroll up
