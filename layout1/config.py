@@ -59,7 +59,7 @@ load("modes",[
 	])
 
 #                      §1234567890+ Tqwertyuiopå Casdfghjklöä <zxcvbnm,.-^ 
-ch("Sym",           """           ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
+ch("Sym",           """    ¤      ±  …_[]^!<>=&   \/{}*?()-:@° #$|~`+%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
 ch("HyperSym",      """              ⫷⫸【】  ‹›«»         ⸨⸩—         „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
 ch("Math",          """       ≡⇔⇒           ↔→         ∘∧∨⊤⊥         ∀∃⊢⊨  """) # Logic-related symbols
 ch("Greek",         """              ;ςερτυθιοπ   ασδφγηξκλ    ζχψωβνμ     """)
