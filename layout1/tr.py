@@ -667,10 +667,17 @@ def macro_and_multiplier_controller(gen):
 		key=inchord[-1]
 		if(downmods=={"Macro"} and key=="space"):
 			yield {**obj,
-				"macrotest": ["cancel" if in_recording else "record", None],
+				"macrotest": ["record", None],
 				"multiplier_ignore": True,
 				}
-			in_recording=not in_recording
+			in_recording=True
+			continue
+		if(downmods=={"Macro"} and key=="S2"):
+			yield {**obj,
+				"macrotest": ["cancel", None],
+				"multiplier_ignore": True,
+				}
+			in_recording=False
 			continue
 		if("Macro" in downmods):
 			macroname=",".join([*sorted(inmods_wo_macro),key])
