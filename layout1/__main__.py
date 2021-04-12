@@ -28,20 +28,23 @@ from libkeyboa import *
 import argparse, sys
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-s", "--state", required=False, help="The file used to persist state. Default: No persistence.")
-ap.add_argument("-i", "--in",    required=False, help="The file used to input key events. Default: stdin.")
-ap.add_argument("-o", "--out",   required=False, help="The file used to output key events. Default: stdout.")
-ap.add_argument("-e", "--err",   required=False, help="The file used to output errors. Default: stderr.")
-ap.add_argument("-u", "--ui",    required=False, help="The terminal used for UI. Default: stderr.")
+ap.add_argument("-s", "--state",   required=False, help="The file used to persist state. Default: No persistence.")
+ap.add_argument("-i", "--in",      required=False, help="The file used to input key events. Default: stdin.")
+ap.add_argument("-o", "--out",     required=False, help="The file used to output key events. Default: stdout.")
+ap.add_argument("-e", "--err",     required=False, help="The file used to output errors. Default: stderr.")
+ap.add_argument("-u", "--ui",      required=False, help="The terminal used for UI. Default: stderr.")
+ap.add_argument("-l", "--stumpwm", required=False, help="The output pipe used for stumpwm UI. Default: none.")
 args = vars(ap.parse_args())
 statefilename=args['state']
 infile=sys.stdin
 outfile=sys.stdout
 uifile=sys.stderr
+stumpwmfile=None
 if(args["in"]): infile=open(args["in"], "r")
 if(args["out"]): outfile=open(args["out"], "w")
 if(args["err"]): sys.stderr=open(args['err'], "w")
 if(args["ui"]): uifile=open(args["ui"], "w")
+if(args["stumpwm"]): stumpwmfile=open(args["stumpwm"], "w")
 
 list_of_transformations = [
 	tr.input_events(file=infile),                           # libkeyboa
@@ -73,6 +76,7 @@ list_of_transformations = [
 	l1.resolve_characters(),                                # layout1
 	tr.altgr_workaround_output(),                           # libkeyboa
 	l1.termui(file=uifile),                                 # layout1
+	l1.stumpwmui(file=stumpwmfile),                         # layout1
 	tr.savestate(statefilename),                            # libkeyboa
 	tr.output_events(file=outfile)]                         # libkeyboa
 

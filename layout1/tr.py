@@ -624,6 +624,116 @@ def termui(file=sys.stderr):
 			yield obj
 	return ret
 
+# Colored stumpwm text.
+def color_stumpwmui(text, color):
+	return (({
+		"red":"^1*",
+		"green":"^2*",
+		"yellow":"^3*",
+		"blue":"^4*",
+		"magenta":"^5*",
+		"cyan":"^6*",
+		"white":"^7*",
+		"brightred":"^B^1*",
+		"brightgreen":"^B^2*",
+		"brightyellow":"^B^3*",
+		"brightblue":"^B^4*",
+		"brightmagenta":"^B^5*",
+		"brightcyan":"^B^6*",
+		"brightwhite":"^B^7*",
+		})[color]+(text.replace("^","^^"))+"^**")
+
+# Similar to termui but will instead output one line of text suitable for
+# rendering in stumpwm. No-op if file is None.
+def stumpwmui(file=None):
+	if(file==None):
+		def ret(gen):
+			for obj in gen:
+				yield obj
+		return ret
+	def ret(gen):
+		oldoutput=""
+		on_keyup_all={
+			"multiplier_executing":"",
+			}
+		defaultdata={
+			**on_keyup_all,
+			"printdate.timezone":None,
+			"events_to_chords.keysdown.commonname":[],
+			"lockedmods":set(),
+			"modes":set(),
+			"multiplier":"",
+			"chords_to_events.keysdown.commonname":[],
+			"macro.state":"waiting",
+			"macro.transition":"finishplayback",
+			"macro.key":"",
+			"unicode_input": None,
+			}
+		script_newer_than_macro_transition=True
+		data=defaultdata
+		update=True
+		for obj in gen:
+			t=obj["type"]
+			if(t=="ui"):
+				update=True
+				data={**data, **obj["data"]}
+				if("macro.transition" in obj["data"]):
+					script_newer_than_macro_transition=False
+				if("script" in obj["data"]):
+					script_newer_than_macro_transition=True
+			if(t=="keyup_all"):
+				update=True
+				data={**data, **on_keyup_all}
+				script_newer_than_macro_transition=True
+			if(update):
+				update=False
+				modes=data["modes"]
+
+				# Build output
+				output=[]
+				# Magenta unicode input
+				if data["unicode_input"]!=None:
+					output.append(color_stumpwmui("0x"+data["unicode_input"], "magenta"))
+				# Right align
+				output.append("^>")
+				# Numerical argument
+				if(data["multiplier"]):
+					output.append(color_stumpwmui((data["multiplier"]+"×").rjust(max_numarg_digits+1), "yellow"))
+				# Macro stuff
+				mk=data["macro.key"]
+				mt=data["macro.transition"]
+				if(mt in ["playback", "record"] or not script_newer_than_macro_transition):
+					multiplier_ui=(color_stumpwmui(str(int(data["multiplier_executing"]))+"×", "yellow") if data["multiplier_executing"] else "")
+					macro_indicator_ui={
+						"record": color_stumpwmui("RECORD","red"),
+						"cancel": color_stumpwmui("CANCEL","red"),
+						"save": color_stumpwmui("SAVE: "+mk,"green"),
+						"playback": color_stumpwmui("PLAY: ","red")+multiplier_ui+color_stumpwmui(mk,"red"),
+						"finishplayback": color_stumpwmui("DONE: ","green")+multiplier_ui+color_stumpwmui(mk,"green"),
+						"emptyplayback": color_stumpwmui("NONE: "+mk,"red"),
+					}[mt]
+					output.append(macro_indicator_ui)
+				# Locked modifiers
+				output.extend([color_stumpwmui(x,"green") for x in sorted(data["lockedmods"])])
+				# Box drawing status
+				if("boxdrawings" in data and "Box" in modes):
+					output.append(color_stumpwmui(boxdrawings_ui(data["boxdrawings"])[2],"white"))
+				# Modes
+				output.extend([color_stumpwmui(x,"brightblue") for x in sorted(modes)])
+				# Timezone indicator
+				tz=data["printdate.timezone"]
+				tzstr="" if tz==None else ("UTC" + (("%+i" % tz) if tz!=0 else ""))
+				output.append(color_stumpwmui(tzstr.ljust(7), "brightyellow"))
+
+				output=" ".join(filter(lambda x:x, output))
+				if("RedactUI" in modes):
+					output=color_stumpwmui("***", "brightblue")
+				if(output!=oldoutput):
+					print(output, file=file, flush=True)
+				oldoutput=output
+			yield obj
+	return ret
+
 def ratelimit_filter_updown(obj):
 	if(obj["type"] in ["keydown", "keypress"]
 	   and "commonname" in obj
