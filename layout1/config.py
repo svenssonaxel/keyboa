@@ -42,7 +42,7 @@ w("from",
  "           S4      S3      S2             space             D2      D3      D4                          " )
 
 w("mods",
- ".       .       WM2     mods    .       .       .       .       .       WM2     .       .       .       " +
+ ".       .       .       mods    .       .       .       .       .       .       .       .       .       " +
  "Super   Macro   WM      Nav2    Nav3    Nav4    .       Modlock Nav2    WM      Univ    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
  "Shell   Shift   Meta    Num     Math    Bats    Bats    Math    Num     Meta    Shift   Shift   .       " +
@@ -122,6 +122,9 @@ compose({
 	"^K":"ᵏ","^L":"ˡ","^M":"ᵐ","^N":"ⁿ","^O":"ᵒ","^P":"ᵖ",         "^R":"ʳ","^S":"ˢ","^T":"ᵗ",
 	"^U":"ᵘ","^V":"ᵛ","^W":"ʷ","^X":"ˣ","^Y":"ʸ","^Z":"ᶻ",
 	"^+":"⁺","^-":"⁻","^=":"⁼","^(":"⁽","^)":"⁾",
+
+	("^", "M4"): "⁻", ("_", "M4"): "₋",
+	("^", "02"): "⁺", ("_", "02"): "₊",
 	})
 
 # Composing math blackboard bold
@@ -162,7 +165,7 @@ w("Nav2",
  ".       .       .       .       .       .       .       .       10*PgUp .       .       .       .       " +
  ".       .       .       C-A-lef C-A-rig .       .       C-Home  PgUp    C-End   C-Back  C-Del   .       " +
  ".       .       .      S-A-LTab A-Tab   .       .       C-Left  PgDn    C-Right S-Ret   .       .       " +
- ".       .       .       .       .       .       .       .       10*PgDn .       S-end,S-rig,S-del .     " )
+ ".       .       .       .       .       .       .       10*Lef  10*PgDn 10*Rig  S-end,S-rig,S-del .     " )
 
 load("Nav3",[
 	("I", "S-up"),
