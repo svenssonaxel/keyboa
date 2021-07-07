@@ -155,17 +155,17 @@ compose({
 })
 
 w("Nav",
- ".       .       .      C-S-LTab C-Tab   .       .       .       10*Up   .       .       .       .       " +
- ".       Esc     Alt-F4  C-PgUp  C-PgDn  A-Home  .       Home    Up      End     Back    Del     .       " +
- ".       A-Left  A-Right S-LTab  Tab     C-Ret   .       Left    Down    Right   Ret     Ret,Up,End .    " +
- ".       .       .       .       .       .       .       Ins     10*Down S-home,Back S-end,del . .       " +
- "           .       .       .              space          space,left .       .                           " )
+ ".       .       .      C-S-LTab  C-Tab   .       .       .      10*Up      .       .           .                 . " +
+ ".       Esc     Alt-F4  C-PgUp   C-PgDn  A-Home  .       Home      Up      End     Back        Del               . " +
+ ".       A-Left  A-Right S-LTab   Tab     C-Ret   .       Left      Down    Right   Ret         Ret,Up,End        . " +
+ ".       .       .       .        .       .       Ins  10*Left   10*Down 10*Right   S-home,Back S-end,del         . " +
+ "           .       .       .               space            space,left        .       .                            " )
 
 w("Nav2",
- ".       .       .       .       .       .       .       .       10*PgUp .       .       .       .       " +
- ".       .       .       C-A-lef C-A-rig .       .       C-Home  PgUp    C-End   C-Back  C-Del   .       " +
- ".       .       .      S-A-LTab A-Tab   .       .       C-Left  PgDn    C-Right S-Ret   .       .       " +
- ".       .       .       .       .       .       .       10*Lef  10*PgDn 10*Rig  S-end,S-rig,S-del .     " )
+ ".       .       .       .        .       .       .       .      10*PgUp    .       .           .                 . " +
+ ".       .       .       C-A-lef  C-A-rig .       .       C-Home    PgUp    C-End   C-Back      C-Del             . " +
+ ".       .       .       S-A-LTab A-Tab   .       .       C-Left    PgDn    C-Right S-Ret       .                 . " +
+ ".       .       .       .        .       .       .    10*C-Left 10*PgDn 10*C-Right .           S-end,S-rig,S-del   " )
 
 load("Nav3",[
 	("I", "S-up"),
@@ -175,7 +175,9 @@ load("Nav3",[
 	("O", "S-end"),
 	("U", "S-home"),
 	("8", "10*S-up"),
+	("M", "10*S-left"),
 	("M2","10*S-down"),
+	("M3","10*S-right"),
 	])
 
 load("Nav4",[
@@ -186,7 +188,9 @@ load("Nav4",[
 	("O", "S-C-end"),
 	("U", "S-C-home"),
 	("8", "10*S-pgup"),
+	("M", "10*S-C-left"),
 	("M2","10*S-pgdn"),
+	("M3","10*S-C-right"),
 	("P2","S-C-right,S-del"),
 	("P", "S-C-left,S-del"),
 	])
