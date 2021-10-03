@@ -9,7 +9,7 @@ from libkeyboa import *
 from time import strftime, sleep
 from datetime import datetime, timedelta
 from unicodedata import name as unicodename
-import sys
+import sys, re
 
 @retgen
 def exit_on_escape(gen):
@@ -247,6 +247,16 @@ def chords_to_scripts(gen):
 		else:
 			yield obj
 
+def split_without_empty_items(string, delimiter):
+	r = string.split(delimiter)
+	while 2<=len(r) and '' in r:
+		i = r.index('')
+		if(i+1<len(r)):
+			r=r[:i]+[delimiter+r[i+1]]+r[i+2:]
+		else:
+			r=r[:-2]+[r[-2]+delimiter]
+	return r
+
 @retgen
 def scripts_to_chords(gen):
 	for obj in gen:
@@ -254,19 +264,17 @@ def scripts_to_chords(gen):
 		if(t=="script"):
 			script=obj["script"]
 			scriptmods=obj["scriptmods"]
-			for item in script.split(","):
+			for item in split_without_empty_items(script, ","):
 				if(len(item)>0 and item[0]=="."):
 					for char in item[1:]:
 						yield {"type":"chord","chord":["."+char]}
-				elif(item in "*-"):
-					yield {"type":"chord","chord":["."+item]}
 				else:
 					repeat=1
-					if("*" in item):
+					if(re.match("^[0-9]+\*.", item)):
 						mulindex=item.index("*")
 						repeat=int(item[:mulindex])
 						item=item[mulindex+1:]
-					itemch=item.split("-")
+					itemch=split_without_empty_items(item, "-")
 					itemmods=itemch[:-1]
 					itemkey=itemch[-1]
 					sendmods=set()
