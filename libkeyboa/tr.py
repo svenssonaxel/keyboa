@@ -235,7 +235,9 @@ def output_events(outputformat="autodetect", file=sys.stdout):
 		raise Exception("Illegal output format specified: "+str(outputformat))
 
 # A transformation that changes nothing while printing everything to stderr
-def debug(file=sys.stderr):
+def debug(file=None):
+	if file==None:
+		file=sys.stderr # Must be evaluated at call time
 	def ret(gen):
 		for obj in gen:
 			print(obj, file=file, flush=True)
@@ -244,7 +246,9 @@ def debug(file=sys.stderr):
 
 # A transformation that changes nothing while printing everything to stderr in
 # json format
-def debug_json(file=sys.stderr):
+def debug_json(file=None):
+	if file==None:
+		file=sys.stderr # Must be evaluated at call time
 	def ret(gen):
 		for obj in gen:
 			json.dump(obj, file, allow_nan=False, indent=1)
