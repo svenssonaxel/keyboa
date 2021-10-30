@@ -209,6 +209,7 @@ load("WM",[
 
 for key in planes["from"]:
 	if(key): load("X11-WM",[(key, "C-M-section,Wait-100,"+key)])
+load("X11-WM",[("Q2", "C-M-section")])
 
 w("Num",
  ".       .       F12     F11     F10     .       .e      .a      .b      .c      .d      .f      .       " +
