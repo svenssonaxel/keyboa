@@ -7,7 +7,7 @@
 #    Q2 Q  W  E  R  T  Y  U  I  O  P  P2 P3 ret
 #    A2 A  S  D  F  G  H  J  K  L  L2 L3 L4
 # Z3 Z2 Z  X  C  V  B  N  M  M2 M3 M4 M5
-#          S4 S3 S2 space D2 D3 D4
+#          S4 S3 S2 space D1 D2 D3
 #
 #
 #commonname, keysym,           vkey
@@ -85,9 +85,9 @@
  S3,         Super_L,          VK_LWIN
  S2,         Alt_L,            VK_LMENU
  S2,         Meta_L,
- D2,         ISO_Level3_Shift, VK_RMENU
- D3,         Super_R,          VK_APPS
- D4,         Control_R,        VK_RCONTROL
+ D1,         ISO_Level3_Shift, VK_RMENU
+ D2,         Super_R,          VK_APPS
+ D3,         Control_R,        VK_RCONTROL
  lef,        Left,             VK_LEFT
  rig,        Right,            VK_RIGHT
 #

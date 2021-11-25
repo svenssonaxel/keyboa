@@ -39,7 +39,7 @@ w("from",
  "Q2      Q       W       E       R       T       Y       U       I       O       P       P2      P3      " +
  "A2      A       S       D       F       G       H       J       K       L       L2      L3      L4      " +
  "Z2      Z       X       C       V       B       N       M       M2      M3      M4      M5      .       " +
- "           S4      S3      S2             space             D2      D3      D4                          " )
+ "           S4      S3      S2             space             D1      D2      D3                          " )
 
 w("mods",
  ".       .       .       mods    .       .       .       .       .       .       .       .       .       " +
@@ -75,12 +75,12 @@ load("Sym", [
 	("Z2","begin_unicode_input"),
 	])
 load("HyperNum", [
-	("D2","₀"),
+	("D1","₀"),
 	("S3","₍"),
 	("S2","₎"),
 	])
 load("HyperMath", [
-	("D2","⁰"),
+	("D1","⁰"),
 	("S3","⁽"),
 	("S2","⁾"),
 	])
