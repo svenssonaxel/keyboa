@@ -90,3 +90,58 @@
  D4,         Control_R,        VK_RCONTROL
  lef,        Left,             VK_LEFT
  rig,        Right,            VK_RIGHT
+#
+#
+#
+# Additional custom commonname mappings for layout1
+#
+# These mappings serve to map input from an Ergodox EZ with the following custom layout:
+#
+# §    1    2    3    4    5    F1                  F2   6    7    8    9    0    +
+# Tab  Q    W    E    R    T    F3                  F4   Y    U    I    O    P    Å
+# F5   A    S    D    F    G                             H    J    K    L    Ö    Ä
+# <    Z    X    C    V    B    F6                  F7   N    M    ,    .    -    RShift
+# F9   F10  F11  F12  _                                       F13  F14  F15  F16   _
+#                               F17  F18       F19  F20
+#                                    F21       F22
+#                          Back Del  F23       F24  Ret  Space
+#
+# to a generic-key name like so:
+#
+# 12   1    2    3    4    5    52                  62   6    7    8    9    0    02
+# Q2   Q    W    E    R    T    T2                  Y2   Y    U    I    O    P    P2
+# A2   A    S    D    F    G                             H    J    K    L    L2   L3
+# Z2   Z    X    C    V    B    B2                  N2   N    M    M2   M3   M4   M5
+# S5   S4   S3   S2   _                                       D1   D2   D3   D4   _
+#                               SC1  SC2       DC2  DC1
+#                                    SC3       DC3
+#                          back del  SC4       DC4  ret  space
+#
+# when used from Windows set to swedish layout, through VNC
+#
+#
+#commonname, keysym,           vkey
+ 52,         F1,
+ 62,         F2,
+ T2,         F3,
+ Y2,         F4,
+ A2,         F5,
+ B2,         F6,
+ N2,         F7,
+ S5,         F9,
+ S4,         F10,
+ S3,         F11,
+ S2,         F12,
+ D1,         F13,
+ D2,         F14,
+ D3,         F15,
+ D4,         F16,
+ SC1,        F17,
+ SC2,        F18,
+ DC2,        F19,
+ DC1,        F20,
+ SC3,        F21,
+ DC3,        F22,
+ SC4,        F23,
+ DC4,        F24,
+ del,        Delete,
