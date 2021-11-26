@@ -394,6 +394,17 @@ load("Win-Univ",[
 	("V", "S-ins"),           # Paste
 	("N", "NONE"),            # Scroll down
 	])
+for key in [
+            "52", "62", "03",
+            "T2", "Y2", "P3",
+            "A2", "L4",
+            "B2", "N2",
+            "S5", "S4", "S3", "S2", "D1", "D2", "D3", "D4",
+            "SC1", "SC2", "DC2", "DC1",
+            "SC3", "DC3",
+            "SC4", "DC4",
+]:
+	load("", [(key, ".")]) # No fallthrough for these keys
 
 key_timeouts={
 	"S3": 20,
