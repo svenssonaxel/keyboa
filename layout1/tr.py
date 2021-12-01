@@ -21,6 +21,14 @@ def exit_on_escape(gen):
 			yield {"type":"exit"}
 			break
 
+def exclude(field, values):
+	def ret(gen):
+		for obj in gen:
+			if(field in obj and obj[field] in values):
+				continue
+			yield obj
+	return ret
+
 def enrich_chord(modifierplane, modeplane):
 	def ret(gen):
 		for obj in gen:
@@ -847,6 +855,7 @@ def resolve_characters(gen):
 
 __all__=[
 	"exit_on_escape",
+	"exclude",
 	"enrich_chord",
 	"modlock",
 	"modeswitch",
