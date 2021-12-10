@@ -39,20 +39,20 @@ w("from",
  "Q2      Q       W       E       R       T       T2                      Y2      Y       U       I       O       P       P2      P3      " +
  "A2      A       S       D       F       G                                       H       J       K       L       L2      L3      L4      " +
  "Z2      Z       X       C       V       B       B2                      N2      N       M       M2      M3      M4      M5      .       " +
- "S5      S4      S3      S2                                                              D1      D2      D3      D4                      " +
+ ".       .       S3      S2                                                              D1      D2      D3      .                       " +
  "                                                SC1     SC2     DC2     DC1                                                             " +
  "                                                        SC3     DC3                                                                     " +
- "                                        back    del     SC4     DC4     ret     space                                                   " )
+ "                                        Back    Del     SC4     DC4     Ret     space                                                   " )
 
 w("mods",
  ".       .       .       mods    .       .       .                       .       .       .       .       .       .       .       .       " +
  "Super   Macro   WM      Nav2    Nav3    Nav4    .                       .       .       Modlock Nav2    WM      Univ    Super   .       " +
  "Hyper   Ctrl    Alt     Nav     Sym     Greek                                   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
- "Shell   Shift   Meta    Num     Math    Bats    .                       .       Bats    Math    Num     Meta    Shift   Shift   .       " +
- ".       Ctrl    Super   Alt                                                             AltGr   .       Ctrl    .                       " +
+ "Shell   Shift   Meta    Num     Math    Bats    .                       .       Bats    Math    Num     Meta    Shift   Shell   .       " +
+ ".       .       .       .                                                               .       .       .       .                       " +
  "                                                .       .       .       .                                                               " +
  "                                                        .       .                                                                       " +
- "                                        .       .       .       .       .       Mirror                                                  " )
+ "                                        .       .       .       .       Nav2WM  WM                                                      " )
 
 load("modes",[
 	("X", "+X11,-Win"),
@@ -226,7 +226,9 @@ load("WM",[
 	])
 
 for key in planes["from"]:
-	if(key): load("X11-WM",[(key, "C-M-section,Wait-100,"+key)])
+	if(key):
+		load("X11-WM",[(key, "C-M-section,Wait-100,"+key)])
+		load("X11-Nav2WM",[(key, "C-M-section,Wait-100,C-"+key)])
 load("X11-WM",[("Q2", "C-M-section")])
 
 w("Num",
@@ -399,7 +401,7 @@ for key in [
             "T2", "Y2", "P3",
             "A2", "L4",
             "B2", "N2",
-            "S5", "S4", "S3", "S2", "D1", "D2", "D3", "D4",
+            "S3", "S2", "D1", "D2", "D3",
             "SC1", "SC2", "DC2", "DC1",
             "SC3", "DC3",
             "SC4", "DC4",

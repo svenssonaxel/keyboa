@@ -81,7 +81,7 @@
  M4,         dead_belowdot,
 #M4,         dead_abovedot,
  M5,         Shift_R,          VK_RSHIFT
- S4,         Control_l,        VK_LCONTROL
+#S4,         Control_l,        VK_LCONTROL
  S3,         Super_L,          VK_LWIN
  S2,         Alt_L,            VK_LMENU
  S2,         Meta_L,
@@ -112,7 +112,7 @@
 # Q2   Q    W    E    R    T    T2                  Y2   Y    U    I    O    P    P2
 # A2   A    S    D    F    G                             H    J    K    L    L2   L3
 # Z2   Z    X    C    V    B    B2                  N2   N    M    M2   M3   M4   M5
-# S5   S4   S3   S2   _                                       D1   D2   D3   D4   _
+# _    _    S3   S2   _                                       D1   D2   D3   _    _
 #                               SC1  SC2       DC2  DC1
 #                                    SC3       DC3
 #                          back del  SC4       DC4  ret  space
@@ -128,14 +128,14 @@
  A2,         F5,
  B2,         F6,
  N2,         F7,
- S5,         F9,
- S4,         F10,
+# S5,         F9,
+# S4,         F10,
  S3,         F11,
  S2,         F12,
  D1,         F13,
  D2,         F14,
  D3,         F15,
- D4,         F16,
+# D4,         F16,
  SC1,        F17,
  SC2,        F18,
  DC2,        F19,
