@@ -60,6 +60,7 @@ load("modes",[
 	("T", "^TeX"),
 	("C", "^Cyr,-Box"),
 	("B", "^Box,-Cyr"),
+	("M2", "^HEX"),
 	("R", "+RedactUI"),
 	("4", "-RedactUI"),
 	])
@@ -241,6 +242,15 @@ w("Num",
  "                                                        .       .                                                                       " +
  "                                        .       .       .       .       .       space                                                   " )
 
+load("HEX-Num",[
+	("6", ".E"),
+	("7", ".A"),
+	("8", ".B"),
+	("9", ".C"),
+	("0", ".D"),
+	("02", ".F"),
+	])
+
 load("Shell",[
 	("Y", ". \"$dir3\""),
 	("H", ". \"$dir2\""),
@@ -330,6 +340,7 @@ modespriority=[
 	({"Box"},set()),
 	({"Cyr"},set()),
 	({"TeX"},set()),
+	({"HEX"},set()),
 	(set(),nativemods),
 	]
 
