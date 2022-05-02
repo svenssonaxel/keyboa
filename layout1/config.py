@@ -64,7 +64,8 @@ load("modes",[
 	("4", "-RedactUI"),
 	])
 
-#                      §12345  67890+ Tqwert  yuiopå Casdfghjklöä <zxcvb  nm,.-^
+ch("",              """§12345  67890+  qwert  yuiopå  asdfghjklöä <zxcvb  nm,.- """)
+ch("Shift",         """ !"#¤%  &/()=?  QWERT  YUIOPÅ  ASDFGHJKLÖÄ >ZXCVB  NM,.- """)
 ch("Sym",           """    ¤        ±  …_[]^  !<>=&°  \/{}*?()-:@  #$|~`  +%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
 ch("HyperSym",      """                ⫷⫸【】    ‹›«»         ⸨⸩—           „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
 ch("Math",          """         ≡⇔⇒             ↔→         ∘∧∨⊤⊥           ∀∃⊢⊨  """) # Logic-related symbols
@@ -72,10 +73,13 @@ ch("Greek",         """                ;ςερτ  υθιοπ   ασδφγηξκ�
 ch("ShiftGreek",    """                  ΕΡΤ  ΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒ  ΝΜ·    """)
 ch("Cyr-",          """                йцуке  нгшщзхъ фывапролджэ  ячсми  тьбю   """)
 ch("Cyr-Shift",     """                ЙЦУКЕ  НГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИ  ТЬБЮ   """)
-ch("Bats",          """ ♭♮♯♩♪  ♫♬        é✆☎          ✧✦✓➔✗ ◇◆●                  """)
+ch("Bats",          """ ♭♮♯♩♪  ♫♬         ✆☎          ✧✦✓➔✗ ◇◆●                  """)
 ch("HyperNum",      """                        ₇₈₉          ₄₅₆           ₊₁₂₃₋  """) # Subscript numpad
 ch("HyperMath",     """                        ⁷⁸⁹          ⁴⁵⁶           ⁺¹²³⁻  """) # Superscript numpad
 
+load("", [
+	("M3", "Period"),
+	])
 load("Sym", [
 	("0","space"),
 	("Z2","begin_unicode_input"),
@@ -124,30 +128,30 @@ load("Sym", [
 	])
 compose({
 	"_0":"₀","_1":"₁","_2":"₂","_3":"₃","_4":"₄","_5":"₅","_6":"₆","_7":"₇","_8":"₈","_9":"₉",
-	"_A":"ₐ",                           "_E":"ₑ",                  "_H":"ₕ","_I":"ᵢ","_J":"ⱼ",
-	"_K":"ₖ","_L":"ₗ","_M":"ₘ","_N":"ₙ","_O":"ₒ","_P":"ₚ",         "_R":"ᵣ","_S":"ₛ","_T":"ₜ",
-	"_U":"ᵤ","_V":"ᵥ",         "_X":"ₓ",
+	"_a":"ₐ",                           "_e":"ₑ",                  "_h":"ₕ","_i":"ᵢ","_j":"ⱼ",
+	"_k":"ₖ","_l":"ₗ","_m":"ₘ","_n":"ₙ","_o":"ₒ","_p":"ₚ",         "_r":"ᵣ","_s":"ₛ","_t":"ₜ",
+	"_u":"ᵤ","_v":"ᵥ",         "_X":"ₓ",
 	"_+":"₊","_-":"₋","_=":"₌","_(":"₍","_)":"₎",
 
 	"^0":"⁰","^1":"¹","^2":"²","^3":"³","^4":"⁴","^5":"⁵","^6":"⁶","^7":"⁷","^8":"⁸","^9":"⁹",
-	"^A":"ᵃ","^B":"ᵇ","^C":"ᶜ","^D":"ᵈ","^E":"ᵉ","^F":"ᶠ","^G":"ᵍ","^H":"ʰ","^I":"ⁱ","^J":"ʲ",
-	"^K":"ᵏ","^L":"ˡ","^M":"ᵐ","^N":"ⁿ","^O":"ᵒ","^P":"ᵖ",         "^R":"ʳ","^S":"ˢ","^T":"ᵗ",
-	"^U":"ᵘ","^V":"ᵛ","^W":"ʷ","^X":"ˣ","^Y":"ʸ","^Z":"ᶻ",
+	"^a":"ᵃ","^b":"ᵇ","^c":"ᶜ","^d":"ᵈ","^e":"ᵉ","^f":"ᶠ","^g":"ᵍ","^h":"ʰ","^i":"ⁱ","^j":"ʲ",
+	"^k":"ᵏ","^l":"ˡ","^m":"ᵐ","^n":"ⁿ","^o":"ᵒ","^p":"ᵖ",         "^r":"ʳ","^s":"ˢ","^t":"ᵗ",
+	"^u":"ᵘ","^v":"ᵛ","^w":"ʷ","^x":"ˣ","^y":"ʸ","^z":"ᶻ",
 	"^+":"⁺","^-":"⁻","^=":"⁼","^(":"⁽","^)":"⁾",
 
-	("^", "M4"): "⁻", ("_", "M4"): "₋",
-	("^", "02"): "⁺", ("_", "02"): "₊",
+	"^-": "⁻", "_-": "₋",
+	"^+": "⁺", "_+": "₊",
 	})
 
 # Composing math blackboard bold
-load("Math", [("B", "compose:BB")])
+load("Math", [("B", "compose:𝔸")])
 compose({
-	("BB","N"): "ℕ",
-	("BB","Z"): "ℤ",
-	("BB","Q"): "ℚ",
-	("BB","R"): "ℝ",
-	("BB","C"): "ℂ",
-	("BB","I"): "ⅈ",
+	"𝔸n": "ℕ",
+	"𝔸z": "ℤ",
+	"𝔸q": "ℚ",
+	"𝔸r": "ℝ",
+	"𝔸c": "ℂ",
+	"𝔸i": "ⅈ",
 	})
 
 # Composing accents for Greek
@@ -280,15 +284,82 @@ w("Mirror",
  "L3      L2      L       K       J       H                       G       F       D       S       A       .       .       " +
  ".       M4      M3      M2      M       N       .       .       B       V       C       X       Z       Z2      .       " )
 
+# Latin character composition
+load("", [("A2", "compose: ")])
+import unicodedata
+def unicodeget(name):
+	try: return unicodedata.lookup(name)
+	except KeyError: return None
+for (diacritic, suffix) in [
+		("acute",                   "s"),
+		#("acute and dot above",     "y"),
+		("caron",                   "v"),
+		#("caron and dot above",     "u"),
+		("cedilla",                 "c"),
+		("circumflex",              "t"),
+		#("comma below",             ","),
+		#("curl",                    ""),
+		#("descender",               "l"),
+		("diaeresis",               "e"),
+		("dot above",               "g"),
+		("dot below and dot above", ":"),
+		("dot below",               "Period"),
+		("grave",                   "a"),
+		#("hook",                    "h"),
+		#("line below",              "w"),
+		#("low line",                "W"),
+		#("middle tilde",            ""),
+		#("oblique stroke",          ""),
+		#("palatal hook",            "j"),
+		#("retroflex hook",          ""),
+		#("stroke",                  ""),
+		#("swash tail",              "t"),
+]:
+	combining=unicodeget(f"combining {diacritic}")
+	if combining:
+		compose({(" ", "Period", suffix): combining})
+	for base in "abcdefghijklmnopqrstuvwxyz":
+		for (capital, letter) in [("capital", base.upper()), ("small", base)]:
+			target=unicodeget(f"latin {capital} letter {letter} with {diacritic}")
+			if target:
+				compose({(" ", letter, suffix): f".{target}"})
+			elif combining:
+				compose({(" ", letter, suffix): f".{letter}{combining}"})
+compose({
+# Old english
+	" Th": "Þ", " th": "þ", # thorn
+	" Dh": "Ð", " dh": "ð", # eth
+	" AE": "Æ", " aE": "æ", # ash ;Also in Modern nordic
+	" Wh": "Ƿ", " wh": "ƿ", # wynn
+	" Gh": "Ȝ", " gh": "ȝ", # yogh
+	" OE": "Œ", " oE": "œ", # ethel
+	" Ng": "Ŋ", " ng": "ŋ", # eng
+	" sf": "ſ",             # long s
+	#                         insular g
+	#                         that
+	#                         tironian ond
+# Modern nordic
+	" Ao": "Å", " ao": "å",
+	" AE": "Æ", " aE": "æ",
+	" O-": "Ø", " o-": "ø",
+})
+
 nativemods=set(["Super", "Hyper", "Meta", "Alt", "Ctrl", "Shift"])
 
 # List and priority of native modifier combinations allowed as prefixes to plane
-# names. The empty list represents an exact match between non-native modifiers
-# and plane name.
+# names together with what modifiers to leave in effect. The empty list
+# represents an exact match between non-native modifiers and plane name.
 planeprefixes=[
-	{"Shift"},
-	{"Hyper"},
+	({"Shift"}, {"Shift"}),
+	({"Hyper"}, set()),
+	(set(), set()),
+	]
+
+# List of the modifier combinations that will allow a compose sequence to
+# continue.
+composenonbreakmodsets=[
 	set(),
+	{"Shift"},
 	]
 
 # List and priority of mode combinations together with allowed effective mods.
@@ -369,7 +440,6 @@ load("Win-Univ",[
 for key in [
             "52", "62", "03",
             "T2", "Y2", "P3",
-            "A2", "L4",
             "B2", "N2",
             "S3", "S2", "D1", "D2", "D3",
             "SC1", "SC2", "DC2", "DC1",

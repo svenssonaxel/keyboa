@@ -184,7 +184,7 @@ def modifier_sets(downmods, lockedmods, modes):
 		if(effectivemodes<=modes and modeprefix not in modeprefixes):
 			modeprefixes.append((modeprefix, allowedeffectivemods))
 	# Loop through native modifier sets allowed as prefixes to plane name
-	for planeprefix in planeprefixes:
+	for (planeprefix, leaveineffect) in planeprefixes:
 		# For every planeprefix, there are two possible ways to find plane and
 		# effective modifiers.
 		downplanemods=downmods.difference(nativemods)
@@ -195,12 +195,12 @@ def modifier_sets(downmods, lockedmods, modes):
 		# 1) locked plane
 		#   - All plane and locked mods are used to select plane.
 		#   - All downnativemods are used to select plane unless also in lockednativemods.
-		#   - All downnativemods not used to select plane, are in effect.
+		#   - All downnativemods used to select plane are ineffective unless they are in leaveineffect.
 		if(planeprefix == lockednativemods.union(downnativemods)):
 			planename = (
 				"".join(sorted(planeprefix)) +
 				"".join(sorted(lockedplanemods.union(downplanemods))))
-			effectivemods = downnativemods.intersection(lockednativemods)
+			effectivemods = downnativemods.intersection(lockednativemods).union(leaveineffect)
 			for (modeprefix, allowedeffectivemods) in modeprefixes:
 				if(effectivemods<=allowedeffectivemods):
 					yield (effectivemods, modeprefix + planename)
@@ -208,13 +208,13 @@ def modifier_sets(downmods, lockedmods, modes):
 		# 2) explicit plane
 		#   - All downplanemods are used to select plane.
 		#   - All downnativemods necessary are used to select plane.
-		#   - All downnativemods not used to select plane, are in effect.
+		#   - All downnativemods used to select plane are ineffective unless they are in leaveineffect.
 		#   - All lockedmods are rendered ineffective.
 		if(planeprefix <= downnativemods):
 			planename = (
 				"".join(sorted(planeprefix)) +
 				"".join(sorted(downplanemods)))
-			effectivemods = downnativemods.difference(planeprefix)
+			effectivemods = downnativemods.difference(planeprefix).union(leaveineffect)
 			for (modeprefix, allowedeffectivemods) in modeprefixes:
 				if(effectivemods<=allowedeffectivemods):
 					yield (effectivemods, modeprefix + planename)
@@ -422,11 +422,15 @@ def printdate(modifier):
 				yield obj
 	return ret
 
-def compose(prefix):
+def compose(prefix, composenonbreakmodsets):
 	def ret(gen):
 		def objs(buf):
 			for scr in buf:
-				yield {"type": "script", "script": scr, "scriptmods":set()}
+				if(scr!=scr.lower() and len(scr)==1):
+					# Workaround for commonname (sometimes) case sensitive.
+					yield {"type": "script", "script": scr, "scriptmods": {"Shift"}}
+				else:
+					yield {"type": "script", "script": scr, "scriptmods": set()}
 		for obj in gen:
 			if(obj["type"]=="script" and
 			   obj["scriptmods"]==set() and
@@ -436,7 +440,7 @@ def compose(prefix):
 					if(obj["type"]=="script"):
 						scr=obj["script"]
 						isspace=scr in {"space","sp"}
-						if(len(obj["scriptmods"])>0 or
+						if(obj["scriptmods"] not in composenonbreakmodsets or
 						   isspace):
 							yield from objs(buf)
 							if(not isspace):

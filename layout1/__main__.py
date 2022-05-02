@@ -64,7 +64,7 @@ list_of_transformations = [
 	l1.numarg_multiplier(),                                 # layout1
 	tr.macro(l1.macrotest, "macros"),                       # libkeyboa
 	l1.chords_to_scripts(),                                 # layout1
-	l1.compose("compose:"),                                 # layout1
+	l1.compose("compose:", c.composenonbreakmodsets),       # layout1
 	l1.scripts_to_chords(),                                 # layout1
 	l1.boxdrawings("b"),                                    # layout1
 	l1.unicode_input(),                                     # layout1
