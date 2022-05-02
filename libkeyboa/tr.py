@@ -179,7 +179,15 @@ def output_events(outputformat="autodetect", file=sys.stdout):
 				cp=obj["unicode_codepoint"] if "unicode_codepoint" in obj else None
 				# Output using codepoint if present
 				if(t=="keypress" and cp and cp>=0x30):
-					print("type '"+chr(cp)+"'", file=file, flush=True)
+					char=chr(cp)
+					if(char==char.lower()):
+						print("type '"+char+"'", file=file, flush=True)
+					else:
+						# Workaround for a bug in xdotool that affects capital
+						# latin characters with diacritics.
+						print("keydown Shift", file=file, flush=True)
+						print("type '"+char+"'", file=file, flush=True)
+						print("keyup Shift", file=file, flush=True)
 				# Otherwise output using keysym or keysym_symbol
 				elif("x11_keysym" in obj or
 				   "x11_keysym_symbol" in obj):
