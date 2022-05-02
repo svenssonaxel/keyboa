@@ -57,7 +57,6 @@ w("mods",
 load("modes",[
 	("X", "+X11,-Win"),
 	("W", "+Win,-X11"),
-	("T", "^TeX"),
 	("C", "^Cyr,-Box"),
 	("B", "^Box,-Cyr"),
 	("M2", "^HEX"),
@@ -274,45 +273,6 @@ load("X11-Shell",[
 	("E", "s-XF86ScrollUp"),    # Scroll up
 	("D", "s-XF86ScrollDown")]) # Scroll down
 
-load("TeX-Math",[
-	("7", ".\\equiv"),
-	("8", ".\\Leftrightarrow"),
-	("9", ".\\Rightarrow"),
-	("U", "compose:.\\neg"),
-	("I", ".\\leftrightarrow"),
-	("O", ".\\to"),
-	("P", "C-back,back"),
-	("H", ".\\circ"),
-	("J", ".\\land"),
-	("K", ".\\lor"),
-	("L", ".\\top"),
-	("L2",".\\bot"),
-	("M", ".\\forall"),
-	("M2",".\\exists"),
-	("M3",".\\vdash"),
-	("M4",".\\models"),
-	])
-compose({
-	(".\\neg",".\\equiv"): ".\\not\\equiv",
-	(".\\neg",".\\leftrightarrow"): ".\\veebar",
-	(".\\neg",".\\land"): ".\\barwedge",
-	(".\\neg",".\\lor"): ".\\bar\\lor",
-	(".\\neg",".\\exists"): ".\\nexists",
-	(".\\neg",".\\vdash"): ".\\nvdash",
-	(".\\neg",".\\models"): ".\\nvDash",
-	(".\\neg","="): ".\\neq",
-	})
-
-w("TeX-Greek", # lower-case greek letters for TeX
-	""".          .          .          .          .          .          .          .          .          .          .          .          .          .          .  """ +
-	""".          .         .\\varsigma .\\epsilon .\\rho     .\\tau     .          .          .\\upsilon .\\theta   .\\iota    .\\omicron .\\pi      .          .  """ +
-	""".          .\\alpha   .\\sigma   .\\delta   .\\phi     .\\gamma                         .\\eta     .\\xi      .\\kappa   .\\lamda   .          .          .  """ +
-	""".          .\\zeta    .\\chi     .\\psi     .\\omega   .\\beta    .          .          .\\nu      .\\mu      .          .          .          .          .  """ )
-w("TeX-ShiftGreek", # upper-case greek letters for Tex
-	""".          .          .          .          .          .          .          .          .          .          .          .          .          .          .  """ +
-	""".          .          .          .\\Epsilon .\\Rho     .\\Tau     .          .          .\\Upsilon .\\Theta   .\\Iota    .\\Omicron .\\Pi      .          .  """ +
-	""".          .\\Alpha   .\\Sigma   .\\Delta   .\\Phi     .\\Gamma                         .\\Eta     .\\Xi      .\\Kappa   .\\Lamda   .          .          .  """ +
-	""".          .\\Zeta    .\\Chi     .\\Psi     .\\Omega   .\\Beta    .          .          .\\Nu      .\\Mu      .          .          .          .          .  """ )
 
 w("Mirror",
  ".       .       .       Back    Ret     .       .       .       .       .       Ret     Back    .       .       .       " +
@@ -339,7 +299,6 @@ modespriority=[
 	({"X11"},{"Ctrl"}),
 	({"Box"},set()),
 	({"Cyr"},set()),
-	({"TeX"},set()),
 	({"HEX"},set()),
 	(set(),nativemods),
 	]
