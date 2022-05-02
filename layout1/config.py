@@ -35,24 +35,24 @@ def compose(composedict):
 		   for key in composedict}}
 
 w("from",
- "12      1       2       3       4       5       52                      62      6       7       8       9       0       02      03      " +
- "Q2      Q       W       E       R       T       T2                      Y2      Y       U       I       O       P       P2      P3      " +
- "A2      A       S       D       F       G                                       H       J       K       L       L2      L3      L4      " +
- "Z2      Z       X       C       V       B       B2                      N2      N       M       M2      M3      M4      M5      .       " +
- ".       .       S3      S2                                                              D1      D2      D3      .                       " +
- "                                                SC1     SC2     DC2     DC1                                                             " +
- "                                                        SC3     DC3                                                                     " +
- "                                        Back    Del     SC4     DC4     Ret     space                                                   " )
+ "12      1       2       3       4       5       52                      62      6       7       8       9       0       02      " +
+ "Q2      Q       W       E       R       T       T2                      Y2      Y       U       I       O       P       P2      " +
+ "A2      A       S       D       F       G                                       H       J       K       L       L2      L3      " +
+ "Z2      Z       X       C       V       B       B2                      N2      N       M       M2      M3      M4      M5      " +
+ "                S3      S2                                                              D1      D2      D3                      " +
+ "                                                SC1     SC2     DC2     DC1                                                     " +
+ "                                                        SC3     DC3                                                             " +
+ "                                        Back    Del     SC4     DC4     Ret     space                                           " )
 
 w("mods",
- ".       .       .       mods    .       .       .                       .       .       .       .       .       .       .       .       " +
- "Super   Macro   WM      Nav2    Nav3    Nav4    .                       .       .       Modlock Nav2    WM      Univ    Super   .       " +
- "Hyper   Ctrl    Alt     Nav     Sym     Greek                                   Greek   Sym     Nav     Alt     Ctrl    Hyper   .       " +
- "Shell   Shift   Meta    Num     Math    Bats    .                       .       Bats    Math    Num     Meta    Shift   Shell   .       " +
- ".       .       .       .                                                               .       .       .       .                       " +
- "                                                .       .       .       .                                                               " +
- "                                                        .       .                                                                       " +
- "                                        .       .       .       .       Nav2WM  WM                                                      " )
+ ".       .       .       mods    .       .       .                       .       .       .       .       .       .       .       " +
+ "Super   Macro   WM      Nav2    Nav3    Nav4    .                       .       .       Modlock Nav2    WM      Univ    Super   " +
+ "Hyper   Ctrl    Alt     Nav     Sym     Greek                                   Greek   Sym     Nav     Alt     Ctrl    Hyper   " +
+ "Shell   Shift   Meta    Num     Math    Bats    .                       .       Bats    Math    Num     Meta    Shift   Shell   " +
+ "                .       .                                                               .       .       .                       " +
+ "                                                .       .       .       .                                                       " +
+ "                                                        .       .                                                               " +
+ "                                        .       .       .       .       Nav2WM  WM                                              " )
 
 load("modes",[
 	("X", "+X11,-Win"),
@@ -64,18 +64,18 @@ load("modes",[
 	("4", "-RedactUI"),
 	])
 
-ch("",              """§12345  67890+  qwert  yuiopå  asdfghjklöä <zxcvb  nm,.- """)
-ch("Shift",         """ !"#¤%  &/()=?  QWERT  YUIOPÅ  ASDFGHJKLÖÄ >ZXCVB  NM,.- """)
-ch("Sym",           """    ¤        ±  …_[]^  !<>=&°  \/{}*?()-:@  #$|~`  +%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
-ch("HyperSym",      """                ⫷⫸【】    ‹›«»         ⸨⸩—           „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
-ch("Math",          """         ≡⇔⇒             ↔→         ∘∧∨⊤⊥           ∀∃⊢⊨  """) # Logic-related symbols
-ch("Greek",         """                ;ςερτ  υθιοπ   ασδφγηξκλ    ζχψωβ  νμ     """)
-ch("ShiftGreek",    """                  ΕΡΤ  ΥΘΙΟΠ   ΑΣΔΦΓΗΞΚΛ    ΖΧΨΩΒ  ΝΜ·    """)
-ch("Cyr-",          """                йцуке  нгшщзхъ фывапролджэ  ячсми  тьбю   """)
-ch("Cyr-Shift",     """                ЙЦУКЕ  НГШЩЗХЪ ФЫВАПРОЛДЖЭ  ЯЧСМИ  ТЬБЮ   """)
-ch("Bats",          """ ♭♮♯♩♪  ♫♬         ✆☎          ✧✦✓➔✗ ◇◆●                  """)
-ch("HyperNum",      """                        ₇₈₉          ₄₅₆           ₊₁₂₃₋  """) # Subscript numpad
-ch("HyperMath",     """                        ⁷⁸⁹          ⁴⁵⁶           ⁺¹²³⁻  """) # Superscript numpad
+ch("",              """§12345  67890+ qwert  yuiopå asdfghjklöä<zxcvb  nm,.- """)
+ch("Shift",         """ !"#¤%  &/()=? QWERT  YUIOPÅ ASDFGHJKLÖÄ>ZXCVB  NM,.- """)
+ch("Sym",           """    ¤        ± …_[]^  !<>=&° \/{}*?()-:@ #$|~`  +%"';  """) # Inspired by https://neo-layout.org/index_en.html Layer 3
+ch("HyperSym",      """               ⫷⫸【】    ‹›«»        ⸨⸩—          „“”‘’  """) # Inspired by http://xahlee.info/comp/unicode_matching_brackets.html
+ch("Math",          """         ≡⇔⇒            ↔→        ∘∧∨⊤⊥          ∀∃⊢⊨  """) # Logic-related symbols
+ch("Greek",         """               ;ςερτ  υθιοπ  ασδφγηξκλ   ζχψωβ  νμ     """)
+ch("ShiftGreek",    """                 ΕΡΤ  ΥΘΙΟΠ  ΑΣΔΦΓΗΞΚΛ   ΖΧΨΩΒ  ΝΜ·    """)
+ch("Cyr-",          """               йцуке  нгшщзх фывапролджэ ячсми  тьбю   """)
+ch("Cyr-Shift",     """               ЙЦУКЕ  НГШЩЗХ ФЫВАПРОЛДЖЭ ЯЧСМИ  ТЬБЮ   """)
+ch("Bats",          """ ♭♮♯♩♪  ♫♬        ✆☎         ✧✦✓➔✗ ◇◆●                 """)
+ch("HyperNum",      """                       ₇₈₉         ₄₅₆          ₊₁₂₃₋  """) # Subscript numpad
+ch("HyperMath",     """                       ⁷⁸⁹         ⁴⁵⁶          ⁺¹²³⁻  """) # Superscript numpad
 
 load("", [
 	("M3", "Period"),
@@ -171,20 +171,20 @@ compose({
 })
 
 w("Nav",
- ".       .       .      C-S-LTab  C-Tab   .       .                       .       .       .      10*Up      .       .           .                 . " +
- ".       Esc     Alt-F4  C-PgUp   C-PgDn  A-Home  .                       .       .       Home      Up      End     Back        Del               . " +
- ".       A-Left  A-Right S-LTab   Tab     C-Ret                                   .       Left      Down    Right   Ret         Ret,Up,End        . " +
- ".       .       .       .        .       .       .                       .       Ins  10*Left   10*Down 10*Right   S-home,Back S-end,del         . " +
- ".       .       .       .                                                                space,left .      .       .                               " +
- "                                                 .       .       .       .                                                                         " +
- "                                                         .       .                                                                                 " +
- "                                         .       .       .       .       .       space                                                             " )
+ ".       .       .      C-S-LTab  C-Tab   .       .                       .       .       .      10*Up      .       .           .                 " +
+ ".       Esc     Alt-F4  C-PgUp   C-PgDn  A-Home  .                       .       .       Home      Up      End     Back        Del               " +
+ ".       A-Left  A-Right S-LTab   Tab     C-Ret                                   .       Left      Down    Right   Ret         Ret,Up,End        " +
+ ".       .       .       .        .       .       .                       .       Ins  10*Left   10*Down 10*Right   S-home,Back S-end,del         " +
+ "                .       .                                                                space,left .      .                                     " +
+ "                                                 .       .       .       .                                                                       " +
+ "                                                         .       .                                                                               " +
+ "                                         .       .       .       .       .       space                                                           " )
 
 w("Nav2",
- ".       .       .       .        .       .       .                       .       .       .      10*PgUp    .       .           .                 . " +
- ".       .       .       C-A-lef  C-A-rig .       .                       .       .       C-Home    PgUp    C-End   C-Back      C-Del             . " +
- ".       .       .       S-A-LTab A-Tab   .                                       .       C-Left    PgDn    C-Right S-Ret       .                 . " +
- ".       .       .       .        .       .       .                       .       .    10*C-Left 10*PgDn 10*C-Right .           S-end,S-rig,S-del   " )
+ ".       .       .       .        .       .       .                       .       .       .      10*PgUp    .       .           .                 " +
+ ".       .       .       C-A-lef  C-A-rig .       .                       .       .       C-Home    PgUp    C-End   C-Back      C-Del             " +
+ ".       .       .       S-A-LTab A-Tab   .                                       .       C-Left    PgDn    C-Right S-Ret       .                 " +
+ ".       .       .       .        .       .       .                       .       .    10*C-Left 10*PgDn 10*C-Right .           S-end,S-rig,S-del " )
 
 load("Nav3",[
 	("I", "S-up"),
@@ -215,14 +215,14 @@ load("Nav4",[
 	])
 
 w("WM",
- ".       .       .       .       .       .       .                       .       .       .       .       .       .       .       .       " +
- ".       .       .       .       .       .       .                       .       .       .       s-up    .       .       .       .       " +
- ".       .       .       .       .       .                                       .       s-lef   s-dow   s-rig   .       .       .       " +
- ".       s-1     s-2     s-3     s-4     .       .                       .       .       .       A-F4    .       .       .       .       " +
- ".       .       .       .                                                               .       .       .       .                       " +
- "                                                .       .       .       .                                                               " +
- "                                                        .       .                                                                       " +
- "                                        .       .       .       .       .       space                                                   " )
+ ".       .       .       .       .       .       .                       .       .       .       .       .       .       .       " +
+ ".       .       .       .       .       .       .                       .       .       .       s-up    .       .       .       " +
+ ".       .       .       .       .       .                                       .       s-lef   s-dow   s-rig   .       .       " +
+ ".       s-1     s-2     s-3     s-4     .       .                       .       .       .       A-F4    .       .       .       " +
+ "                .       .                                                               .       .       .                       " +
+ "                                                .       .       .       .                                                       " +
+ "                                                        .       .                                                               " +
+ "                                        .       .       .       .       .       space                                           " )
 
 load("WM",[
 	("Q", "A-space,Wait-250,X"),
@@ -236,14 +236,14 @@ for key in planes["from"]:
 load("X11-WM",[("Q2", "C-M-section")])
 
 w("Num",
- ".       .       F12     F11     F10     .       .                       .       .e      .a      .b      .c      .d      .f      .       " +
- ".       F12     F9      F8      F7      .       .                       .       /       7       8       9      back    Comma    .       " +
- ".       F11     F6      F5      F4      .                                       *       4       5       6      ret     Period   .       " +
- ".       F10     F3      F2      F1      .       .                       .       +       1       2       3       -       :       .       " +
- ".       .       (       )                                                               0       [       ]       .                       " +
- "                                                .       .       .       .                                                               " +
- "                                                        .       .                                                                       " +
- "                                        .       .       .       .       .       space                                                   " )
+ ".       .       F12     F11     F10     .       .                       .       .e      .a      .b      .c      .d      .f      " +
+ ".       F12     F9      F8      F7      .       .                       .       /       7       8       9      back    Comma    " +
+ ".       F11     F6      F5      F4      .                                       *       4       5       6      ret     Period   " +
+ ".       F10     F3      F2      F1      .       .                       .       +       1       2       3       -       :       " +
+ "                (       )                                                               0       [       ]                       " +
+ "                                                .       .       .       .                                                       " +
+ "                                                        .       .                                                               " +
+ "                                        .       .       .       .       .       space                                           " )
 
 load("HEX-Num",[
 	("6", ".E"),
@@ -278,11 +278,6 @@ load("X11-Shell",[
 	("D", "s-XF86ScrollDown")]) # Scroll down
 
 
-w("Mirror",
- ".       .       .       Back    Ret     .       .       .       .       .       Ret     Back    .       .       .       " +
- "P2      P       O       I       U       Y       .       .       T       R       E       W       Q       Q2      .       " +
- "L3      L2      L       K       J       H                       G       F       D       S       A       .       .       " +
- ".       M4      M3      M2      M       N       .       .       B       V       C       X       Z       Z2      .       " )
 
 # Latin character composition
 load("", [("A2", "compose: ")])
@@ -394,14 +389,14 @@ def planelookup(key, plane, default=None):
 max_numarg_digits=4
 
 w("Box-",
- ".       b-das=N b-das=2 b-das=3 b-das=4 .       .                       .       space   b-___R  b-L__R  b-L___  .       .       .       " +
- ".       b-lef=d b-dow=d b-up=d  b-rig=d b-arc=Y .                       .       b-_D__  b-_D_R  b-LD_R  b-LD__  back    del     .       " +
- ".       b-lef=l b-dow=l b-up=l  b-rig=l b-arc=N                                 b-_DU_  b-_DUR  b-LDUR  b-LDU_  ret     ret,up,end .    " +
- ".       b-lef=h b-dow=h b-up=h  b-rig=h .       .                       .       b-__U_  b-__UR  b-L_UR  b-L_U_  .       .       .       " +
- ".       .       .       .                                                                       .       .       .       .               " +
- "                                                .       .       .       .                                                               " +
- "                                                        .       .                                                                       " +
- "                                        .       .       .       .       .       space                                                   " )
+ ".       b-das=N b-das=2 b-das=3 b-das=4 .       .                       .       space   b-___R  b-L__R  b-L___  .       .          " +
+ ".       b-lef=d b-dow=d b-up=d  b-rig=d b-arc=Y .                       .       b-_D__  b-_D_R  b-LD_R  b-LD__  back    del        " +
+ ".       b-lef=l b-dow=l b-up=l  b-rig=l b-arc=N                                 b-_DU_  b-_DUR  b-LDUR  b-LDU_  ret     ret,up,end " +
+ ".       b-lef=h b-dow=h b-up=h  b-rig=h .       .                       .       b-__U_  b-__UR  b-L_UR  b-L_U_  .       .          " +
+ "                .       .                                                                       .       .       .                  " +
+ "                                                .       .       .       .                                                          " +
+ "                                                        .       .                                                                  " +
+ "                                        .       .       .       .       .       space                                              " )
 
 
 load("Univ",[
@@ -438,8 +433,8 @@ load("Win-Univ",[
 	("N", "NONE"),            # Scroll down
 	])
 for key in [
-            "52", "62", "03",
-            "T2", "Y2", "P3",
+            "52", "62",
+            "T2", "Y2",
             "B2", "N2",
             "S3", "S2", "D1", "D2", "D3",
             "SC1", "SC2", "DC2", "DC1",
@@ -448,13 +443,6 @@ for key in [
 ]:
 	load("", [(key, ".")]) # No fallthrough for these keys
 
-key_timeouts={
-	"S3": 20,
-	"L": 30,
-	"S2": 15,
-	"Q2": 5,
-	}
-
 __all__=[
 	"nativemods",
 	"planeprefixes",
@@ -462,6 +450,5 @@ __all__=[
 	"modnotation",
 	"planelookup",
 	"max_numarg_digits",
-	"key_timeouts",
 	"composition",
 	]

@@ -55,7 +55,6 @@ list_of_transformations = [
 	tr.add_commonname(),                                    # libkeyboa
 	l1.exclude("x11_keysym_symbol", ["Alt_L"]),             # layout1
 	tr.suppress_repeat("commonname"),                       # libkeyboa
-	tr.unstick_keys("commonname", c.key_timeouts),          # libkeyboa
 	tr.events_to_chords("commonname"),                      # libkeyboa
 	l1.enrich_chord("mods", "modes"),                       # layout1
 	l1.modlock({"Modlock"}, "Modlock", "space"),            # layout1
