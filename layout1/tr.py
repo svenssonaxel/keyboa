@@ -359,7 +359,7 @@ def unicode_input(gen):
 		except ValueError: return ""
 		except TypeError: return ""
 	for obj in gen:
-		if(obj["type"]=="chord" and obj["chord"]==["begin_unicode_input"]):
+		if(obj["type"]=="chord" and obj["chord"]==["unicode"]):
 			str=""
 			yield {"type":"ui","data":{"unicode_input":str}}
 			hexchars="0123456789abcdef"
