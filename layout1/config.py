@@ -291,45 +291,45 @@ w("Bats",
 
 ##### Navigation layers #####
 w("Nav",
-# § 1      2       3        4       5              6       7         8          9          0             +
- ". .      .       C-S-LTab C-Tab   .      .     . .       .      10*Up         .          .             .                 " +
- ". Esc    Alt-F4  C-PgUp   C-PgDn  A-Home .     . .       Home      Up         End        Back          Del               " +
- ". A-Left A-Right S-LTab   Tab     C-Ret          .       Left      Down       Right      Ret           Ret,Up,End        " +
- ". .      .       .        .       .      .     . Ins  10*Left   10*Down    10*Right      S-home,Back   S-end,del         " +
- "         .       .                                       space,left .         .                                          " +
- "                                         . . . .                                                                         " +
- "                                           . .                                                                           " +
- "                                  .      . . . . space                                                                   " )
+# § 1      2       3        4       5              6       7         8          9          0                   +
+ ". .      .       C-S-LTab C-Tab   .      .     . .       .      10*Up         .          .                   .                 " +
+ ". Esc    Alt-F4  C-PgUp   C-PgDn  A-Home .     . .       Home      Up         End        Back                Del               " +
+ ". A-Left A-Right S-LTab   Tab     C-Ret          .       Left      Down       Right      Ret                 Ret,Up,End        " +
+ ". .      .       .        .       .      .     . Ins  10*Left   10*Down    10*Right      S-home,Back         S-end,del         " +
+ "         .       .                                       space,left .         .                                                " +
+ "                                         . . . .                                                                               " +
+ "                                           . .                                                                                 " +
+ "                                  .      . . . . space                                                                         " )
 w("Nav2",
-# § 1      2       3        4       5              6       7         8          9          0             +
- ". .      .       .        .       .      .     . .       .      10*PgUp       .          .             .                 " +
- ". .      .       C-A-lef  C-A-rig .      .     . .       C-Home    PgUp       C-End      C-Back        C-Del             " +
- ". .      .       S-A-LTab A-Tab   .              .       C-Left    PgDn       C-Right    S-Ret         .                 " +
- ". .      .       .        .       .      .     . .    10*C-Left 10*PgDn    10*C-Right    .             S-end,S-rig,S-del " )
+# § 1      2       3        4       5              6       7         8          9          0                   +
+ ". .      .       .        .       .      .     . .       .      10*PgUp       .          .                   .                   " +
+ ". .      .       C-A-lef  C-A-rig .      .     . .       C-Home    PgUp       C-End      C-Back              C-Del               " +
+ ". .      .       S-A-LTab A-Tab   .              .       C-Left    PgDn       C-Right    S-Ret               .                   " +
+ ". .      .       .        .       .      .     . .    10*C-Left 10*PgDn    10*C-Right    S-C-lef,S-C-rig,del S-C-rig,S-C-lef,del " )
 w("Nav3",
-# § 1      2       3        4       5              6       7         8          9          0             +
- ". .      .       .        .       .      .     . .       .      10*S-up       .          .             .                 " +
- ". .      .       .        .       .      .     . .       S-home    S-up       S-end      .             .                 " +
- ". .      .       .        .       .              .       S-left    S-down     S-right    .             .                 " +
- ". .      .       .        .       .      .     . .    10*S-left 10*S-down  10*S-right    .             .                 " )
+# § 1      2       3        4       5              6       7         8          9          0                   +
+ ". .      .       .        .       .      .     . .       .      10*S-up       .          .                   .                 " +
+ ". .      .       .        .       .      .     . .       S-home    S-up       S-end      .                   .                 " +
+ ". .      .       .        .       .              .       S-left    S-down     S-right    .                   .                 " +
+ ". .      .       .        .       .      .     . .    10*S-left 10*S-down  10*S-right    .                   .                 " )
 w("Nav4",
-# § 1      2       3        4       5              6       7         8          9          0             +
- ". .      .       .        .       .      .     . .       .      10*S-pgup     .          .             .                 " +
- ". .      .       .        .       .      .     . .       S-C-home  S-pgup     S-C-end    S-C-lef,S-del S-C-rig,S-del     " +
- ". .      .       .        .       .              .       S-C-left  S-pgdn     S-C-rig    .             .                 " +
- ". .      .       .        .       .      .     . .    10*S-C-lef 10*S-pgdn 10*S-C-rig    .             .                 " )
+# § 1      2       3        4       5              6       7         8          9          0                   +
+ ". .      .       .        .       .      .     . .       .      10*S-pgup     .          .                   .                 " +
+ ". .      .       .        .       .      .     . .       S-C-home  S-pgup     S-C-end    S-C-lef,S-del       S-C-rig,S-del     " +
+ ". .      .       .        .       .              .       S-C-left  S-pgdn     S-C-rig    .                   .                 " +
+ ". .      .       .        .       .      .     . .    10*S-C-lef 10*S-pgdn 10*S-C-rig    .                   .                 " )
 
 ##### Window management layers #####
 w("WM",
-# § 1      2       3        4       5              6       7         8          9          0             +
- ". .      .       .        .       .      .     . .       .         .          .          .             .                 " +
- ". .      .       .        .       .      .     . .       .         s-up       .          .             .                 " +
- ". .      .       .        .       .              .       s-lef     s-dow      s-rig      .             .                 " +
- ". s-1    s-2     s-3      s-4     .      .     . .       .         A-F4       .          .             .                 " +
- "         .       .                                       .         .          .                                          " +
- "                                         . . . .                                                                         " +
- "                                           . .                                                                           " +
- "                                  .      . . . . space                                                                   " )
+# § 1      2       3        4       5              6       7         8          9          0                   +
+ ". .      .       .        .       .      .     . .       .         .          .          .                   .                 " +
+ ". .      .       .        .       .      .     . .       .         s-up       .          .                   .                 " +
+ ". .      .       .        .       .              .       s-lef     s-dow      s-rig      .                   .                 " +
+ ". s-1    s-2     s-3      s-4     .      .     . .       .         A-F4       .          .                   .                 " +
+ "         .       .                                       .         .          .                                                " +
+ "                                         . . . .                                                                               " +
+ "                                           . .                                                                                 " +
+ "                                  .      . . . . space                                                                         " )
 load("WM",[
 	("Q", "A-space,Wait-250,X"),
 	("M4","A-space,Wait-250,N"),
