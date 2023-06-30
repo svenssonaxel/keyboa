@@ -103,9 +103,14 @@ for (diacritic, suffix) in [
 		#("stroke",                  ""),
 		#("swash tail",              "t"),
 ]:
-	combining=unicodeget(f"combining {diacritic}")
-	if combining:
-		compose({(" ", "Period", suffix): combining})
+	for combiningname in [
+			f"combining {diacritic}",
+			f"combining {diacritic} accent",
+	]:
+		combining=unicodeget(combiningname)
+		if combining:
+			compose({(" ", "Period", suffix): combining})
+			break
 	for base in "abcdefghijklmnopqrstuvwxyz":
 		for (capital, letter) in [("capital", base.upper()), ("small", base)]:
 			target=unicodeget(f"latin {capital} letter {letter} with {diacritic}")
