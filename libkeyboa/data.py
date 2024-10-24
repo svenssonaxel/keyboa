@@ -106,6 +106,8 @@ def keysyminfo(x):
 			if(x.startswith(prefix)):
 				try: return _keysymsdict[replacement+x[(len(prefix)):]]
 				except KeyError: pass
+		if(x[:2]=="U+"):
+			return {"unicode_codepoint": int(x[2:], 16)}
 	return {}
 
 # Use the table of common names in commonname.csv to add information to

@@ -278,7 +278,7 @@ def scripts_to_chords(gen):
 						yield {"type":"chord","chord":["."+char]}
 				else:
 					repeat=1
-					if(re.match("^[0-9]+\*.", item)):
+					if(re.match(r"^[0-9]+\*.", item)):
 						mulindex=item.index("*")
 						repeat=int(item[:mulindex])
 						item=item[mulindex+1:]

@@ -102,10 +102,16 @@ def add_commonname(gen):
 					 else vko["win_virtualkey_symbol"]}
 			elif("x11_keysym" in obj):
 				kso=data.keysyminfo(obj["x11_keysym"])
-				obj={**obj,"commonname":
-					 kso["commonname_obj"]["commonname"]
-					 if("commonname_obj" in kso)
-					 else kso["x11_keysym_symbol"]}
+				if("commonname_obj" in kso):
+					commonname = kso["commonname_obj"]["commonname"]
+				elif("x11_keysym_symbol" in kso):
+					commonname = kso["x11_keysym_symbol"]
+				elif(0x1000000 < obj["x11_keysym"] and
+					 obj["x11_keysym"] <= 0x110ffff):
+					commonname = "U+"+hex(obj["x11_keysym"] - 0x1000000)[2:]
+				else:
+					commonname = "keysym_"+str(obj["x11_keysym"])
+				obj={**obj, "commonname": commonname}
 		yield obj
 
 @retgen

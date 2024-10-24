@@ -46,7 +46,7 @@ w("mods",
 """Super   Macro   WM      Nav2    Nav3    Nav4    .                       .       .       Modlock Nav2    WM      Univ    Super   """ +
 """Hyper   Ctrl    Alt     Nav     Sym     Greek                                   Greek   Sym     Nav     Alt     Ctrl    Hyper   """ +
 """Shell   Shift   Meta    Num     Logic   Bats    .                       .       Bats    Logic   Num     Meta    Shift   Shell   """ +
-"""                .       .                                                               .       .       .                       """ +
+"""                .       .                                                               AltGr   .       .                       """ +
 """                                                .       .       .       .                                                       """ +
 """                                                        .       .                                                               """ +
 """                                        .       .       .       .       Nav2WM  WM                                              """ )
@@ -72,6 +72,36 @@ w("Shift",
 """.       Q       W       E       R       T       .                       .       Y       U       I       O       P       Å       """ +
 """.       A       S       D       F       G                                       H       J       K       L       Ö       Ä       """ +
 """>       Z       X       C       V       B       .                       .       N       M       ,       Period  -       .       """ )
+
+# Understand client's local swedish layout, which is necessary for keepass auto-type.
+for key in ["P3", "L4", "03"]: planes["from"].append(key)
+load("AltGr",[
+	("2",  "@"),
+	("4",  "$"),
+	("7",  "{"),
+	("8",  "["),
+	("9",  "]"),
+	("0",  "}"),
+	("02", "\\"),
+	("Z2", "|"),
+	("P3", "~"),
+	])
+load("Z3",[
+	("P3", "^"),
+	("Z2", ">"),
+	("0",  "="),
+	("6",  "&"),
+	("7",  "/"),
+	("L4", "*"),
+	("02", "?"),
+	("8",  "("),
+	("9",  ")"),
+	("M3", ":"),
+	("03", "`"),
+	("2",  '"'),
+	("M2", ";"),
+	])
+
 # Latin character composition
 load("", [("A2", "compose: ")])
 import unicodedata
